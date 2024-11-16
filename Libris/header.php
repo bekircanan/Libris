@@ -15,9 +15,9 @@
 
     $pageActuelle = basename($_SERVER['PHP_SELF']);
     $errlog = "<p style='color:red;'>";
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form']=== 'connect') {
         if( isset($_POST['mdp']) && isset($_POST['email'])){
-            $stmt = $conn->prepare("SELECT id_util,pseudo,email_util FROM utilisateur WHERE email_util like ? OR pseudo like ?");
+            $stmt = $conn->prepare("SELECT id_util,pseudo,email,mdp FROM utilisateur WHERE email like ? OR pseudo like ?");
             $stmt->bindParam(1, $_POST['email']);
             $stmt->bindParam(2, $_POST['email']);
             $stmt->execute();
@@ -38,7 +38,7 @@
                     header('Location: index.php');
                     exit();
                 }else{
-                    $errlog .= "Nom d'utilisateur ou mot de passe incorrect.</p>";
+                    $errlog .= "mot de passe incorrect.</p>";
                 }
             } else {
                 $errlog .= "Utilisateur non trouvé.</p>";
@@ -64,6 +64,7 @@
         <div class="search-bar-container">
             <div class="search-bar">
                 <form method="post">
+                    <input type="hidden" name="form" value="search">
                     <input type="text" placeholder="Rechercher un livre...">
                     <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
@@ -81,7 +82,7 @@
             <a href="catalogue.php"><i class="fa-solid fa-book-open"></i> Catalogue</a>
             <?php 
             if(isset($_SESSION['user'])){
-                if($_SESSION['admin']===1){
+                if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
                     echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des comptes</a></li>';
                     echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des livres</a></li>';
                 }else{
@@ -94,7 +95,7 @@
         <br>
         <ul>
             <?php if(isset($_SESSION['user'])) { 
-                if($_SESSION['admin']===0){
+                if(isset($_SESSION['admin']) && $_SESSION['admin']===0){
                     echo '<li><a href="compte.php"><i class="fa-solid fa-user"></i> Paramètres du compte</a></li>';
                 }
                 echo '<li><a href="deconnexion.php"><i class="fa-solid fa-sign-out-alt"></i> Se déconnecter</a></li>';
@@ -103,6 +104,7 @@
                 echo '<li class="sign-buttons popup">
                         <a href="#" onclick="popup()"><i class="fa-solid fa-sign-in-alt"></i> Se connecter</a>
                         <form class="popuptext" id="popup" method="POST">
+                            <input type="hidden" name="form" value="connect">
                             Connectez-vous :
                             '.$errlog.'
                             <input type="text" name="email" placeholder="Email/Identifiant">

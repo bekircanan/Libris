@@ -18,9 +18,9 @@
                 return '<input type="text" name="nom" placeholder="Nom" required>
                         <input type="text" name="prenom" placeholder="Prénom" required>
                         <input type="text" name="adresse" placeholder="Adresse" required>
-                        <input type="text" name="ville" placeholder="Ville" required>
-                        <input type="text" name="code_postal" placeholder="Code postal" required>
+                        <input type="tel" name="tel" placeholder="Telephone" required>
                         <input type="email" name="email" placeholder="Email" required>
+                        <input type="text" name="pseudo" placeholder="Pseudo" required>
                         <input type="password" name="mdp" placeholder="Mot de passe" required>
                         <input type="password" name="mdp2" placeholder="Confirmer mot de passe" required>';
             case 3:
@@ -29,16 +29,97 @@
                         <input type="text" name="cvv" placeholder="CVV" required>';
         }
     }
-    if($_SERVER["REQUEST_METHOD"] == "POST"){
-        if(isset($_POST['etape'])){
-            $etape = $_POST['etape'];
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form'] === 'inscrire') {
+        if (isset($_POST['etape'])) {
+            $etape = (int)$_POST['etape'];
         }
-        if(isset($_Post['date_naissance'])){
-            $date_naissance = $_POST['date_naissance'];
-        }elseif(isset($_POST['categorie'])){
-            $categorie = $_POST['categorie'];
-        }elseif(isset($_POST['nom'])){}
-
+        switch ($etape) {
+            case 1:
+                if (isset($_POST['date_naissance']) && !empty($_POST['date_naissance'])) {
+                    $_SESSION['date_naissance'] = $_POST['date_naissance'];
+                }else{
+                    $errlog = "<p>La date de naissance est requise.</p>";
+                    $etape = 0;
+                }
+                break;
+            case 2:
+                if (isset($_POST['categorie']) && !empty($_POST['categorie'])) {
+                    switch ($_POST['categorie']) {
+                        case 'jeune':
+                            $_SESSION['categorie'] = 1;
+                            break;
+                        case 'etudiant':
+                            $_SESSION['categorie'] = 2;
+                            break;
+                        case 'adulte':
+                            $_SESSION['categorie'] = 3;
+                            break;
+                        default:
+                            $errlog = "<p>Catégorie d'abonnement invalide.</p>";
+                            $etape = 1;
+                            break;
+                    }
+                }else{
+                    $errlog = "<p>La catégorie d'abonnement est requise.</p>";
+                    $etape = 1;
+                }
+                break;
+            case 3:
+                if (isset($_POST['nom'], $_POST['prenom'], $_POST['adresse'], $_POST['tel'], $_POST['email'], $_POST['mdp'], $_POST['mdp2'], $_POST['pseudo']) && !empty($_POST['nom']) && !empty($_POST['pseudo']) && !empty($_POST['prenom']) && !empty($_POST['adresse']) && !empty($_POST['tel']) && !empty($_POST['email']) && !empty($_POST['mdp']) && !empty($_POST['mdp2'])) {
+                    $_SESSION['nom'] = $_POST['nom'];
+                    $_SESSION['prenom'] = $_POST['prenom'];
+                    $_SESSION['adresse'] = $_POST['adresse'];
+                    $_SESSION['tel'] = $_POST['tel'];
+                    $_SESSION['email'] = $_POST['email'];
+                    $_SESSION['mdp'] = $_POST['mdp'];
+                    $_SESSION['mdp2'] = $_POST['mdp2'];
+                    $_SESSION['pseudo'] = $_POST['pseudo'];
+                    if ($_SESSION['mdp'] !== $_SESSION['mdp2']) {
+                        $errlog = "<p>Les mots de passe ne correspondent pas.</p>";
+                        $etape = 2;
+                    }
+                }else{
+                    $errlog = "<p>Les informations personnelles sont requises.</p>";
+                    $etape = 2;
+                }
+                break;
+            case 4:
+                if (isset($_POST['numero_carte'], $_POST['date_expiration'], $_POST['cvv']) && !empty($_POST['numero_carte']) && !empty($_POST['date_expiration']) && !empty($_POST['cvv'])) {
+                    $_SESSION['numero_carte'] = $_POST['numero_carte'];
+                    $_SESSION['date_expiration'] = $_POST['date_expiration'];
+                    $_SESSION['cvv'] = $_POST['cvv'];
+                    $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, 'test',?, ?)");
+                    $stmt->bindParam(1, $_SESSION['prenom']);
+                    $stmt->bindParam(2, $_SESSION['nom']);
+                    $stmt->bindParam(3, $_SESSION['adresse']);
+                    $stmt->bindParam(4, $_SESSION['tel']);
+                    $stmt->bindParam(5, $_SESSION['pseudo']);
+                    $_SESSION['mdp']=password_hash($_SESSION['mdp'], PASSWORD_DEFAULT);
+                    $stmt->bindParam(6, $_SESSION['mdp']);
+                    $stmt->bindParam(7, $_SESSION['email']);
+                    $stmt->bindParam(8, $_SESSION['date_naissance']);
+                    $stmt->execute();
+                    $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ?");
+                    $stmt->bindParam(1, $_SESSION['email']);
+                    $stmt->execute();
+                    $util = $stmt->fetch();
+                    $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
+                    $stmt->bindParam(1, $_SESSION['categorie']);
+                    $stmt->bindParam(2, $util['id_util']);
+                    $stmt->execute();
+                    $_SESSION['user'] = $_SESSION['pseudo'];
+                    $_SESSION['email'] = $_SESSION['email'];
+                    header("Location: index.php");
+                    exit();
+                }else{
+                    $errlog = "<p>Les informations de paiement sont requises.</p>";
+                    $etape = 3;
+                }
+                break;
+            default:
+                $etape = 0;
+                break;
+        }
     }
 
     echo "<div class='login-container'>";
@@ -61,6 +142,7 @@
 </div>
 <div class="inscrire">
     <form method="POST">
+        <input type="hidden" name="form" value="inscrire">
         <?php 
             echo "<h2>$etape_array[$etape]</h2>";
             echo $errlog;
