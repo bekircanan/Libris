@@ -32,15 +32,6 @@
         }
     }
 
-
-    try {
-        $conn = new PDO("mysql:host=localhost;dbname=libris", 'root', '');
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die($e->getMessage());
-    }
-//$_SESSION['id']
-
     $stmtAfficheEbook = $conn->prepare("SELECT DISTINCT l.titre_livre, a.nom_auteur, e.prix, achat.id_achat, e.lien_PDF
                                         FROM achat_ebook achat JOIN ebook e ON e.id_ebook = achat.id_ebook 
                                                 JOIN livre l ON e.id_livre = l.id_livre 
@@ -48,7 +39,7 @@
                                                 JOIN auteur a ON ae.id_auteur = a.id_auteur 
                                         WHERE id_util LIKE :idUtilisateur AND regle = 0");
         
-    $stmtAfficheEbook->execute([':idUtilisateur' => 2]);
+    $stmtAfficheEbook->execute([':idUtilisateur' => $_SESSION['id']]);
     $achatEbook = $stmtAfficheEbook->fetchAll();
     
     $prixTotal = 0;
@@ -67,18 +58,18 @@
             }else if(isset($_POST['payer']) && !isset($_POST['supprimer']) && $prixTotal !== 0){
                 $_SESSION['afficherPopUp'] = true;
                 $stmtRecupEmail = $conn->prepare("SELECT email FROM utilisateur WHERE id_util = :idUtilisateur");
-                $stmtRecupEmail->execute([':idUtilisateur' => 2]); 
+                $stmtRecupEmail->execute([':idUtilisateur' => $_SESSION['id']]); 
                 $user = $stmtRecupEmail->fetch();
     
                 $stmtModifDateAchat = $conn->prepare("UPDATE achat_ebook SET regle = 1, date_achat = NOW() WHERE id_util = :idUtilisateur");
-                $stmtModifDateAchat->execute([':idUtilisateur' => 2]);
+                $stmtModifDateAchat->execute([':idUtilisateur' => $_SESSION['id']]);
     
                 // si l'utilisateur existe, on crée un token et on l'envoie par mail
                 if($user){
                     $token = bin2hex(random_bytes(16));
                     $expire = date('Y-m-d H:i:s', time() + 60 * 15);
                     $stmt = $conn->prepare("INSERT INTO token (nom_token, expire, id_util) VALUES (:nomToken, :expire, :idUtilisateur)");
-                    $stmt->execute([':expire' => $expire, ':nomToken' => $token, ':idUtilisateur' => 2]);
+                    $stmt->execute([':expire' => $expire, ':nomToken' => $token, ':idUtilisateur' => $_SESSION['id']]);
                     $errlog = smtp($user['email'], 'Merci pour votre achat sur Libris !', 'Merci pour cette transaction sur Libris. Voici le lien de téléchargement de chaques livres : '. "\n" . $listeLienEbook);
                 } else {
                     $errlog ='Aucun compte n\'est associé à cet email.';

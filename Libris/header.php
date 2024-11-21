@@ -26,8 +26,9 @@
                 if(password_verify($_POST['mdp'], $user['mdp'])){
                     $_SESSION['user'] = $user['pseudo'];
                     $_SESSION['email'] = $user['email'];
+                    $_SESSION['id'] = $user['id_util'];
                     $stmt = $conn->prepare("SELECT id_util FROM bibliotecaire WHERE id_util = ?");
-                    $stmt->bindParam(1, $_POST['id_util']);
+                    $stmt->bindParam(1, $user['id_util']);
                     $stmt->execute();
                     $iduser = $stmt->fetch();
                     if($iduser){
