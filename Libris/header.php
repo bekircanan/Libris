@@ -1,5 +1,52 @@
-<!DOCTYPE html>
-<html lang="fr">
+<?php
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    try {
+        $conn = new PDO("mysql:host=localhost;dbname=libris", 'root', '');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        die($e->getMessage());
+    }
+
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
+    $pageActuelle = basename($_SERVER['PHP_SELF']);
+    $errlog = "<p style='color:red;'>";
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form']=== 'connect') {
+        if( isset($_POST['mdp']) && isset($_POST['email'])){
+            $stmt = $conn->prepare("SELECT id_util,pseudo,email,mdp FROM utilisateur WHERE email like ? OR pseudo like ?");
+            $stmt->bindParam(1, $_POST['email']);
+            $stmt->bindParam(2, $_POST['email']);
+            $stmt->execute();
+            $user = $stmt->fetch();
+            if ($user) {
+                if(password_verify($_POST['mdp'], $user['mdp'])){
+                    $_SESSION['user'] = $user['pseudo'];
+                    $_SESSION['email'] = $user['email'];
+                    $stmt = $conn->prepare("SELECT id_util FROM bibliotecaire WHERE id_util = ?");
+                    $stmt->bindParam(1, $_POST['id_util']);
+                    $stmt->execute();
+                    $iduser = $stmt->fetch();
+                    if($iduser){
+                        $_SESSION['admin'] = 1;
+                    }else{
+                        $_SESSION['admin'] = 0;
+                    }
+                    header('Location: index.php');
+                    exit();
+                }else{
+                    $errlog .= "mot de passe incorrect.</p>";
+                }
+            } else {
+                $errlog .= "Utilisateur non trouvé.</p>";
+            }
+        }
+    }
+
+?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +56,15 @@
 </head>
 <body>
     <header>
-        <a class="open" onclick="toggleNav()">
+        <span class="open" onclick="ouvreNav()">
             <span></span>
             <span></span>
             <span></span>
-        </a>
+</span>
         <div class="search-bar-container">
             <div class="search-bar">
                 <form method="post">
+                    <input type="hidden" name="form" value="search">
                     <input type="text" placeholder="Rechercher un livre...">
                     <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
@@ -27,31 +75,58 @@
         <a href="index.php"><img src="img/logo.png" alt="Logo"></a>
         </div>
     </header>
-    <div id="mySidebar" class="sidebar">
+    <div id="Sidebar" class="sidebar">
         <ul>
-            <li><a href="index.php" class="active"><i class="fa-solid fa-house"></i> Decouvrir</a></li>
-            <li><a href="#"><i class="fa-solid fa-book-open"></i> Catalogue</a></li>
+            <a href="javascript:void(0)" class="closebtn" onclick="fermeNav()">&times;</a>
+            <a href="index.php" class="active"><i class="fa-solid fa-house"></i> Decouvrir</a>
+            <a href="catalogue.php"><i class="fa-solid fa-book-open"></i> Catalogue</a>
+            <?php 
+            if(isset($_SESSION['user'])){
+                if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
+                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des livres</a></li>';
+                }else{
+                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes réservations</a></li>';
+                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes e-books</a></li>';
+                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mon panier</a></li>';
+                }    
+            }?>
         </ul>
         <br>
         <ul>
-            <li class="sign-buttons"><a href="#"><i class="fa-solid fa-user-plus"></i> S'inscrire</a></li>
-            <li class="sign-buttons"><a href="#"><i class="fa-solid fa-sign-in-alt"></i> Se connecter</a></li>
+            <?php if(isset($_SESSION['user'])) { 
+                if(isset($_SESSION['admin']) && $_SESSION['admin']===0){
+                    echo '<li><a href="compte.php"><i class="fa-solid fa-user"></i> Paramètres du compte</a></li>';
+                }
+                echo '<li><a href="deconnexion.php"><i class="fa-solid fa-sign-out-alt"></i> Se déconnecter</a></li>';
+            }else{
+                echo '<li class="sign-buttons"><a href="inscrire.php"><i class="fa-solid fa-user-plus"></i> S\'inscrire</a></li>';
+                echo '<li class="sign-buttons popup">
+                        <a href="#" onclick="popup()"><i class="fa-solid fa-sign-in-alt"></i> Se connecter</a>
+                        <form class="popuptext" id="popup" method="POST">
+                            <input type="hidden" name="form" value="connect">
+                            Connectez-vous :
+                            '.$errlog.'
+                            <input type="text" name="email" placeholder="Email/Identifiant">
+                            <input type="password" name="mdp" placeholder="Mot de passe">
+                            <button type="submit">Valider</button>
+                        </form>
+                    </li>';
+            } ?>
         </ul>
     </div>
+    
     <script>
-        const open = document.querySelector('.open');
-        open.addEventListener('click', () => {
-            open.classList.toggle('active');
-        });
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-                document.body.style.marginLeft = "0";
-            } else {
-                sidebar.style.width = "250px";
-                document.body.style.marginLeft = "250px";
-            }
+        function ouvreNav() {
+        document.getElementById("Sidebar").style.width = "250px";
+        }
+
+        function fermeNav() {
+        document.getElementById("Sidebar").style.width = "0";
+        }
+        function popup() {
+            var popup = document.getElementById("popup");
+            popup.classList.toggle("show");
         }
     </script>
     <main>
