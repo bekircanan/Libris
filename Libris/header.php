@@ -89,7 +89,7 @@
                 }else{
                     echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes réservations</a></li>';
                     echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes e-books</a></li>';
-                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mon panier</a></li>';
+                    echo '<li><a href="./panier.php"><i class="fa-solid fa-book-open"></i> Mon panier</a></li>';
                 }    
             }?>
         </ul>
@@ -108,7 +108,7 @@
                             <input type="hidden" name="form" value="connect">
                             Connectez-vous :
                             '.$errlog.'
-                            <input type="text" name="email" placeholder="Email/Identifiant">
+                            <input type="text" name="email" placeholder="Email/Pseudo">
                             <input type="password" name="mdp" placeholder="Mot de passe">
                             <button type="submit">Valider</button>
                         </form>

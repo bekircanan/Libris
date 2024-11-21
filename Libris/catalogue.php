@@ -28,7 +28,8 @@
                                 OR :recherche LIKE l.type_litteraire
                                 OR :recherche LIKE lang.nom_langue
                                 OR :recherche LIKE ed.nom_edition
-                                OR :recherche LIKE a.nom_auteur"); 
+                                OR :recherche LIKE a.nom_auteur
+                                OR :recherche LIKE l.cote_livre"); 
         
         $stmtRecherche->execute([':recherche' => 'Roman']);
         $infoLivres = $stmtRecherche->fetchAll();
