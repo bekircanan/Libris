@@ -341,33 +341,18 @@ div.info_ebook_acheter p:nth-of-type(1){
     height:16px; 
     vertical-align:middle;
 }
-
-/* catalogue */
-#page_catalogue{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-}
-#filtre{
-    grid-column: 1/2;
-    background-color: #D0BDF6;
-}
-#catalogue{
-    grid-column: 2/3;
-}
-
 .mask {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Black background with transparency */
-    display: none; /* Hidden by default */
-    z-index: 99; /* Just behind the modal */
+    background-color: rgba(0, 0, 0, 0.8); 
+    display: none;
+    z-index: 99; 
 }
 .mask_change {
-    display: flex; /* Hidden by default */
+    display: flex; 
 }
 
 .modal {
@@ -375,17 +360,69 @@ div.info_ebook_acheter p:nth-of-type(1){
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: white;
+    background-color: #D0BDF6;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    display: none; /* Hidden by default */
-    z-index: 1000; /* Above the mask */
-    max-width: 500px; /* Optional max-width */
-    width: 100%; /* Full width up to max-width */
+    display: none; 
+    z-index: 1000; 
+    max-width: 500px; 
+    width: 100%; 
 }
 
 .modal_change {
-    display: flex; /* Hidden by default */
+    display: flex; 
 }
+
+
+/* catalogue */
+ #page_catalogue{
+    display: flex;
+    padding: 20px;
+}  
+.filters {
+    width: 20%;
+    background-color: #D0BDF6;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.filters h2 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.filters section {
+    margin-bottom: 20px;
+}
+
+.filters ul {
+    list-style: none;
+}
+
+.book-list {
+    width: 80%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 10px;
+}
+
+.book-item {
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+}
+.book-item h3 {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.price {
+    color: #f57c00;
+    font-weight: bold;
+}
+
 
