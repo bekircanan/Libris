@@ -33,7 +33,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
         /* On se place ici dans le cas où un utilisateur ajoute un commentaire à l'article.*/
         $new_comment = $_POST['new_avis'];
         $idLivre = $_SESSION['idLivreActuel'];
-        settype($_SESSION['idUtil'], "integer");
+        settype($_SESSION['id'], "integer");
         $new_note = (int)$_POST['note'];
         $idUtilAvis = $_SESSION['id'];
         $stmtInsertAvis->execute();
@@ -64,27 +64,27 @@ elseif($_SERVER['REQUEST_METHOD'] == 'GET'){
 
 /* Requête permettant de tester si l'utilisateur actuel a déjà ajouter l'article a ses favoris. */
 $stmtSelectLivre = $conn->prepare(
-    "SELECT * from livre where id_livre = 1/*{$_SESSION['idLivreActuel']}*/"
+    "SELECT * from livre where id_livre = 1{$_SESSION['idLivreActuel']}"
 );
 $stmtSelectLivre->execute();
 $infoLivre = $stmtSelectLivre->fetch();
 
-$stmtTestDisponibilite = $conn->prepare("SELECT * FROM emprunter WHERE id_livre = 1/*{$_SESSION['idLivreActuel']}*/");
+$stmtTestDisponibilite = $conn->prepare("SELECT * FROM emprunter WHERE id_livre = {$_SESSION['idLivreActuel']}");
 $stmtTestDisponibilite->execute();
 $disponibilite = $stmtTestDisponibilite->fetch();
-$stmtTestReservation = $conn->prepare("SELECT * FROM reserver WHERE id_livre = 1/*{$_SESSION['idLivreActuel']}*/");
+$stmtTestReservation = $conn->prepare("SELECT * FROM reserver WHERE id_livre = {$_SESSION['idLivreActuel']}");
 $stmtTestReservation->execute();
 $est_reserver = $stmtTestReservation->fetch();
 
 $stmtSelectAuteur = $conn->prepare(
     "SELECT * from auteur a JOIN a_ecrit e ON a.id_auteur = e.id_auteur
-                            WHERE e.id_livre = 1/*{$_SESSION['idLivreActuel']}*/"
+                            WHERE e.id_livre = {$_SESSION['idLivreActuel']}"
 );
 
 
 
 $stmtSelectAllAvis = $conn->prepare(
-    "SELECT * FROM avis WHERE id_livre = 1/*{$_SESSION['idLivreActuel']}*/ order by date_avis desc"
+    "SELECT * FROM avis WHERE id_livre = {$_SESSION['idLivreActuel']} order by date_avis desc"
 );
 
 ?>
@@ -92,7 +92,7 @@ $stmtSelectAllAvis = $conn->prepare(
         <div class="img_couverture">
             <img src="<?php echo $infoLivre['img_couverture'] ?>" alt="image de couverture">
         </div>
-        <div id="infos_livre_generales"> 
+        <div class="infos_livre_generales"> 
             <h2><?php echo $infoLivre['titre_livre']?></h2>
             <p>Auteurs : 
             <?php 
@@ -109,7 +109,7 @@ $stmtSelectAllAvis = $conn->prepare(
                             echo '<p> Disponible en bibliothèque </p>';
                         } 
                         elseif(!empty($disponibilite) and empty($est_reserver)){
-                            $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter WHERE id_livre = 1/*{$_SESSION['idLivreActuel']}*/");
+                            $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter WHERE id_livre = {$_SESSION['idLivreActuel']}");
                             $stmtSelectDateFinEmprunt->execute();
                             $dateFinEmrpunt = $stmtSelectDateFinEmprunt->fetch();
                             echo '<p> Disponible en réservation au maximum le </p>'.$dateFinEmprunt['date_fin_emprunt'];
@@ -121,13 +121,13 @@ $stmtSelectAllAvis = $conn->prepare(
                 </p>
                 <p>
                     <?php
-                        $stmtSelectEbook = $conn->prepare("SELECT * FROM ebook WHERE id_livre = 1/*{$_SESSION['idLivreActuel']}*/");
+                        $stmtSelectEbook = $conn->prepare("SELECT * FROM ebook WHERE id_livre = {$_SESSION['idLivreActuel']}");
                         $stmtSelectEbook->execute();
                         $infoEbook = $stmtSelectEbook->fetch();
                         if (!empty($infoEbook)){
                             $_SESSION['idEbook'] = $infoEbook['id_ebook'];
                             echo '<p> E-BOOK | '.$infoEbook['prix'];
-                            $stmtTestEbookPanier = $conn->prepare("SELECT * FROM achat_ebook WHERE id_util = {$_SESSION['idUtil']} and id_ebook = {$infoEbook['id_ebook']}");
+                            $stmtTestEbookPanier = $conn->prepare("SELECT * FROM achat_ebook WHERE id_util = {$_SESSION['id']} and id_ebook = {$infoEbook['id_ebook']}");
                             $stmtTestEbookPanier->execute();
                             $testEbook = $stmtTestEbookPanier->fetch();
                         }
@@ -141,6 +141,8 @@ $stmtSelectAllAvis = $conn->prepare(
                         <button type="submit" name="reserver" <?php echo (empty($disponibilite) and empty($est_reserver)) or (!empty($disponibilite) and empty($est_reserver)) ? '': 'disabled' ?>>Réserver</button>
                     </form>
         </div>
+    </section>
+    <section id="res/carac">
         <div id="Resume">
             <h2>Résumé</h2>
             <p><?php echo $infoLivre['resume']?></p>
@@ -159,7 +161,7 @@ $stmtSelectAllAvis = $conn->prepare(
 																   JOIN public_cible pc ON lp.id_public = pc.id_public
 																   JOIN isbn i ON l.id_livre = i.id_livre
                                                                    JOIN a_ecrit ae ON l.id_livre = ae.id_livre
-																   WHERE l.id_livre = 1/*{$_SESSION['idLivreActuel']}*/");
+																   WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
                 $stmtSelectInfoCarac->execute();
                 $infoCarac = $stmtSelectInfoCarac->fetch();
 
