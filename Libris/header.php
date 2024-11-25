@@ -54,6 +54,7 @@
     <title>Libris</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="js/icon.js"></script>
 </head>
 <body>
     <header>
@@ -79,17 +80,17 @@
     <div id="Sidebar" class="sidebar">
         <ul>
             <a href="javascript:void(0)" class="closebtn" onclick="fermeNav()">&times;</a>
-            <a href="index.php" class="active"><i class="fa-solid fa-house"></i> Decouvrir</a>
-            <a href="catalogue.php"><i class="fa-solid fa-book-open"></i> Catalogue</a>
+            <a href="index.php" class="active"><i class="fa-sharp fa-regular fa-house"></i> Decouvrir</a>
+            <a href="catalogue.php"><i class="fa-regular fa-book-open"></i> Catalogue</a>
             <?php 
             if(isset($_SESSION['user'])){
                 if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
-                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des comptes</a></li>';
-                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Gestion des livres</a></li>';
+                    echo '<li><a href=""><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href=""><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
                 }else{
-                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes réservations</a></li>';
-                    echo '<li><a href=""><i class="fa-solid fa-book-open"></i> Mes e-books</a></li>';
-                    echo '<li><a href="./panier.php"><i class="fa-solid fa-book-open"></i> Mon panier</a></li>';
+                    echo '<li><a href=""><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
+                    echo '<li><a href=""><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
+                    echo '<li><a href="./panier.php"><i class="fa-regular fa-basket-shopping"></i> Mon panier</a></li>';
                 }    
             }?>
         </ul>
@@ -97,11 +98,11 @@
         <ul>
             <?php if(isset($_SESSION['user'])) { 
                 if(isset($_SESSION['admin']) && $_SESSION['admin']===0){
-                    echo '<li><a href="compte.php"><i class="fa-solid fa-user"></i> Paramètres du compte</a></li>';
+                    echo '<li><a href="compte.php"><i class="fa-regular fa-gear"></i> Paramètres du compte</a></li>';
                 }
                 echo '<li><a href="deconnexion.php"><i class="fa-solid fa-sign-out-alt"></i> Se déconnecter</a></li>';
             }else{
-                echo '<li class="sign-buttons"><a href="inscrire.php"><i class="fa-solid fa-user-plus"></i> S\'inscrire</a></li>';
+                echo '<li class="sign-buttons"><a href="inscrire.php"><i class="fa-sharp fa-light fa-user-plus"></i> S\'inscrire</a></li>';
                 echo '<li class="sign-buttons popup">
                         <a href="#" onclick="popup()"><i class="fa-solid fa-sign-in-alt"></i> Se connecter</a>
                         <form class="popuptext" id="popup" method="POST">
