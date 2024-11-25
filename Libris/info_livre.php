@@ -64,14 +64,17 @@ elseif($_SERVER['REQUEST_METHOD'] == 'GET'){
 
 /* Requête permettant de tester si l'utilisateur actuel a déjà ajouter l'article a ses favoris. */
 $stmtSelectLivre = $conn->prepare(
-    "SELECT * from livre where id_livre = 1{$_SESSION['idLivreActuel']}"
+    "SELECT * from livre where id_livre = {$_SESSION['idLivreActuel']}"
 );
 $stmtSelectLivre->execute();
 $infoLivre = $stmtSelectLivre->fetch();
 
 $stmtTestDisponibilite = $conn->prepare("SELECT * FROM emprunter WHERE id_livre = {$_SESSION['idLivreActuel']}");
 $stmtTestDisponibilite->execute();
-$disponibilite = $stmtTestDisponibilite->fetch();
+$disponibilite = $stmtTestDisponibilite->fetchAll();
+$stmtSelectNbExemplaires = $conn->prepare("SELECT nb_exemplaires FROM exemplaire WHERE id_livre = {$_SESSION['idLivreActuel']}");
+$stmtSelectNbExemplaires->execute();
+$nbExemplaires = $stmtSelectNbExemplaires->fetch();
 $stmtTestReservation = $conn->prepare("SELECT * FROM reserver WHERE id_livre = {$_SESSION['idLivreActuel']}");
 $stmtTestReservation->execute();
 $est_reserver = $stmtTestReservation->fetch();
@@ -105,10 +108,10 @@ $stmtSelectAllAvis = $conn->prepare(
                 
                 <p>
                     <?php
-                        if (empty($disponibilite) and empty($est_reserver)){
+                        if ((empty($disponibilite) || $stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) and empty($est_reserver)){
                             echo '<p> Disponible en bibliothèque </p>';
                         } 
-                        elseif(!empty($disponibilite) and empty($est_reserver)){
+                        elseif((!empty($disponibilite) || $stmtTestDisponibilite->rowCount() === $nbExemplaires['nb_exemplaires']) and empty($est_reserver)){
                             $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter WHERE id_livre = {$_SESSION['idLivreActuel']}");
                             $stmtSelectDateFinEmprunt->execute();
                             $dateFinEmrpunt = $stmtSelectDateFinEmprunt->fetch();
@@ -137,8 +140,8 @@ $stmtSelectAllAvis = $conn->prepare(
                     ?>
                     <form method="post">
                         <input type="hidden" name="form" value="res/acha">
-                        <?php echo (!empty($infoEbook) && empty($testEbook)) ? '<button type="submit" name="acheter">Ajouter au panier</button>' : ((!empty($infoEbook) && !empty($testEbook)) ? '<button type="submit" name="acheter" disabled>Ajouter au panier</button>' : ''); ?>
-                        <button type="submit" name="reserver" <?php echo (empty($disponibilite) and empty($est_reserver)) or (!empty($disponibilite) and empty($est_reserver)) ? '': 'disabled' ?>>Réserver</button>
+                        <?php echo (!empty($infoEbook) && empty($testEbook)) ? '<button type="submit" name="acheter" id="btn_achat">Ajouter au panier</button>' : ((!empty($infoEbook) && !empty($testEbook)) ? '<button type="submit" name="acheter" id="btn_achat" disabled>Ajouter au panier</button>' : ''); ?>
+                        <button type="submit" name="reserver" id="btn_res" <?php echo ((empty($disponibilite) || $stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) and empty($est_reserver)) or ((!empty($disponibilite) || $stmtTestDisponibilite->rowCount() === $nbExemplaires['nb_exemplaires']) and empty($est_reserver)) ? '': 'disabled' ?>>Réserver</button>
                     </form>
         </div>
     </section>
@@ -150,30 +153,57 @@ $stmtSelectAllAvis = $conn->prepare(
         <div id="Caracteristisques">
             <h2>Caractéristiques</h2>
             <?php
-                $stmtSelectInfoCarac = $conn->prepare("SELECT g.nom_genre, i.isbn, langue.nom_langue, e.nom_edition, le.nb_pages, pc.type_public, ae.date_parution
-                                                      FROM genre g JOIN livre_genre lg ON g.id_genre = lg.id_genre
-																   JOIN livre l ON lg.id_livre = l.id_livre
-																   JOIN livre_langue ll ON l.id_livre = ll.id_livre
-																   JOIN langue ON ll.id_langue = langue.id_langue
-																   JOIN livre_edition le ON l.id_livre = le.id_livre
-																   JOIN edition e ON le.id_edition = e.id_edition
-																   JOIN livre_public lp ON l.id_livre = lp.id_livre
-																   JOIN public_cible pc ON lp.id_public = pc.id_public
-																   JOIN isbn i ON l.id_livre = i.id_livre
-                                                                   JOIN a_ecrit ae ON l.id_livre = ae.id_livre
-																   WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
-                $stmtSelectInfoCarac->execute();
-                $infoCarac = $stmtSelectInfoCarac->fetch();
+                $stmtSelectInfoCaracGenre = $conn->prepare("SELECT g.nom_genre from genre g JOIN livre_genre lg ON g.id_genre = lg.id_genre
+                JOIN livre l ON lg.id_livre = l.id_livre
+                WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
+                $stmtSelectInfoCaracLangue = $conn->prepare("SELECT langue.nom_langue from langue langue JOIN livre_langue ll ON langue.id_langue = ll.id_langue
+                        JOIN livre l ON ll.id_livre = l.id_livre
+                        WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
+                $stmtSelectInfoCaracEdition = $conn->prepare("SELECT e.nom_edition from edition e JOIN livre_edition le ON e.id_edition = le.id_edition
+                        JOIN livre l ON le.id_livre = l.id_livre
+                        WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
+                $stmtSelectInfoCaracPublic = $conn->prepare("SELECT pc.type_public from public_cible pc  JOIN livre_public lp ON pc.id_public = lp.id_public
+                        JOIN livre l ON lp.id_livre = l.id_livre
+                        WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
+                $stmtSelectInfoCaracDate = $conn->prepare("SELECT date_parution/*, l.isbn*/ FROM a_ecrit ae JOIN livre l ON ae.id_livre = l.id_livre 
+                    WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
+                
+                $stmtSelectInfoCaracGenre->execute();
+                $stmtSelectInfoCaracLangue->execute();
+                $stmtSelectInfoCaracEdition->execute();
+                $stmtSelectInfoCaracPublic->execute();
+                $stmtSelectInfoCaracDate->execute();
+                $infoCaracGenre = $stmtSelectInfoCaracGenre->fetchAll();
+                $infoCaracDate = $stmtSelectInfoCaracDate->fetch();
+                $infoCaracEdition = $stmtSelectInfoCaracEdition->fetchAll();
+                $infoCaracPublic = $stmtSelectInfoCaracPublic->fetchAll();
+                $infoCaracLangue = $stmtSelectInfoCaracLangue->fetchAll();
 
 
-                echo '<p> Date de parution..........................'.$infoCarac['date_parution'].'</p>';
-                echo '<p> ISBN......................................'.$infoCarac['isbn'].'</p>';                
+                echo '<p> Date de parution..........................'.$infoCaracDate['date_parution'].'</p>';
+                echo '<p> ISBN......................................'./*$infoCaracDate['isbn'].*/'</p>';                
                 echo '<p> Cote......................................'.$infoLivre['cote_livre'].'</p>';
-                echo '<p> Genre.....................................'.$infoCarac['nom_genre'].'</p>';
-                echo '<p> Langue....................................'.$infoCarac['nom_langue'].'</p>';
-                echo '<p> Edition...................................'.$infoCarac['nom_edition'].'</p>';
+                echo '<p> Genre.....................................';
+                foreach($infoCaracGenre as $rows){
+                    echo $rows['nom_genre']." ";
+                }
+                echo '</p>';
+                echo '<p> Langue....................................';
+                foreach($infoCaracLangue as $rows){
+                    echo $rows['nom_langue']." ";
+                }
+                echo '</p>';
+                echo '<p> Edition...................................';
+                foreach($infoCaracEdition as $rows){
+                    echo $rows['nom_edition']." ";
+                }
+                echo '</p>';
                 echo '<p> Type littéraire...........................'.$infoLivre['type_litteraire'].'</p>';
-                echo '<p> Public cible..............................'.$infoCarac['type_public'].'</p>';
+                echo '<p> Public cible..............................';
+                foreach($infoCaracEdition as $rows){
+                    echo $rows['type_public']." ";
+                }
+                echo '</p>';
             
                 
             ?>
@@ -183,7 +213,7 @@ $stmtSelectAllAvis = $conn->prepare(
         
     </section>
 
-    <form action = "article.php" method="post">
+    <form  method="post">
         <input type="hidden" name="form" value="avis">
         <h3>Laisser un avis :</h3>
         <div class="note">
@@ -217,7 +247,11 @@ $stmtSelectAllAvis = $conn->prepare(
                     $pseudo_util = $row2['pseudo'];
                     echo '<div class="affichage_avis">';
                     echo '<img src= "' + $row2['img_profil'] +'" alt="Image de profil">';
-                    echo '<div class="description_utilisateur"> <p>' . $pseudo_util . '</p><p>' . $rows['date_avis']. '</p> </div>';
+                    echo '<div class="description_utilisateur"> <p>' . $pseudo_util . '</p><p>' . $rows['date_avis']. '</p>';
+                    for ($i=0; $i<$rows['note_avis'];$i++ ){
+                        echo '<label for="etoileJaune">★</label>';
+                    }
+                    echo '</div>';
                     echo "<p>" . $rows['comment_avis']."</p>";
                     echo '</div>';
                 }
