@@ -88,8 +88,8 @@
                     echo '<li><a href=""><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
                     echo '<li><a href=""><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
                 }else{
-                    echo '<li><a href=""><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
-                    echo '<li><a href=""><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
+                    echo '<li><a href="./mes-reservations.php"><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
+                    echo '<li><a href="./mes-ebooks.php"><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
                     echo '<li><a href="./panier.php"><i class="fa-regular fa-basket-shopping"></i> Mon panier</a></li>';
                 }    
             }?>
