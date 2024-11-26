@@ -634,6 +634,124 @@ div.info_ebook_acheter p:nth-of-type(1){
     color: #000000;
 }
 
+/* Mes réservations */
+.reservations-ebooks {
+	padding: 0 10em;
+	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif"
+}
+.reservations-ebooks h1 {
+	font-size: 28px;
+	margin: 2em 0 0.5em 0;
+}
+
+.imgCouverture {
+	width: 8em;
+    height: 12em;
+    object-fit: cover;
+	box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.reservations-disponibles {
+	background-color: #FFDA89;
+	border-radius: 25px;
+	padding: 1em;
+	margin: 0 2em;
+}
+
+.reservations-indisponibles {
+	background-color: #D0BDF6;
+	border-radius: 25px;
+	padding: 1em;
+	margin: 4em 2em;
+}
+
+.reservations-disponibles h2 {
+	background-color: #D0BDF6;
+	border-radius: 20px;
+	display: inline-block;
+	padding: 10px;
+	margin: 0;
+}
+
+.reservations-indisponibles h2 {
+	background-color: #FFDA89;
+	border-radius: 20px;
+	display: inline-block;
+	padding: 10px;
+	margin: 0;
+}
+
+
+.livres {
+	display: flex;
+    flex-wrap: wrap;
+	margin: 1em 0 0 0;
+}
+
+.livre {
+	padding: 0 3em;
+	width: 13.5em;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.livre p {
+	margin-top: auto;
+	margin-bottom: 0;
+}
+
+/* Mes e-books */
+.mes-ebooks {
+    background-color: #D0BDF6;
+    border-radius: 25px;
+    padding: 1em;
+    margin: 0 2em 4em 2em;
+}
+
+/* Gestion des emprunts et réservations */
+.gestion-emprunts-reservations {
+    margin-bottom: 4em;
+    margin-left: 10em;
+    margin-right: 10em;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    font-size: small;
+}
+
+.gestion-emprunts-reservations h1{
+    font-size: 28px;
+    margin: 2em 0 0.5em 0;
+}
+.table-emprunts-reservations {
+    width: 100%;
+    border-collapse: collapse;
+    border: solid 3px black;
+}
+
+.table-emprunts-reservations thead th {
+    background-color: #FFDA89;
+    text-align: center;
+    padding: 10px;
+}
+
+.table-emprunts-reservations tbody td {
+    text-align: center;
+    padding: 10px;
+}
+
+.table-emprunts-reservations tbody tr:nth-child(odd) {
+    background-color: #D0BDF6;
+}
+
+.table-emprunts-reservations tbody tr:nth-child(even) {
+    background-color: #F4BCF5;
+}
+
+.table-emprunts-reservations .border-vertical {
+    border-left: 3px solid black; /* Ajustez l'épaisseur à votre convenance */
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     #page_catalogue {
