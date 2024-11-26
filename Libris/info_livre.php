@@ -29,7 +29,7 @@ $stmtInsertReservation->bindParam(2,$id_util);
 
 if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_POST['form'] === 'avis')){
     
-    if (isset($_POST['new_avis']) and !isset($_POST['acheter']) && isset($_POST['rating'])){
+    if (isset($_POST['new_avis']) and !isset($_POST['acheter']) && isset($_POST['note']) && !isset($_POST['reserver'])){
         /* On se place ici dans le cas où un utilisateur ajoute un commentaire à l'article.*/
         $new_comment = $_POST['new_avis'];
         $idLivre = $_SESSION['idLivreActuel'];
@@ -40,7 +40,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
         header("Location: livre.php?id_livre={$_SESSION['idArticleActuel']}");
         exit;
     }
-    elseif(!isset($_SESSION['acheter'])){
+    elseif(!isset($_POST['acheter'])){
         $id_livre = $_SESSION['idLivreActuel'];
         $id_util = $_SESSION['id'];
         $stmtInsertReservation->execute();
