@@ -18,8 +18,8 @@
         <?php foreach($livres as $liv){
             echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['titre_livre']. '">'; 
             echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-            echo '<h2>' . $liv['titre'] . '</h2>';
-            echo '<p>by ' . $liv['pseudo'] . '</p>';
+            echo '<h2>' . $liv['titre_livre'] . '</h2>';
+            echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
             echo '</a></div>'; 
         }
         $i=0;
@@ -56,8 +56,8 @@
             <?php foreach($livres as $liv){
                 echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['titre_livre']. '">'; 
                 echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-                echo '<h2>' . $liv['titre'] . '</h2>';
-                echo '<p>by ' . $liv['pseudo'] . '</p>';
+                echo '<h2>' . $liv['titre_livre'] . '</h2>';
+                echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
                 echo '</a></div>'; 
             }
             $i=0;

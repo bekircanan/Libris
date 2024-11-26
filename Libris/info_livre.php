@@ -37,14 +37,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
         $new_note = (int)$_POST['note'];
         $idUtilAvis = $_SESSION['id'];
         $stmtInsertAvis->execute();
-        header("Location: livre.php?id_livre={$_SESSION['idArticleActuel']}");
+        header("Location: info_livre.php?id_livre={$_SESSION['idLivreActuel']}");
         exit;
     }
     elseif(!isset($_POST['acheter'])){
         $id_livre = $_SESSION['idLivreActuel'];
         $id_util = $_SESSION['id'];
         $stmtInsertReservation->execute();
-        header("Location: livre.php?id_livre={$_SESSION['idLivreActuel']}");
+        header("Location: info_livre.php?id_livre={$_SESSION['idLivreActuel']}");
         exit;
     }
     else{
@@ -53,7 +53,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
         $idAchatEbook = $_SESSION['idEbook'];
         $new_regle = 0;
         $stmtInsertAchatEbooks->execute();
-        header("Location: livre.php?id_livre={$_SESSION['idLivreActuel']}");
+        header("Location: info_livre.php?id_livre={$_SESSION['idLivreActuel']}");
         exit;
     }
 }
@@ -217,16 +217,16 @@ $stmtSelectAllAvis = $conn->prepare(
         <input type="hidden" name="form" value="avis">
         <h3>Laisser un avis :</h3>
         <div class="note">
-            <input type="radio" id="etoile5" name="note" value="5" />
-            <label for="etoile5" title="5 étoiles">★</label>
-            <input type="radio" id="etoile4" name="note" value="4" />
-            <label for="etoile4" title="4 étoiles">★</label>
+            <input type="radio" id="etoile5" name="note" value="1" />
+            <label for="etoile5" title="5 étoiles">1★</label>
+            <input type="radio" id="etoile4" name="note" value="2" />
+            <label for="etoile4" title="4 étoiles">2★</label>
             <input type="radio" id="etoile3" name="note" value="3" />
-            <label for="etoile3" title="3 étoiles">★</label>
-            <input type="radio" id="etoile2" name="note" value="2" />
-            <label for="etoile2" title="2 étoiles">★</label>
-            <input type="radio" id="etoile1" name="note" value="1" />
-            <label for="etoile1" title="1 étoile">★</label>
+            <label for="etoile3" title="3 étoiles">3★</label>
+            <input type="radio" id="etoile2" name="note" value="4" />
+            <label for="etoile2" title="2 étoiles">4★</label>
+            <input type="radio" id="etoile1" name="note" value="5" />
+            <label for="etoile1" title="1 étoile">5★</label>
         </div>
 
         <textarea name="new_avis" rows="5" required></textarea>

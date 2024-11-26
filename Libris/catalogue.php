@@ -42,7 +42,7 @@
                                         OR :recherche LIKE l.cote_livre
                                     ORDER BY l.titre_livre "); 
 
-    $stmtRecherche->execute([':recherche' => 'roman']);//$infoRecherche]);
+    $stmtRecherche->execute([':recherche' => 'essai']);
     $livreRecherche = $stmtRecherche->fetchAll();
 
     $stmtNbAvis = $conn->prepare("SELECT COUNT(id_avis) as avis
@@ -52,12 +52,6 @@
     $stmtAuteur = $conn->prepare("SELECT DISTINCT a.nom_auteur, a.prenom_auteur 
                                     FROM auteur a LEFT OUTER JOIN a_ecrit ae ON a.id_auteur = ae.id_auteur
                                     WHERE id_livre = :id_livre ");
-    
-    // $index = 0;
-    // foreach($livreRecherche as $livre){
-    //     $listeIdLivre[]
-    //     $index = $index + 1
-    // }
 
     $resultGenre = $conn->query("SELECT nom_genre FROM genre");
 
@@ -99,7 +93,6 @@
         </section>
     </section>
     <section id="catalogue">
-        <?php echo 'la' . $_SESSION['trie']; ?>
         <form method="POST" action="">
             <input type="hidden" name="form" value="trie">
             <label for="tri-select">Trier par :</label>
