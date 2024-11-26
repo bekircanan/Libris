@@ -200,7 +200,7 @@ $stmtSelectAllAvis = $conn->prepare(
                 echo '</p>';
                 echo '<p> Type littéraire...........................'.$infoLivre['type_litteraire'].'</p>';
                 echo '<p> Public cible..............................';
-                foreach($infoCaracEdition as $rows){
+                foreach($infoCaracPublic as $rows){
                     echo $rows['type_public']." ";
                 }
                 echo '</p>';
@@ -246,7 +246,7 @@ $stmtSelectAllAvis = $conn->prepare(
                     $row2 = $result->fetch();
                     $pseudo_util = $row2['pseudo'];
                     echo '<div class="affichage_avis">';
-                    echo '<img src= "' + $row2['img_profil'] +'" alt="Image de profil">';
+                    echo '<img src= "' . $row2['img_profil'] . '" alt="Image de profil">';
                     echo '<div class="description_utilisateur"> <p>' . $pseudo_util . '</p><p>' . $rows['date_avis']. '</p>';
                     for ($i=0; $i<$rows['note_avis'];$i++ ){
                         echo '<label for="etoileJaune">★</label>';
