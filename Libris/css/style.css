@@ -346,10 +346,42 @@ main {
 .forfait {
     background-color: #D0BDF6;
 }
-
 .inscrire {
+    margin: auto;
+    padding: 20px;
     background-color: #FFDA89;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+.inscrire h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.inscrire form {
+    display: flex;
+    flex-direction: column;
+}
+.inscrire input, .inscrire select {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.inscrire button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #D0BDF6;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.inscrire button:hover {
+    background-color: #b09bd6;
+}
+
 .forfait h2 {
     grid-area: 1 / 1 / 2 / 3;
 }

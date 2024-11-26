@@ -9,12 +9,6 @@
             case 0:
                 return '<input type="date" name="date_naissance" required>';
             case 1:
-                return '<select name="categorie" required>
-                            <option value="jeune">Moins de 18 ans</option>
-                            <option value="etudiant">Etudiant</option>
-                            <option value="adulte">Adulte</option>
-                        </select>';
-            case 2:
                 return '<input type="text" name="nom" placeholder="Nom" required>
                         <input type="text" name="prenom" placeholder="Prénom" required>
                         <input type="text" name="adresse" placeholder="Adresse" required>
@@ -23,6 +17,13 @@
                         <input type="text" name="pseudo" placeholder="Pseudo" required>
                         <input type="password" name="mdp" placeholder="Mot de passe" required>
                         <input type="password" name="mdp2" placeholder="Confirmer mot de passe" required>';
+            case 2:
+                return '<select name="categorie" required>
+                            <option value="jeune">Moins de 18 ans</option>
+                            <option value="etudiant">Etudiant</option>
+                            <option value="adulte">Adulte</option>
+                            <option value="aucune">Aucune</option>
+                        </select>';
             case 3:
                 return '<input type="text" name="numero_carte" placeholder="Numéro de carte" required>
                         <input type="text" name="date_expiration" placeholder="Date d\'expiration" required>
@@ -43,28 +44,6 @@
                 }
                 break;
             case 2:
-                if (isset($_POST['categorie']) && !empty($_POST['categorie'])) {
-                    switch ($_POST['categorie']) {
-                        case 'jeune':
-                            $_SESSION['categorie'] = 1;
-                            break;
-                        case 'etudiant':
-                            $_SESSION['categorie'] = 2;
-                            break;
-                        case 'adulte':
-                            $_SESSION['categorie'] = 3;
-                            break;
-                        default:
-                            $errlog = "<p>Catégorie d'abonnement invalide.</p>";
-                            $etape = 1;
-                            break;
-                    }
-                }else{
-                    $errlog = "<p>La catégorie d'abonnement est requise.</p>";
-                    $etape = 1;
-                }
-                break;
-            case 3:
                 if (isset($_POST['nom'], $_POST['prenom'], $_POST['adresse'], $_POST['tel'], $_POST['email'], $_POST['mdp'], $_POST['mdp2'], $_POST['pseudo']) && !empty($_POST['nom']) && !empty($_POST['pseudo']) && !empty($_POST['prenom']) && !empty($_POST['adresse']) && !empty($_POST['tel']) && !empty($_POST['email']) && !empty($_POST['mdp']) && !empty($_POST['mdp2'])) {
                     $_SESSION['nom'] = $_POST['nom'];
                     $_SESSION['prenom'] = $_POST['prenom'];
@@ -76,10 +55,36 @@
                     $_SESSION['pseudo'] = $_POST['pseudo'];
                     if ($_SESSION['mdp'] !== $_SESSION['mdp2']) {
                         $errlog = "<p>Les mots de passe ne correspondent pas.</p>";
-                        $etape = 2;
+                        $etape = 1;
                     }
                 }else{
                     $errlog = "<p>Les informations personnelles sont requises.</p>";
+                    $etape = 1;
+                }
+                break;
+            case 3:
+                if (isset($_POST['categorie']) && !empty($_POST['categorie'])) {
+                    switch ($_POST['categorie']) {
+                        case 'jeune':
+                            $_SESSION['categorie'] = 1;
+                            break;
+                        case 'etudiant':
+                            $_SESSION['categorie'] = 2;
+                            break;
+                        case 'adulte':
+                            $_SESSION['categorie'] = 3;
+                            break;
+                        case 'aucune':
+                            $_SESSION['categorie'] = 4;
+                            goto fini;
+                            break;
+                        default:
+                            $errlog = "<p>Catégorie d'abonnement invalide.</p>";
+                            $etape = 2;
+                            break;
+                    }
+                }else{
+                    $errlog = "<p>La catégorie d'abonnement est requise.</p>";
                     $etape = 2;
                 }
                 break;
@@ -88,6 +93,7 @@
                     $_SESSION['numero_carte'] = $_POST['numero_carte'];
                     $_SESSION['date_expiration'] = $_POST['date_expiration'];
                     $_SESSION['cvv'] = $_POST['cvv'];
+                    fini:
                     $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, 'test',?, ?)");
                     $stmt->bindParam(1, $_SESSION['prenom']);
                     $stmt->bindParam(2, $_SESSION['nom']);
@@ -109,6 +115,8 @@
                     $stmt->execute();
                     $_SESSION['user'] = $_SESSION['pseudo'];
                     $_SESSION['email'] = $_SESSION['email'];
+                    $_SESSION['admin']=0;
+                    $_SESSION['id'] = $util['id_util'];
                     header("Location: index.php");
                     exit();
                 }else{
