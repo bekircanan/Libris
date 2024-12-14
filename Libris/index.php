@@ -22,11 +22,6 @@
             echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
             echo '</a></div>'; 
         }
-        $i=0;
-        while($i<50){
-            echo '<p>test'.$i.'</p>';
-            $i++;
-        }
         ?>
 
         </div>
@@ -60,11 +55,7 @@
                 echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
                 echo '</a></div>'; 
             }
-            $i=0;
-            while($i<50){
-                echo '<p>test'.$i.'</p>';
-                $i++;
-            }?>
+            ?>
         </div>
         <button class="scroll-right background-violet" style="display: none;">></button>
     </div>
