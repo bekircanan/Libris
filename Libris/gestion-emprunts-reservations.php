@@ -1,44 +1,108 @@
 <?php
 require('header.php');
 
-$_SESSION['id'] = 1;
+$stmtNbExemplairesDisponibles = $conn->prepare("
+    SELECT 
+        l.id_livre,
+        l.titre_livre,
+        i.id_edition,
+        ed.nom_edition,
+        i.num_isbn,
+        COUNT(e.id_exemplaire) AS nb_exemplaires,
+        (COUNT(e.id_exemplaire) - COUNT(emp.id_exemplaire)) AS nb_exemplaires_disponibles
+    FROM 
+        exemplaire e
+    INNER JOIN 
+        isbn i ON e.num_isbn = i.num_isbn
+    INNER JOIN 
+        edition ed ON i.id_edition = ed.id_edition
+    INNER JOIN 
+        livre l ON i.id_livre = l.id_livre
+    LEFT JOIN 
+        emprunter emp ON e.id_exemplaire = emp.id_exemplaire
+    GROUP BY 
+        i.num_isbn, l.id_livre, l.titre_livre, i.id_edition, ed.nom_edition
+");
+$stmtNbExemplairesDisponibles->execute();
+$nbExemplairesDisponibles = $stmtNbExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
+
 
 $stmtExemplairesDisponibles = $conn->prepare("
     SELECT 
-        e.id_livre, 
-        e.nb_exemplaires, 
-        (e.nb_exemplaires - COUNT(emp.id_livre)) AS exemplaires_disponibles
+        e.num_isbn,
+        e.id_exemplaire
     FROM 
         exemplaire e
     LEFT JOIN 
-        emprunter emp ON e.id_livre = emp.id_livre
-    GROUP BY 
-        e.id_livre, e.nb_exemplaires
+        emprunter emp ON e.id_exemplaire = emp.id_exemplaire 
+        AND emp.date_fin_emprunt IS NULL
+    WHERE 
+        emp.id_exemplaire IS NULL
+    ORDER BY 
+        e.num_isbn
 ");
 $stmtExemplairesDisponibles->execute();
 $exemplairesDisponibles = $stmtExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
 
+
+
 $stmtEmprunts = $conn->prepare("
     SELECT 
+        l.id_livre, 
+        l.titre_livre, 
+        l.cote_livre, 
+        e.id_exemplaire,
+        e.num_isbn,
+        u.id_util, 
+        u.nom_util, 
+        u.prenom_util, 
+        u.email, 
+        emp.date_debut_emprunt, 
+        emp.date_fin_emprunt
+    FROM 
+        emprunter emp
+    INNER JOIN 
+        exemplaire e ON emp.id_exemplaire = e.id_exemplaire
+    INNER JOIN 
+        isbn i ON e.num_isbn = i.num_isbn
+    INNER JOIN 
+        livre l ON i.id_livre = l.id_livre
+    INNER JOIN 
+        utilisateur u ON emp.id_util = u.id_util
+    ORDER BY
+        l.id_livre, emp.date_debut_emprunt
+");
+$stmtEmprunts->execute();
+$emprunts = $stmtEmprunts->fetchAll(PDO::FETCH_ASSOC);
+
+
+$stmtReservations = $conn->prepare("
+    SELECT 
+        reserver.date_reservation,
+        reserver.num_isbn,
         livre.id_livre, 
         livre.titre_livre, 
         livre.cote_livre, 
+        livre.type_litteraire, 
+        livre.img_couverture, 
         utilisateur.id_util, 
-        utilisateur.nom_util, 
         utilisateur.prenom_util, 
+        utilisateur.nom_util, 
         utilisateur.email, 
-        emprunter.date_debut_emprunt
+        utilisateur.pseudo
     FROM 
-        emprunter
+        reserver
     INNER JOIN 
-        livre ON emprunter.id_livre = livre.id_livre
+        isbn ON reserver.num_isbn = isbn.num_isbn
     INNER JOIN 
-        utilisateur ON emprunter.id_util = utilisateur.id_util
-    ORDER BY
-        emprunter.id_livre, emprunter.date_debut_emprunt
+        livre ON isbn.id_livre = livre.id_livre
+    INNER JOIN 
+        utilisateur ON reserver.id_util = utilisateur.id_util
+    ORDER BY 
+        reserver.date_reservation ASC, livre.titre_livre
 ");
-$stmtEmprunts->execute();
-$emprunts = $stmtEmprunts->fetchAll();
+$stmtReservations->execute();
+$reservations = $stmtReservations->fetchAll(PDO::FETCH_ASSOC);
 
 function calculerDateRetour($dateEmprunt) {
     $date = new DateTime($dateEmprunt);
@@ -56,42 +120,22 @@ function calculerStatut($dateEmprunt) {
     }
 }
 
-$stmtReservations = $conn->prepare("
-    SELECT 
-        reserver.date_reservation,
-        livre.id_livre, 
-        livre.titre_livre, 
-        livre.cote_livre, 
-        livre.disponibilite,
-        utilisateur.id_util, 
-        utilisateur.nom_util, 
-        utilisateur.prenom_util, 
-        utilisateur.email
-    FROM 
-        reserver
-    INNER JOIN 
-        livre ON reserver.id_livre = livre.id_livre
-    INNER JOIN 
-        utilisateur ON reserver.id_util = utilisateur.id_util
-    ORDER BY 
-        reserver.id_livre, reserver.date_reservation
-");
-$stmtReservations->execute();
-$reservations = $stmtReservations->fetchAll();
-
-function calculerDisponibilite($disponibilite) {
-    if ($disponibilite == "1") {
-        return "Disponible";
-    }
-    else if ($disponibilite == "0") {
-        return "Indisponible";
+function calculerDisponibilite($num_isbn, $nbExemplairesDisponibles) {
+    foreach ($nbExemplairesDisponibles as $exemplaire) {
+        if ($exemplaire['num_isbn'] == $num_isbn) {
+            if ($exemplaire['nb_exemplaires_disponibles'] > 0) {
+                return "Disponible (".$exemplaire['nb_exemplaires_disponibles'] ."/".$exemplaire['nb_exemplaires'].")";
+            } else {
+                return "Indisponible";
+            }
+        }
     }
 }
 
-function calculerPositionFileAttente($reservations, $id_util, $id_livre) {
+function calculerPositionFileAttente($reservations, $id_util, $num_isbn) {
     $i = 1;
     foreach ($reservations as $reservation) {
-        if ($reservation['id_livre'] == $id_livre) {
+        if ($reservation['num_isbn'] == $num_isbn) {
             if ($reservation['id_util'] == $id_util) {
                 return $i;
             }
@@ -100,11 +144,11 @@ function calculerPositionFileAttente($reservations, $id_util, $id_livre) {
     }
 }
 
-function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $id_util, $id_livre) {
+function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $id_util, $num_isbn) {
     // Créer la file d'attente des utilisateurs ayant réservé le livre
     $fileAttente = [];
     foreach ($reservations as $reservation) {
-        if ($reservation['id_livre'] == $id_livre) {
+        if ($reservation['num_isbn'] == $num_isbn) {
             array_push($fileAttente, $reservation['id_util']);
         }
     }
@@ -112,7 +156,7 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
     // Créer la file d'attente des dates de retour des emprunts pour ce livre
     $fileRetoursEmprunts = [];
     foreach ($emprunts as $emprunt) {
-        if ($emprunt['id_livre'] == $id_livre) {
+        if ($emprunt['num_isbn'] == $num_isbn) {
             array_push($fileRetoursEmprunts, calculerDateRetour($emprunt['date_debut_emprunt']));
         }
     }
@@ -120,33 +164,84 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
     // Récupérer le nombre d'exemplaires disponibles pour le livre
     $nbExemplairesDisponibles = 0;
     foreach ($exemplairesDisponibles as $exemplaire) {
-        if ($exemplaire['id_livre'] == $id_livre) {
-            $nbExemplairesDisponibles = $exemplaire['exemplaires_disponibles'];
+        if ($exemplaire['num_isbn'] == $num_isbn) {
+            $nbExemplairesDisponibles = $exemplaire['nb_exemplaires_disponibles'];
             break;
         }
     }
 
     $user = $fileAttente[0];
     $dateDisponibilite = "Disponible";
-    while ($user != $id_util) {
-        $user = array_shift($fileAttente);
+    if ($user == $id_util) {
         if ($nbExemplairesDisponibles > 0) {
             $nbExemplairesDisponibles--;
         }
         else {
-            $dateDisponibilite = array_shift($fileRetoursEmprunts);
+            $dateDisponibilite = convertirDate2(array_shift($fileRetoursEmprunts));
         }
     }
+    else {
+        while ($user != $id_util) {
+            $user = array_shift($fileAttente);
+            if ($nbExemplairesDisponibles > 0) {
+                $nbExemplairesDisponibles--;
+            }
+            else {
+                $dateDisponibilite = convertirDate2(array_shift($fileRetoursEmprunts));
+            }
+        }
+    }
+
     return $dateDisponibilite;
 }
 
+function convertirDate($date) {
+    $timestamp = strtotime($date);
+
+    // Formats
+    $mois = [
+        "01" => "janvier", "02" => "février", "03" => "mars",
+        "04" => "avril", "05" => "mai", "06" => "juin",
+        "07" => "juillet", "08" => "août", "09" => "septembre",
+        "10" => "octobre", "11" => "novembre", "12" => "décembre"
+    ];
+
+    $jour = date("d", $timestamp);
+    $moisNum = date("m", $timestamp);
+    $annee = date("Y", $timestamp);
+    $heure = date("H", $timestamp);
+    $minute = date("i", $timestamp);
+
+    return "$jour " . $mois[$moisNum] . " $annee à $heure:$minute";
+}
+
+function convertirDate2($date) {
+    $timestamp = strtotime($date);
+
+    // Formats
+    $mois = [
+        "01" => "janvier", "02" => "février", "03" => "mars",
+        "04" => "avril", "05" => "mai", "06" => "juin",
+        "07" => "juillet", "08" => "août", "09" => "septembre",
+        "10" => "octobre", "11" => "novembre", "12" => "décembre"
+    ];
+
+    $jour = date("d", $timestamp);
+    $moisNum = date("m", $timestamp);
+    $annee = date("Y", $timestamp);
+    $heure = date("H", $timestamp);
+    $minute = date("i", $timestamp);
+
+    return "$jour " . $mois[$moisNum] . " $annee";
+}
+
 if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerRetour')) {
-    $id_livre = $_POST['id_livre'];
+    $id_exemplaire = $_POST['id_exemplaire'];
     $id_util = $_POST['id_util'];
 
-    if (!empty($id_livre) && !empty($id_util)) {
-        $stmt = $conn->prepare("DELETE FROM emprunter WHERE id_livre = :id_livre AND id_util = :id_util");
-        $stmt->bindParam(':id_livre', $id_livre, PDO::PARAM_INT);
+    if (!empty($id_exemplaire) && !empty($id_util)) {
+        $stmt = $conn->prepare("DELETE FROM emprunter WHERE id_exemplaire = :id_exemplaire AND id_util = :id_util");
+        $stmt->bindParam(':id_exemplaire', $id_exemplaire, PDO::PARAM_INT);
         $stmt->bindParam(':id_util', $id_util, PDO::PARAM_INT);
 
         $stmt->execute();
@@ -155,12 +250,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerRetour'
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'annulerReservation')) {
-    $id_livre = $_POST['id_livre'];
+    $num_isbn = $_POST['num_isbn'];
     $id_util = $_POST['id_util'];
 
-    if (!empty($id_livre) && !empty($id_util)) {
-        $stmt = $conn->prepare("DELETE FROM reserver WHERE id_livre = :id_livre AND id_util = :id_util");
-        $stmt->bindParam(':id_livre', $id_livre, PDO::PARAM_INT);
+    if (!empty($num_isbn) && !empty($id_util)) {
+        $stmt = $conn->prepare("DELETE FROM reserver WHERE num_isbn = :num_isbn AND id_util = :id_util");
+        $stmt->bindParam(':num_isbn', $num_isbn, PDO::PARAM_STR);
         $stmt->bindParam(':id_util', $id_util, PDO::PARAM_INT);
 
         $stmt->execute();
@@ -169,38 +264,40 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'annulerReservati
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt')) {
-    $id_livre = $_POST['id_livre'];
+    $num_isbn = $_POST['num_isbn'];
     $id_util = $_POST['id_util'];
 
-    if (!empty($id_livre) && !empty($id_util)) {
-        // Vérifier la disponibilité
-        $stmtVerifierDisponibilite = $conn->prepare("
-            SELECT (e.nb_exemplaires - COUNT(emp.id_livre)) AS exemplaires_disponibles
-            FROM exemplaire e
-            LEFT JOIN emprunter emp ON e.id_livre = emp.id_livre
-            WHERE e.id_livre = :id_livre
-            GROUP BY e.nb_exemplaires
+    if (!empty($num_isbn) && !empty($id_util)) {
+        $stmtDelete = $conn->prepare("DELETE FROM reserver WHERE num_isbn = :num_isbn AND id_util = :id_util");
+        $stmtDelete->bindParam(':num_isbn', $num_isbn, PDO::PARAM_STR);
+        $stmtDelete->bindParam(':id_util', $id_util, PDO::PARAM_INT);
+        $stmtDelete->execute();
+
+        $stmtExemplaire = $conn->prepare("
+            SELECT e.id_exemplaire
+            FROM EXEMPLAIRE e
+            LEFT JOIN EMPRUNTER em ON e.id_exemplaire = em.id_exemplaire AND em.date_fin_emprunt IS NULL
+            WHERE e.num_isbn = :num_isbn AND em.id_exemplaire IS NULL
+            LIMIT 1
         ");
-        $stmtVerifierDisponibilite->bindParam(':id_livre', $id_livre, PDO::PARAM_INT);
-        $stmtVerifierDisponibilite->execute();
-        $resultDispo = $stmtVerifierDisponibilite->fetch(PDO::FETCH_ASSOC);
+        $stmtExemplaire->bindParam(':num_isbn', $num_isbn, PDO::PARAM_STR);
+        $stmtExemplaire->execute();
+        $idExemplaireDisponible = $stmtExemplaire->fetchColumn();
 
-        // Si exemplaires disponibles
-        if ($resultDispo['exemplaires_disponibles'] > 0) {
-            $stmtDelete = $conn->prepare("DELETE FROM reserver WHERE id_livre = :id_livre AND id_util = :id_util");
-            $stmtDelete->bindParam(':id_livre', $id_livre, PDO::PARAM_INT);
-            $stmtDelete->bindParam(':id_util', $id_util, PDO::PARAM_INT);
-            $stmtDelete->execute();
 
-            $stmtValider = $conn->prepare("INSERT INTO emprunter(id_livre, id_util) VALUES (:id_livre, :id_util)");
-            $stmtValider->bindParam(':id_livre', $id_livre, PDO::PARAM_INT);
-            $stmtValider->bindParam(':id_util', $id_util, PDO::PARAM_INT);
-            $stmtValider->execute();
-
-            header('Location: gestion-emprunts-reservations.php');
-        } else {
-            echo "<script>alert('Aucun exemplaire disponible pour ce livre.');</script>";
+        foreach ($exemplairesDisponibles as $exemplaire) {
+            if ($exemplaire['num_isbn'] == $num_isbn) {
+                $idExemplaire = $exemplaire['id_exemplaire'];
+                break;
+            }
         }
+
+        $stmtValider = $conn->prepare("INSERT INTO emprunter(id_exemplaire, id_util) VALUES (:id_exemplaire, :id_util)");
+        $stmtValider->bindParam(':id_exemplaire', $idExemplaire, PDO::PARAM_INT);
+        $stmtValider->bindParam(':id_util', $id_util, PDO::PARAM_INT);
+        $stmtValider->execute();
+
+        header('Location: gestion-emprunts-reservations.php');
     }
 }
 
@@ -215,49 +312,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
 <body>
     <main class="gestion-emprunts-reservations">
         <h1>Emprunts</h1>
-        <table class="table-emprunts-reservations">
+        <input type="text" id="search-emprunts-input" placeholder="Rechercher un emprunt..." onkeyup="searchEmprunts()">
+        <table class="table-emprunts-reservations" id="table-emprunts">
             <thead>
             <tr>
-                <th colspan="3">Informations sur le livre</th>
-                <th colspan="4" class="border-vertical">Informations sur l’utilisateur</th>
-                <th colspan="3" class='border-vertical'>Informations sur l’emprunt</th>
-                <th>Action</th>
-            </tr>
-            <tr>
-                <th>ID</th>
-                <th>Titre</th>
-                <th>Cote</th>
-                <th class="border-vertical">ID</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Email</th>
-                <th class='border-vertical'>Date de début</th>
+                <th>Utilisateur</th>
+                <th>Livre</th>
+                <th>ISBN</th>
+                <th>ID exemplaire</th>
+                <th>Date de début</th>
                 <th>Date de retour prévu</th>
                 <th>Statut</th>
-                <th></th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <?php
             foreach ($emprunts as $emprunt) {
                 echo "<tr>";
-                echo "<td>". $emprunt['id_livre']. "</td>";
+                echo "<td>". $emprunt['prenom_util']." ". $emprunt['nom_util'] ."</td>";
                 echo "<td>". $emprunt['titre_livre']. "</td>";
-                echo "<td>". $emprunt['cote_livre']. "</td>";
-                echo "<td class='border-vertical'>". $emprunt['id_util']. "</td>";
-                echo "<td>". $emprunt['nom_util']. "</td>";
-                echo "<td>". $emprunt['prenom_util']. "</td>";
-                echo "<td>". $emprunt['email']. "</td>";
-                echo "<td class='border-vertical'>". $emprunt['date_debut_emprunt']. "</td>";
-                echo "<td>". calculerDateRetour($emprunt['date_debut_emprunt']) . "</td>";
+                echo "<td>". $emprunt['num_isbn']. "</td>";
+                echo "<td>". $emprunt['id_exemplaire']. "</td>";
+                echo "<td>". convertirDate($emprunt['date_debut_emprunt']). "</td>";
+                echo "<td>". convertirDate(calculerDateRetour($emprunt['date_debut_emprunt']))  . "</td>";
                 echo "<td class='col-statut'>". calculerStatut($emprunt['date_debut_emprunt']) ."</td>";
                 echo "<td>
-                    <form method='POST' action='gestion-emprunts-reservations.php' onsubmit='return confirmRetour();'>
-                        <input type='hidden' name='form' value='confirmerRetour'>
-                        <input type='hidden' name='id_livre' value='" . $emprunt['id_livre'] . "'>
-                        <input type='hidden' name='id_util' value='" . $emprunt['id_util'] . "'>
-                        <button type='submit'>Confirmer retour</button>
-                    </form>
+                    <button onclick=popupConfirmRetour(".$emprunt['id_exemplaire'].",".$emprunt['id_util'].")>Retour</button>
                 </td>";
                 echo "</tr>";
             }
@@ -265,58 +346,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
             </tbody>
         </table>
         <h1>Réservations</h1>
-        <table class="table-emprunts-reservations">
+        <input type="text" id="search-reservations-input" placeholder="Rechercher une réservation..." onkeyup="searchReservations()">
+        <table class="table-emprunts-reservations" id="table-reservations">
             <thead>
             <tr>
-                <th colspan="4">Informations sur le livre</th>
-                <th colspan="4" class='border-vertical'>Informations sur l’utilisateur</th>
-                <th colspan="3" class='border-vertical'>Informations sur la réservation</th>
-                <th>Action</th>
-            </tr>
-            <tr>
-                <th>ID</th>
-                <th>Titre</th>
+                <th>Utilisateur</th>
+                <th>Livre</th>
                 <th>Cote</th>
-                <th>Disponibilité</th>
-                <th class='border-vertical'>ID</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Email</th>
-                <th class='border-vertical'>Date de réservation</th>
+                <th>ISBN</th>
+                <th>Disponibilité édition</th>
+                <th>Date de réservation</th>
                 <th>Date de disponibilité</th>
                 <th>Position file d'attente</th>
-                <th></th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <?php
             foreach ($reservations as $reservation) {
                 echo "<tr>";
-                echo "<td>". $reservation['id_livre']. "</td>";
+                echo "<td>". $reservation['prenom_util']." ". $reservation['nom_util'] ."</td>";
                 echo "<td>". $reservation['titre_livre']. "</td>";
                 echo "<td>". $reservation['cote_livre']. "</td>";
-                echo "<td class='col-disponibilite'>". calculerDisponibilite($reservation['disponibilite']). "</td>";
-                echo "<td class='border-vertical'>". $reservation['id_util']. "</td>";
-                echo "<td>". $reservation['nom_util']. "</td>";
-                echo "<td>". $reservation['prenom_util']. "</td>";
-                echo "<td>". $reservation['email']. "</td>";
-                echo "<td class='border-vertical'>". $reservation['date_reservation']. "</td>";
-                echo "<td class='col-date-disponibilite'>". calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['id_livre']) . "</td>";
-                echo "<td>". calculerPositionFileAttente($reservations, $reservation['id_util'], $reservation['id_livre']) ."</td>";
+                echo "<td>". $reservation['num_isbn']. "</td>";
+                echo "<td class='col-disponibilite'>". calculerDisponibilite($reservation['num_isbn'], $nbExemplairesDisponibles). "</td>";
+                echo "<td>". convertirDate($reservation['date_reservation']). "</td>";
+                echo "<td class='col-date-disponibilite'>". calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) . "</td>";
+                echo "<td>". calculerPositionFileAttente($reservations, $reservation['id_util'], $reservation['num_isbn']) ."</td>";
                 echo "<td>
-                    <form method='POST' action='gestion-emprunts-reservations.php' onsubmit='return confirmSuppression();'>
-                        <input type='hidden' name='form' value='annulerReservation'>
-                        <input type='hidden' name='id_livre' value='" . $reservation['id_livre'] . "'>
-                        <input type='hidden' name='id_util' value='" . $reservation['id_util'] . "'>
-                        <button type='submit'>Annuler</button>
-                    </form>
-                    <form method='POST' action='gestion-emprunts-reservations.php' onsubmit='return confirmEmprunt();'>
-                        <input type='hidden' name='form' value='validerEmprunt'>
-                        <input type='hidden' name='id_livre' value='" . $reservation['id_livre'] . "'>
-                        <input type='hidden' name='id_util' value='" . $reservation['id_util'] . "'>
-                        <button type='submit'>Valider l'emprunt</button>
-                    </form>
-                </td>";
+                    <button onclick=popupConfirmSuppression('".$reservation['num_isbn']."',".$reservation['id_util'].")>Supprimer</button>";
+                if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) == "Disponible") {
+                    echo "<button onclick=popupConfirmEmprunt('".$reservation['num_isbn']."',".$reservation['id_util'].")>Accepter</button>";
+                }
+                echo "</td>";
                 echo "</tr>";
             }
             ?>
@@ -324,22 +386,140 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
         </table>
     </main>
     <script>
-        function confirmSuppression() {
-            return confirm("Êtes-vous sûr de vouloir annuler cette réservation ?");
+        function searchEmprunts() {
+            let input = document.getElementById('search-emprunts-input').value.toLowerCase();
+
+            let table = document.querySelector('#table-emprunts tbody');
+            let rows = table.getElementsByTagName('tr');
+
+            // Parcourir les lignes du tableau
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let cells = row.getElementsByTagName('td');
+                let rowText = "";
+
+                // Concaténer le texte des colonnes de la ligne actuelle
+                for (let j = 0; j < cells.length; j++) {
+                    rowText += cells[j].innerText.toLowerCase() + " ";
+                }
+
+                // Vérifier si le texte de la ligne contient la valeur recherchée
+                if (rowText.includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
         }
-        function confirmRetour() {
-            return confirm("Êtes-vous sûr de vouloir confirmer le retour de ce livre ?");
+        function searchReservations() {
+            let input = document.getElementById('search-reservations-input').value.toLowerCase();
+
+            let table = document.querySelector('#table-reservations tbody');
+            let rows = table.getElementsByTagName('tr');
+
+            // Parcourir les lignes du tableau
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let cells = row.getElementsByTagName('td');
+                let rowText = "";
+
+                // Concaténer le texte des colonnes de la ligne actuelle
+                for (let j = 0; j < cells.length; j++) {
+                    rowText += cells[j].innerText.toLowerCase() + " ";
+                }
+
+                // Vérifier si le texte de la ligne contient la valeur recherchée
+                if (rowText.includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
         }
-        function confirmEmprunt() {
-            return confirm("Êtes-vous sûr de vouloir confirmer l'emprunt de ce livre ?");
+
+        function popupConfirmRetour(id_exemplaire, id_util) {
+            let popup = document.createElement('div');
+            popup.className = 'popupGestion hidden';
+            popup.innerHTML = `
+                <div class="popupGestion-content">
+                    <h2>Confirmation de retour</h2>
+                    <p>Êtes-vous sûr de vouloir confirmer le retour de cet emprunt ?</p>
+                    <form method="POST" action="gestion-emprunts-reservations.php">
+                        <input type="hidden" name="form" value="confirmerRetour">
+                        <input type="hidden" name="id_exemplaire" value="${id_exemplaire}">
+                        <input type="hidden" name="id_util" value="${id_util}">
+                        <button type="submit">OK</button>
+                    </form>
+                    <button class='popupGestionAnnuler'>Annuler</button>
+                </div>
+            `;
+            const main = document.querySelector('main');
+            main.appendChild(popup);
+
+            const cancelButton = popup.querySelector('.popupGestionAnnuler');
+            cancelButton.addEventListener('click', () => {
+                main.removeChild(popup);
+            });
         }
+
+        function popupConfirmSuppression(num_isbn, id_util) {
+            let popup = document.createElement('div');
+            popup.className = 'popupGestion hidden';
+            popup.innerHTML = `
+                <div class="popupGestion-content">
+                    <h2>Confirmation d'annulation</h2>
+                    <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+                    <form method="POST" action="gestion-emprunts-reservations.php">
+                        <input type="hidden" name="form" value="annulerReservation">
+                        <input type="hidden" name="num_isbn" value="${num_isbn}">
+                        <input type="hidden" name="id_util" value="${id_util}">
+                        <button type="submit">OK</button>
+                    </form>
+                    <button class='popupGestionAnnuler'>Annuler</button>
+                </div>
+            `;
+            const main = document.querySelector('main');
+            main.appendChild(popup);
+
+            const cancelButton = popup.querySelector('.popupGestionAnnuler');
+            cancelButton.addEventListener('click', () => {
+                main.removeChild(popup);
+            });
+        }
+
+        function popupConfirmEmprunt(num_isbn, id_util) {
+            let popup = document.createElement('div');
+            popup.className = 'popupGestion hidden';
+            popup.innerHTML = `
+                <div class="popupGestion-content">
+                    <h2>Confirmation d'emprunt</h2>
+                    <p>Êtes-vous sûr de vouloir accepter l'emprunt de ce livre ?</p>
+                    <form method="POST" action="gestion-emprunts-reservations.php">
+                        <input type="hidden" name="form" value="validerEmprunt">
+                        <input type="hidden" name="num_isbn" value="${num_isbn}">
+                        <input type="hidden" name="id_util" value="${id_util}">
+                        <button type="submit">OK</button>
+                    </form>
+                    <button class='popupGestionAnnuler'>Annuler</button>
+                </div>
+            `;
+            const main = document.querySelector('main');
+            main.appendChild(popup);
+
+            const cancelButton = popup.querySelector('.popupGestionAnnuler');
+            cancelButton.addEventListener('click', () => {
+                main.removeChild(popup);
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             // Sélectionner toutes les cellules avec la classe "disponibilite"
             const disponibiliteCells = document.querySelectorAll(".col-disponibilite");
 
             // Parcourir chaque cellule pour vérifier son contenu
             disponibiliteCells.forEach(cell => {
-                if (cell.textContent.trim() === "Disponible") {
+
+                if (cell.textContent.substring(0, 10) === "Disponible") {
                     cell.style.backgroundColor = "#BCF5C5";
                 } else {
                     cell.style.backgroundColor = "#F5BCCA";

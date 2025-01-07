@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="75355eb7-f570-4b79-8d1e-8283b8e1a56d" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2p3vLXEt7kb8ZAb8z3JQPbrdQtc" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/wamp64/www/Libris-Arthur",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\wamp64\www\Libris\js" />
+      <recent name="C:\wamp64\www\Libris" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PS-242.23339.16" />
+        <option value="bundled-php-predefined-a98d8de5180a-90914f2295cb-com.jetbrains.php.sharedIndexes-PS-242.23339.16" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="75355eb7-f570-4b79-8d1e-8283b8e1a56d" name="Changes" comment="" />
+      <created>1732007517204</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1732007517204</updated>
+      <workItem from="1732007518236" duration="106000" />
+      <workItem from="1732026325528" duration="1699000" />
+      <workItem from="1732107794720" duration="2478000" />
+      <workItem from="1732179183364" duration="20000" />
+      <workItem from="1732289260628" duration="7980000" />
+      <workItem from="1732455225366" duration="16068000" />
+      <workItem from="1732524049714" duration="1160000" />
+      <workItem from="1732539177753" duration="641000" />
+      <workItem from="1732570067012" duration="1197000" />
+      <workItem from="1732604658135" duration="545000" />
+      <workItem from="1732636105642" duration="1905000" />
+      <workItem from="1733686792944" duration="2868000" />
+      <workItem from="1733727855104" duration="6584000" />
+      <workItem from="1735829443660" duration="4343000" />
+      <workItem from="1735901088277" duration="7316000" />
+      <workItem from="1735998581554" duration="2614000" />
+      <workItem from="1736014298417" duration="874000" />
+      <workItem from="1736183534336" duration="12505000" />
+      <workItem from="1736257206879" duration="1936000" />
+      <workItem from="1736263884150" duration="781000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
