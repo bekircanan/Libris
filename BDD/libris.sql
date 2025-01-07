@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mar. 07 jan. 2025 à 15:13
+-- Généré le : mar. 07 jan. 2025 à 15:37
 -- Version du serveur : 8.3.0
 -- Version de PHP : 8.2.18
 
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS `achat_ebook` (
   `date_achat` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `regle` tinyint(1) NOT NULL,
   PRIMARY KEY (`id_achat`,`id_util`),
-  UNIQUE KEY `idEbook` (`id_ebook`),
-  KEY `id_util` (`id_util`)
+  KEY `id_util` (`id_util`),
+  KEY `idEbook` (`id_ebook`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
