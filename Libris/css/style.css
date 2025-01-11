@@ -3,7 +3,9 @@ html, body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    font-family: "Montserrat", sans-serif;  
+    font-family: "Montserrat", sans-serif; 
+    overflow: scroll; 
+    overflow-x: hidden;  
 }
 /* Header */
 header {
@@ -466,11 +468,10 @@ hr {
     max-width: 60rem;
     padding: 2rem;
     border-radius: 1rem;
-
 }
 #prix{
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr ;
 }
 #payer{
@@ -494,25 +495,30 @@ hr {
     font-size: 25px;
     font-weight: bold;
 }
-#payer a{
+#payer div{
     grid-row: 1/2;
     grid-column: 1/2;
+    align-self: center;
+    text-align: center;
+}
+#payer div a{
     text-align: center;
     text-decoration: none;
-    align-self: center;
+    padding:1rem;
 }
-#payer a:visited{
+#payer div a:visited{
     color: #000000;
 }
-#payer a:hover{
+#payer div a:hover{
     background-color:#b09dd7;
     border-radius: 1rem;
+    cursor: pointer;
+
 }
 #payer form{
     grid-row: 1/2;
     grid-column: 3/4;
-    margin-right: 5rem;
-    justify-items: center;
+    text-align: center;
 }
 #payer form button{
     border: none;
@@ -522,10 +528,10 @@ hr {
     font-weight: bold;
     font-size: 16px;
     border-radius: 1rem;
-    margin-left: 3rem;
 }
 #payer button:hover {
-    background-color: #fdc44a;
+    background-color: #fdc44a;    
+    cursor: pointer;
 }
 .ebook_acheter{
     background-color: #FFDA89;
@@ -578,6 +584,7 @@ div.info_ebook_acheter p:nth-of-type(1){
     border: none;
     background: none;
     cursor: pointer;
+    padding:1rem;
 }
 .ebook_acheter form{
     align-self:flex-end;
@@ -586,10 +593,12 @@ div.info_ebook_acheter p:nth-of-type(1){
     background-color:#fdc44a;
     border-radius: 1rem;
 }
-#poubelle{
-    width:16px; 
-    height:16px; 
-    vertical-align:middle;
+.ebook_acheter img{
+    max-height: 15rem;
+    max-width: 10rem;
+    min-height: 10rem;
+    min-width: 5rem;
+    padding-right:2rem;
 }
 .mask {
     position: fixed;
@@ -607,6 +616,7 @@ div.info_ebook_acheter p:nth-of-type(1){
 
 .modal {
     position: fixed;
+    justify-content: space-between;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -614,10 +624,20 @@ div.info_ebook_acheter p:nth-of-type(1){
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    display: none; 
     z-index: 1000; 
+    display: none;
+    font-size: 18px;
     max-width: 500px; 
     width: 100%; 
+
+}
+.modal i{
+    margin-top: 1.5rem;
+    margin-right: 1rem;
+}
+.modal i:hover{
+    color: #8a8a8a;
+    cursor: pointer;
 }
 
 .modal_change {
@@ -707,12 +727,122 @@ div.info_ebook_acheter p:nth-of-type(1){
     background-color: #cecece;
     border-radius: 0.8rem;
 }
+.book-item img{
+    height: 15rem;
+}
 .liste-ebook a{
     color: #000000;
     text-decoration: none;
 }
 .liste-ebook a:visited{
     color: #000000;
+}
+
+/* recherche avancé */
+.contenair-recherche {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #e9d8f4;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+}
+
+.contenair-recherche h1 {
+    text-align: center;
+    font-size: 24px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.filtre{
+    background-color: #D0BDF6;
+    padding : 1rem;
+    border-radius: 5%;
+}
+.recherche-avance {
+    margin-bottom: 20px;
+}
+
+.group-critaire {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.group-critaire label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.group-critaire select, .group-critaire input {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+
+.filtre h2 {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.filtre-groupe {
+    margin-bottom: 20px;
+}
+
+.filtre-groupe h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.checkboxes label {
+    margin-right: 15px;
+    margin-bottom: 5px;
+}
+
+.recherche-avance input[type="number"], .recherche-avance input[type="text"], .recherche-avance input[type="range"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100px;
+    font-size: 14px;
+}
+
+.recherche-avance input[type="range"] {
+    width: 200px;
+}
+
+.button-recherche-avance, .recherche-avance input[type="submit"] {
+    background-color: #f0d78c;
+    border: none;
+    padding: 10px 20px;
+    color: #333;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-recherche-avance:hover, input[type="submit"]:hover {
+    background-color: #d9c071;
+}
+
+.button-recherche-avance {
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 1rem;
+    padding: 10px;
 }
 
 /* Mes réservations */
