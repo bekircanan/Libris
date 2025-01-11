@@ -65,12 +65,12 @@
 </span>
         <div class="search-bar-container">
             <div class="search-bar">
-                <form method="post">
+                <form method="get" action="./catalogue.php">
                     <input type="hidden" name="form" value="search">
-                    <input type="text" placeholder="Rechercher un livre...">
+                    <input type="text" name="recherche" placeholder="Rechercher un livre...">
                     <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
-                <a class="advanced-search">Recherche avancé</a>
+                <a class="advanced-search" href="./recherche_avance.php">Recherche avancé</a>
             </div>
         </div>
         <div>
