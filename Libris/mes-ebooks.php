@@ -8,7 +8,7 @@ $stmtEbooks = $conn->prepare("
     FROM achat_ebook ae
     INNER JOIN ebook e ON ae.id_ebook = e.id_ebook
     INNER JOIN livre l ON e.id_livre = l.id_livre
-    WHERE ae.id_util = :idUtilisateur
+    WHERE ae.id_util = :idUtilisateur and ae.regle = 1
 ");
 $stmtEbooks->execute([':idUtilisateur' => $_SESSION['id']]);
 $ebooks = $stmtEbooks->fetchAll();

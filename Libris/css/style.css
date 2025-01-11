@@ -804,6 +804,16 @@ div.info_ebook_acheter p:nth-of-type(1){
     font-size: 28px;
     margin: 2em 0 0.5em 0;
 }
+
+#search-emprunts-input, #search-reservations-input {
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    height: 2vw;
+    width: 20vw;
+    margin-bottom: 1vw;
+}
+
 .table-emprunts-reservations {
     width: 100%;
     border-collapse: collapse;
@@ -822,15 +832,50 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 
 .table-emprunts-reservations tbody tr:nth-child(odd) {
-    background-color: #D0BDF6;
+    background-color: #F2F2F2;
 }
 
 .table-emprunts-reservations tbody tr:nth-child(even) {
-    background-color: #F4BCF5;
+    background-color: #E6E6E6;
 }
 
 .table-emprunts-reservations .border-vertical {
     border-left: 3px solid black; /* Ajustez l'épaisseur à votre convenance */
+}
+
+.gestion-emprunts-reservations button {
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.gestion-emprunts-reservations button:hover {
+    background-color: #FFDA89;
+    transition: 0.3s ease;
+}
+
+.popupGestion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popupGestion-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 }
 
 /* Responsive Design */
