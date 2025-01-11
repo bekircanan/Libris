@@ -533,6 +533,10 @@ hr {
     background-color: #fdc44a;    
     cursor: pointer;
 }
+#payer button:disabled:hover{
+    background-color:#FFDA89;
+    cursor: not-allowed;
+}
 .ebook_acheter{
     background-color: #FFDA89;
     min-width: 55rem;
