@@ -1,6 +1,6 @@
 <?php
     require_once 'header.php';
-
+    
     $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, a.nom_auteur, a.prenom_auteur FROM livre l
                                 JOIN a_ecrit ae ON l.id_livre = ae.id_livre
                                 JOIN auteur a ON a.id_auteur = ae.id_auteur
@@ -16,16 +16,11 @@
     <div class="slide-container">
         <div class="slide">
         <?php foreach($livres as $liv){
-            echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['titre_livre']. '">'; 
+            echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['id_livre']. '">'; 
             echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
             echo '<h2>' . $liv['titre_livre'] . '</h2>';
             echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
             echo '</a></div>'; 
-        }
-        $i=0;
-        while($i<50){
-            echo '<p>test'.$i.'</p>';
-            $i++;
         }
         ?>
 
@@ -54,17 +49,13 @@
     <div class="slide-container">
         <div class="slide">
             <?php foreach($livres as $liv){
-                echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['titre_livre']. '">'; 
+                echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['id_livre']. '">'; 
                 echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
                 echo '<h2>' . $liv['titre_livre'] . '</h2>';
                 echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
                 echo '</a></div>'; 
             }
-            $i=0;
-            while($i<50){
-                echo '<p>test'.$i.'</p>';
-                $i++;
-            }?>
+            ?>
         </div>
         <button class="scroll-right background-violet" style="display: none;">></button>
     </div>
@@ -75,7 +66,7 @@
         const scrollButton = container.nextElementSibling;
         let isScrolling = false;
 
-        if (items.length > 20) {
+        if (items.length > 3) {
             scrollButton.style.display = 'block';
         }
 
@@ -114,14 +105,14 @@
 
         scrollButton.addEventListener('click', debounce(() => handleScroll('forward'), 300));
 
-        container.addEventListener('wheel', debounce((evt) => {
-            evt.preventDefault();
-            if (evt.deltaY > 0) {
-                handleScroll('forward');
-            } else {
-                handleScroll('backward');
-            }
-        }, 300));
+        // container.addEventListener('wheel', debounce((evt) => {
+        //     evt.preventDefault();
+        //     if (evt.deltaY > 0) {
+        //         handleScroll('forward');
+        //     } else {
+        //         handleScroll('backward');
+        //     }
+        // }, 300));
     });
 </script>
 <?php

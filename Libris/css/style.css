@@ -255,32 +255,40 @@ main {
     margin: 1%;
     box-shadow: -1px 2px 5px 0px black;
 }
-.background-violet{
-    background-color: #D0BDF6;
-    border: none;
-    font-size: large;
-    font-weight: bold;
-    margin: auto;
-    cursor: pointer;
+
+.background-violet {
+  background-color: #D0BDF6;
+  border: none;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 1%;
+  margin-bottom: 0;
+  padding: 10px 16px;
+  cursor: pointer;
 }
 .text-container{
     display: flex;
     align-items: center;
-    margin: 1%;
+    margin-left: 1%;
+}
+.text-container h1{
+    margin-bottom: 0;
 }
 .slide-container{
     display: grid;
     grid-template-columns: 1fr 20%;
     justify-content: center;
     align-items: center;
-    margin: 1%;
-
 }
 .slide {
     display: flex;
     overflow-x: auto;
+    justify-content: flex-start;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
+    margin-left: 1%;
 }
 
 .slide::-webkit-scrollbar {
@@ -289,14 +297,50 @@ main {
 
 .slide .pre-livre, .slide p {
     flex: 0 0 auto;
-    scroll-snap-align: start;
-    margin-right: 20px;
-    transition: transform 0.3s ease;
+    scroll-snap-align: end;
+    margin: 1%;
+    transition: transform 1s ease;
 }
 
 .pre-livre img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     width: 10em;
     height: auto;
+}
+
+.pre-livre {
+    width:20rem;
+    height: 23rem;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 50px 50px 50px 50px / 25px 25px 25px 25px;
+    box-shadow: 1px 3px 5px 0px #FFDA89, -1px 3px 5px 0px #FFDA89;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.pre-livre h2  {
+    font-size: 16px;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pre-livre p {
+    font-size: 14px;
+    margin: 0;
+}
+
+
+.pre-livre a {
+    text-decoration: none;
+    color: #333;
 }
 
 .scroll-right {
@@ -673,17 +717,17 @@ div.info_ebook_acheter p:nth-of-type(1){
 
 /* Mes réservations */
 .reservations-ebooks {
-	padding: 0 10em;
+	padding: 0 10rem;
 	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif"
 }
 .reservations-ebooks h1 {
 	font-size: 28px;
-	margin: 2em 0 0.5em 0;
+	margin: 2rem 0 0.5rem 0;
 }
 
 .imgCouverture {
-	width: 8em;
-    height: 12em;
+	width: 8rem;
+    height: 12rem;
     object-fit: cover;
 	box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -691,15 +735,15 @@ div.info_ebook_acheter p:nth-of-type(1){
 .reservations-disponibles {
 	background-color: #FFDA89;
 	border-radius: 25px;
-	padding: 1em;
-	margin: 0 2em;
+	padding: 1rem;
+	margin: 0 2rem;
 }
 
 .reservations-indisponibles {
 	background-color: #D0BDF6;
 	border-radius: 25px;
-	padding: 1em;
-	margin: 4em 2em;
+	padding: 1rem;
+	margin: 4rem 2rem;
 }
 
 .reservations-disponibles h2 {
@@ -722,12 +766,12 @@ div.info_ebook_acheter p:nth-of-type(1){
 .livres {
 	display: flex;
     flex-wrap: wrap;
-	margin: 1em 3em 0 3em;
-    gap: 3vw;
+	margin: 1rem 0 0 0;
 }
 
 .livre {
-	width: 13.5em;
+	padding: 0 3rem;
+	width: 13.5rem;
 	text-align: center;
 	display: flex;
 	flex-direction: column;
@@ -743,8 +787,8 @@ div.info_ebook_acheter p:nth-of-type(1){
 .mes-ebooks {
     background-color: #D0BDF6;
     border-radius: 25px;
-    padding: 1em;
-    margin: 0 2em 4em 2em;
+    padding: 1rem;
+    margin: 0 2rem 4rem 2rem;
 }
 
 /* Gestion des emprunts et réservations */

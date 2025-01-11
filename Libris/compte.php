@@ -1,6 +1,6 @@
 <?php
     require_once 'header.php';
-
+    ini_set('file_uploads', '1');
     if(!isset($_SESSION['user'])){
         header('Location: index.php');
         exit;
@@ -35,31 +35,58 @@
             }else{
                 $errlog = "Mot de passe incorrect.";
             }
+        }else if(isset($_FILES["profil"]) && !empty($_FILES["profil"])){
+            $imageFileType = strtolower(pathinfo($_FILES["profil"]["name"],PATHINFO_EXTENSION));
+            $target_file =  "img/profil/" . $_SESSION['id'] . "." . $imageFileType;
+            $uploadOk = 1;
+            if ($_FILES["profil"]["size"] > 500000) {
+                $errlog = "Désolé, votre fichier est trop volumineux.";
+                $uploadOk = 0;
+            }elseif(!in_array($imageFileType, ['jpg', 'png', 'jpeg'])) {
+                $errlog = "Désolé, seuls les fichiers JPG, JPEG, PNG sont autorisés.";
+                $uploadOk = 0;
+            }elseif($uploadOk == 0) {
+                $errlog = "Désolé, votre fichier n'a pas été téléchargé.";
+            }else{
+                if (file_exists($target_file)) {
+                    unlink($target_file);
+                }
+                if(move_uploaded_file($_FILES["profil"]["tmp_name"], $target_file)) { 
+                    $stmt = $conn->prepare("UPDATE utilisateur SET img_profil = ? WHERE id_util  = ?");
+                    $stmt->bindParam(1,$target_file);
+                    $stmt->bindParam(2,$_SESSION['id']);
+                    $stmt->execute();
+                }else {
+                    $errlog = "Désolé, une erreur s'est produite lors du téléchargement de votre fichier.";
+                }
+            }
+        }else{
+            $errlog = "Veuillez remplir les champs.";
+            print_r($_POST);
         }
     
 ?>
 <br>
 <div class="inscrire">
     <?php echo '<p style="color:red">'.$errlog ?>
-    <form method="post">
-        <h2>Modifier Pseudo</h2>
+    <form method="post" enctype="multipart/form-data">
         <input type="hidden" name="form" value="c">
-        <input type="text" name="pseudo" placeholder="<?php echo $_SESSION['user']; ?>" size="<?php echo strlen($_SESSION['user']); ?>">
-        <button type="submit">Valider</button>
-    </form>
-    <form method="post">
-        <h2>Modifier Email</h2>
-        <input type="hidden" name="form" value="c">
-        <input type="text" name="email" placeholder="<?php echo $_SESSION['email']; ?>" size="<?php echo strlen($_SESSION['email']); ?>">
-        <button type="submit">Valider</button>
-    </form>
 
-    <form method="post">
-        <h2>Modifier Mot de passe</h2>
-        <input type="hidden" name="form" value="c">
-        <input type="password" name="amdp" placeholder="Current Mot de passe">
-        <input type="password" name="nmdp" placeholder="New Mot de passe">
+        <h2>Pseudo</h2>
+        <input type="text" name="pseudo" placeholder="<?php echo $_SESSION['user']; ?>" size="<?php echo strlen($_SESSION['user']); ?>">
+
+        <h2>Email</h2>
+        <input type="text" name="email" placeholder="<?php echo $_SESSION['email']; ?>" size="<?php echo strlen($_SESSION['email']); ?>">
+
+        <h2>Mot de passe</h2>
+        <input type="password" name="amdp" placeholder="Actuel Mot de passe">
+        <input type="password" name="nmdp" placeholder="Nouveau Mot de passe">
+
+        <h2>Image profil</h2>
+        
+        <input type="file" accept="image/*" name="profil" id="profil">
         <button type="submit">Valider</button>
+        <br>
     </form>
 </div>
 <br>
