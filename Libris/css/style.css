@@ -537,6 +537,12 @@ hr {
     background-color:#FFDA89;
     cursor: not-allowed;
 }
+.panier_vide{
+    margin-top: 2em;
+    font-weight: bold;
+    font-size: 30px;
+
+}
 .ebook_acheter{
     background-color: #FFDA89;
     min-width: 55rem;
