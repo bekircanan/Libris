@@ -15,7 +15,7 @@
 
     $pageActuelle = basename($_SERVER['PHP_SELF']);
     $errlog = "<p style='color:red;'>";
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form']=== 'connect') {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form']=== 'connect' ) {
         if( isset($_POST['mdp']) && isset($_POST['email'])){
             $stmt = $conn->prepare("SELECT id_util,pseudo,email,mdp FROM utilisateur WHERE email like ? OR pseudo like ?");
             $stmt->bindParam(1, $_POST['email']);
@@ -40,9 +40,12 @@
                     exit();
                 }else{
                     $errlog .= "mot de passe incorrect.</p>";
+                    echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav(); popup(); });</script>";
+                    
                 }
             } else {
                 $errlog .= "Utilisateur non trouvé.</p>";
+                echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav(); popup(); });</script>";
             }
         }
     }
@@ -86,8 +89,9 @@
             <?php 
             if(isset($_SESSION['user'])){
                 if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
-                    echo '<li><a href=""><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
-                    echo '<li><a href=""><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
+                    echo '<li><a href="./gestion-comptes"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href="./gestion-livres"><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
+                    echo '<li><a href="./gestion-emprunts-reservations"><i class="fa-sharp fa-thin fa-books"></i> Gestion des emprunts/reservations</a></li>';
                 }else{
                     echo '<li><a href="./mes-reservations.php"><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
                     echo '<li><a href="./mes-ebooks.php"><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
@@ -121,7 +125,7 @@
     
     <script>
         function ouvreNav() {
-        document.getElementById("Sidebar").style.width = "250px";
+        document.getElementById("Sidebar").style.width = "300px";
         }
 
         function fermeNav() {

@@ -1,9 +1,11 @@
 <?php
     require_once 'header.php';
     
-    $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, a.nom_auteur, a.prenom_auteur FROM livre l
+    $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, GROUP_CONCAT(CONCAT(a.prenom_auteur, ' ', a.nom_auteur) SEPARATOR ', ') AS auteurs
+                                FROM livre l
                                 JOIN a_ecrit ae ON l.id_livre = ae.id_livre
                                 JOIN auteur a ON a.id_auteur = ae.id_auteur
+                                GROUP BY l.id_livre, l.titre_livre, l.img_couverture
                                 ORDER BY ae.date_parution DESC LIMIT 25;");
     $stmt->execute();
     $livres = $stmt->fetchAll();
@@ -15,12 +17,17 @@
     </div>
     <div class="slide-container">
         <div class="slide">
-        <?php foreach($livres as $liv){
-            echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['id_livre']. '">'; 
-            echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-            echo '<h2>' . $liv['titre_livre'] . '</h2>';
-            echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
-            echo '</a></div>'; 
+        <?php 
+        if($livres){
+            foreach($livres as $liv){
+                echo '<div class="pre-livre"><a href="./info_livre.php?id_livre=' . $liv['id_livre']. '">'; 
+                echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
+                echo '<h2>' . $liv['titre_livre'] . '</h2>';
+                echo '<p>by ' . $liv['auteurs'] . '</p>';
+                echo '</a></div>'; 
+            }
+        } else {
+            echo '<p>Aucune Livre trouve</p>';
         }
         ?>
 
@@ -30,36 +37,49 @@
 </div>
 
 <?php
-    $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, a.nom_auteur, a.prenom_auteur, AVG(av.note_avis) AS moy FROM livre l
-                                JOIN a_ecrit ae ON l.id_livre = ae.id_livre
-                                JOIN auteur a ON a.id_auteur = ae.id_auteur
-                                JOIN avis av ON l.id_livre = av.id_livre
-                                GROUP BY l.id_livre, l.titre_livre, l.img_couverture, a.nom_auteur, a.prenom_auteur
-                                HAVING AVG(av.note_avis) > (SELECT AVG(note_avis) FROM avis WHERE id_livre = l.id_livre)
-                                ORDER BY moy desc LIMIT 25;");
-    $stmt->execute();
-    $livres = $stmt->fetchAll();
+$stmt = $conn->prepare("
+SELECT l.id_livre, l.titre_livre, l.img_couverture, 
+       GROUP_CONCAT(DISTINCT CONCAT(a.prenom_auteur, ' ', a.nom_auteur) SEPARATOR ', ') AS auteurs, 
+       AVG(av.note_avis) AS moy
+        FROM livre l
+        JOIN a_ecrit ae ON l.id_livre = ae.id_livre
+        JOIN auteur a ON a.id_auteur = ae.id_auteur
+        LEFT JOIN avis av ON l.id_livre = av.id_livre
+        GROUP BY l.id_livre, l.titre_livre, l.img_couverture
+        HAVING AVG(av.note_avis) >= (SELECT AVG(note_avis) FROM avis)
+        ORDER BY moy DESC LIMIT 25
+");
+$stmt->execute();
+$livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
-<div class ="pre-container">
+<div class="pre-container">
     <div class="text-container">
         <h1>Les mieux notés</h1>
         <button class="background-violet">Parcourir ></button>
     </div>
     <div class="slide-container">
         <div class="slide">
-            <?php foreach($livres as $liv){
-                echo '<div class="pre-livre"><a href="./livre.php?id_livre=' . $liv['id_livre']. '">'; 
-                echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-                echo '<h2>' . $liv['titre_livre'] . '</h2>';
-                echo '<p>by ' . $liv['prenom_auteur'] . '</p>';
-                echo '</a></div>'; 
+            <?php 
+            if ($livres) {
+                foreach ($livres as $liv) { 
+                    echo '<div class="pre-livre">';
+                    echo '<a href="./info_livre.php?id_livre=' . $liv['id_livre'] . '">';
+                    echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
+                    echo '<h2>' . $liv['titre_livre'] . '</h2>';
+                    echo '<p>by ' . $liv['auteurs'] . '</p>';
+                    echo '</a></div>';
+                 }
+            } else {
+                echo '<p>No books found with sufficient ratings.</p>';
             }
             ?>
         </div>
         <button class="scroll-right background-violet" style="display: none;">></button>
     </div>
 </div>
+
 <script>
     document.querySelectorAll('.slide').forEach(container => {
         const items = container.children;
