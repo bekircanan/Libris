@@ -1012,6 +1012,79 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 
 
+/* Info Livre*/
+
+section#livre {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 2rem;
+}
+
+section#livre .div_img_couverture .img_couverture {
+    width: 15rem;
+    height: 20rem;
+    object-fit: cover;
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
+    margin-right: 2rem;
+}
+
+section#livre .actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating span {
+    font-size: 2rem;
+    color: #FFD700; /* Yellow color */
+    padding: 0 0.1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.star-rating span:hover,
+.star-rating span:hover ~ span,
+.star-rating input:checked ~ span {
+    color: #FFD700; /* Yellow color */
+    transform: scale(1.2); /* Slightly larger on hover */
+}
+
+.star-rating span:before {
+    border-radius: 50%; /* Rounded edges */
+}
+
+section#livre .actions button {
+    background-color: #D0BDF6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+section#livre .actions button:hover {
+    background-color: #b09bd6;
+}
+
+section#livre .actions button:disabled:hover {
+    background-color: #D0BDF6;
+    cursor: not-allowed;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     #page_catalogue {
@@ -1023,4 +1096,6 @@ div.info_ebook_acheter p:nth-of-type(1){
         width: 100%;
     }
 }
+
+
 
