@@ -1,7 +1,6 @@
 <?php
 require('header.php');
 
-$_SESSION['id'] = 1;
 
 $stmtReservationsUtil = $conn->prepare("
     SELECT l.titre_livre, l.img_couverture, l.id_livre

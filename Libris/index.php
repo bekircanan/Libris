@@ -13,7 +13,7 @@
 <div class ="pre-container">
     <div class="text-container">
         <h1>Derniers ouvrages</h1>
-        <button class="background-violet">Parcourir ></button>
+        <button class="background-violet"><a href="catalogue.php">Parcourir ></a></button>
     </div>
     <div class="slide-container">
         <div class="slide">
@@ -46,7 +46,6 @@ SELECT l.id_livre, l.titre_livre, l.img_couverture,
         JOIN auteur a ON a.id_auteur = ae.id_auteur
         LEFT JOIN avis av ON l.id_livre = av.id_livre
         GROUP BY l.id_livre, l.titre_livre, l.img_couverture
-        HAVING AVG(av.note_avis) >= (SELECT AVG(note_avis) FROM avis)
         ORDER BY moy DESC LIMIT 25
 ");
 $stmt->execute();
@@ -57,7 +56,7 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="pre-container">
     <div class="text-container">
         <h1>Les mieux notés</h1>
-        <button class="background-violet">Parcourir ></button>
+        <button class="background-violet"><a href="catalogue.php">Parcourir ></a></button>
     </div>
     <div class="slide-container">
         <div class="slide">
@@ -86,7 +85,7 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
         const scrollButton = container.nextElementSibling;
         let isScrolling = false;
 
-        if (items.length > 3) {
+        if (items.length > 4) {
             scrollButton.style.display = 'block';
         }
 

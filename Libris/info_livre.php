@@ -220,11 +220,7 @@ $stmtSelectAllAvis = $conn->prepare(
                     $auteurs[] = $rows['nom_auteur'].' '.$rows['prenom_auteur'];
                 }
                 echo implode(', ', $auteurs);
-            ?> </p>
-                
-                
-                <p>
-                    <?php
+
                         $stmtSelectAllAvis->execute();
                         $allAvis = $stmtSelectAllAvis->fetchAll();
                         $totalAvis = count($allAvis);
@@ -260,11 +256,8 @@ $stmtSelectAllAvis = $conn->prepare(
                         }
                         else{
                             echo '<p> Indisponible pour le moment </p>';
-                        }               
-                    ?>
-                </p>
-                <p>
-                    <?php
+                        }
+
                         $stmtSelectEbook = $conn->prepare("SELECT * FROM ebook WHERE id_livre = {$_SESSION['idLivreActuel']}");
                         $stmtSelectEbook->execute();
                         $infoEbook = $stmtSelectEbook->fetch();
@@ -328,95 +321,91 @@ $stmtSelectAllAvis = $conn->prepare(
                     </form>
         </div>
     </section>
-    <section id ="res/carac">
+    <section id ="res_carac">
         <div id="Resume">
-            <h2>Résumé</h2>
-            <p><?php echo $infoLivre['resume']?></p>
+            <input type="checkbox" id="btnRe" hidden/>
+            <label for="btnRe"><h2>Résumé</h2>
+            <p><?php echo $infoLivre['resume']?></p></label>
         </div>    
         <div id="Caracteristisques">
-            <h2>Caractéristiques</h2>
+        <input type="checkbox" id="btnCa" hidden/>
+        <label for="btnCa"><h2>Caractéristiques</h2>
             <?php
 
 
                 echo '<p> Date de parution..........................'.$infoCaracDate['date_parution'].'</p>';              
-                echo '<p> Cote......................................'.$infoLivre['cote_livre'].'</p>';
-                echo '<p> Genre.....................................';
+                echo '<p> Cote..............................................'.$infoLivre['cote_livre'].'</p>';
+                echo '<p> Genre...........................................';
                 foreach($infoCaracGenre as $rows){
                     echo $rows['nom_genre']." ";
                 }
                 echo '</p>';
-                echo '<p> Langue....................................';
+                echo '<p> Langue.........................................';
                 foreach($infoCaracLangue as $rows){
                     echo $rows['nom_langue']." ";
                 }
                 echo '</p>';
-                echo '<p> Edition...................................';
+                echo '<p> Edition.........................................';
                 foreach($infoCaracEdition2 as $rows){
                     echo $rows['nom_edition']." ";
                 }
                 echo '</p>';
-                echo '<p> Type littéraire...........................'.$infoLivre['type_litteraire'].'</p>';
-                echo '<p> Public cible..............................';
+                echo '<p> Type littéraire...............................'.$infoLivre['type_litteraire'].'</p>';
+                echo '<p> Public cible..................................';
                 foreach($infoCaracPublic as $rows){
                     echo $rows['type_public']." ";
                 }
                 echo '</p>';
-            
-            
-                
-            ?>
-        </div>  
-            
-            
+            ?></label>
+        </div> 
+        <div class="affichage_avis">
+        <input type="checkbox" id="btnAv" hidden/>
+        <label for="btnAv"><h2> Avis : </h2>
+
+            <form  method="post">
+                <input type="hidden" name="form" value="avis">
+                <h3>Laisser un avis :</h3>
+                <div class="note">
+                    <input type="radio" id="etoile1" name="note" value="1" />
+                    <label for="etoile1" title="1 étoiles">★</label>
+                    <input type="radio" id="etoile2" name="note" value="2" />
+                    <label for="etoile2" title="2 étoiles">★</label>
+                    <input type="radio" id="etoile3" name="note" value="3" />
+                    <label for="etoile3" title="3 étoiles">★</label>
+                    <input type="radio" id="etoile4" name="note" value="4" />
+                    <label for="etoile4" title="4 étoiles">★</label>
+                    <input type="radio" id="etoile5" name="note" value="5" />
+                    <label for="etoile5" title="5 étoile">★</label>
+                </div>
+
+                <textarea name="new_avis" rows="5" required></textarea>
+
+                <button type="submit">Commenter</button>
+            </form>
         
-    </section>
-
-    <form  method="post">
-        <input type="hidden" name="form" value="avis">
-        <h3>Laisser un avis :</h3>
-        <div class="note">
-            <input type="radio" id="etoile5" name="note" value="5" />
-            <label for="etoile5" title="5 étoiles">★</label>
-            <input type="radio" id="etoile4" name="note" value="4" />
-            <label for="etoile4" title="4 étoiles">★</label>
-            <input type="radio" id="etoile3" name="note" value="3" />
-            <label for="etoile3" title="3 étoiles">★</label>
-            <input type="radio" id="etoile2" name="note" value="2" />
-            <label for="etoile2" title="2 étoiles">★</label>
-            <input type="radio" id="etoile1" name="note" value="1" />
-            <label for="etoile1" title="1 étoile">★</label>
-        </div>
-
-        <textarea name="new_avis" rows="5" required></textarea>
-
-        <button type="submit">Commenter</button>
-    </form>
-
-    <section class="affichage_avis">
-        <h3> Avis : </h3>
-
-        <?php
-            $stmtSelectAllAvis->execute();
-            foreach ($stmtSelectAllAvis as $rows){
-                $_SESSION['idUtilAvis'] = $rows['id_util'];
-                $sql = "SELECT * from utilisateur where id_util = {$_SESSION['idUtilAvis']}";
-                $result = $conn->query($sql);
-                $row2 = $result->fetch();
-                $pseudo_util = $row2['pseudo'];
-                echo '<div class="affichage_avis">';
-                echo '<img src= "'.$row2['img_profil'].'" alt="Image de profil">';
-                echo '<div class="description_utilisateur"> <p>' . $pseudo_util . '</p><p>' . $rows['date_avis']. '</p> </div>';
-                echo '<div class="star-rating">';
-                for ($i = 1; $i <= 5; $i++) {
-                    if ($i <= $rows['note_avis']) {
-                        echo '<span class="star filled">★</span>';
-                    } 
+            <?php
+                $stmtSelectAllAvis->execute();
+                foreach ($stmtSelectAllAvis as $rows){
+                    $_SESSION['idUtilAvis'] = $rows['id_util'];
+                    $sql = "SELECT * from utilisateur where id_util = {$_SESSION['idUtilAvis']}";
+                    $result = $conn->query($sql);
+                    $row2 = $result->fetch();
+                    $pseudo_util = $row2['pseudo'];
+                    echo '<div class="affichage_avis">';
+                    echo '<div><img src= "'.$row2['img_profil'].'" alt="Image de profil"></div>';
+                    echo '<div class="description_utilisateur"> <p>' . $pseudo_util . '</p><p>' . $rows['date_avis']. '</p> </div>';
+                    echo '<div class="star-rating">';
+                    for ($i = 1; $i <= 5; $i++) {
+                        if ($i <= $rows['note_avis']) {
+                            echo '<span class="star filled">★</span>';
+                        } 
+                    }
+                    echo '</div>';
+                    echo "<div><p>" . $rows['comment_avis']."</p></div>";
+                    echo '</div>';
                 }
-                echo '</div>';
-                echo "<p>" . $rows['comment_avis']."</p>";
-                echo '</div>';
-            }
-        ?>
+            ?></label>
+        </div>
     </section>
 
        
