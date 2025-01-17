@@ -1283,6 +1283,99 @@ section#livre {
 }
 
 
+
+/* Gestion des livres*/
+
+.drop-zone {
+    border: 2px dashed #D0BDF6;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.drop-zone.dragover {
+    display: block;
+    background-color: #eee9db;
+    width: 100%;
+    height: 20em;
+    text-align: center;
+}
+
+.drop-zone.dragover input{
+    display: none;
+}
+
+.ajout_livre h1{
+    width: 20%;
+    padding: 20px;
+}
+
+.drop-zones-container {
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    margin: 20px;
+    gap: 20px; /* Adjust the gap as needed */
+}
+.drop-zone label {
+    padding: auto;
+    font-size: 16px;
+    color: #333;
+}
+
+.btn_valider_ajout.container{
+    display: flex;
+    justify-content: space-around;
+    margin-left: 40%;
+    margin-right: 40%;  
+}
+
+button.btn_valider_ajout {
+    width: 100%;
+    height: 50px;
+    font-size: larger;
+    font-style: bold;
+    background-color: #D0BDF6;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.drop-zone img{
+    width: 100px;
+}
+
+.info-style-fichier{
+    
+    border: 2px solid #D0BDF6;
+    width: 70%;
+    border-radius: 10px;
+    background-color: #D0BDF6;
+    padding: 20px;
+}
+
+.info-style-container{
+    display: flex;
+    justify-content: center;
+}
+
+.info-style-fichier a button{
+    background-color: #FFDA89;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     #page_catalogue {
