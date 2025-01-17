@@ -2,18 +2,16 @@
 require_once "header.php";
 
 // Check if image file is an actual image or fake image
-print_r($_POST);
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['form'] === 'ajout_livre') {
     if (isset($_POST["envoyer"])) {
         if (empty($_FILES["fileToUpload"]["name"])) {
-            echo "Veuillez sélectionner un fichier .csv";
+            echo "<script>document.addEventListener('DOMContentLoaded', function() {  popup(); });</script>";
         }
         else if (empty($_FILES["folderToUpload"]["name"])) {
-            echo "Veuillez sélectionner un dossier d'images";
+            echo "<script>document.addEventListener('DOMContentLoaded', function() {  popup(); });</script>";
         }
         else{
             $fileType = strtolower(pathinfo($_FILES["fileToUpload"]["name"], PATHINFO_EXTENSION));
-            $FileTypeImg = strtolower(pathinfo($_FILES["folderToUpload"]["name"], PATHINFO_EXTENSION));
             if ($fileType === "csv") {
                 $content = file_get_contents($_FILES["fileToUpload"]["tmp_name"]);
                 $lines = explode(";", $content);
@@ -26,17 +24,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                     $resume = $test[3];
                     $fields = explode(" ", $test[0]);
                     $num_isbn = $fields[0];
+                    $num_isbn = str_replace(" ", "", $num_isbn);
                     $cote = $fields[1];
                     $type_litteraire = $test[2];
                     $field = explode(" ", $test[4]);
-                    $genres = explode(",", $field[0]);
-                    $langue = $field[0];
-                    $public_cibles = explode(",", $field[1]);
-                    $edition = $field[2];
-                    $nb_pages = $field[3];
-                    $nom_auteurs = explode(",", $field[4]);;
-                    $prenom_auteurs = explode(",", $field[5]);;
-                    $date_parution = date('Y-m-d', strtotime($field[6]));
+                    $genres = explode(",", $field[1]);
+                    $langue = $field[2];
+                    $public_cibles = explode(",", $field[3]);
+                    $edition = $field[4];
+                    $nb_pages = $field[5];
+                    $nom_auteurs = explode(",", $field[6]);;
+                    $prenom_auteurs = explode(",", $field[7]);;
+                    $date_parution = date('Y-m-d', strtotime($field[8]));
                     
                     $stmtTestIsbn = $conn->prepare("SELECT * FROM isbn WHERE num_isbn = '{$num_isbn}'");
                     $stmtTestIsbn->execute();
@@ -205,23 +204,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                         
                         $imageFileName = "{$titre}.png";
                         $imageFileName = str_replace(' ', '_', $imageFileName);
-                        $targetDir = "img_couv/";
+                        $targetDir = "./img/img_couv/";
                         $targetFile = $targetDir . basename($imageFileName);
-                        echo $targetFile;
-                        echo $imageFileName;
+                        if (file_exists($targetFile)) {
+                            unlink($targetFile);
 
-                        if (file_exists($_FILES["folderToUpload"]["tmp_name"] . "/" . $imageFileName)) {
-                            
-                            move_uploaded_file($_FILES["folderToUpload"]["tmp_name"] . "/" . $imageFileName, $targetFile);
-
-                        
-                            $stmtUpdateLivre = $conn->prepare("
-                                UPDATE livre
-                                SET img_couverture = :image_link
-                                WHERE id_livre = :id_livre");
-                            $stmtUpdateLivre->bindParam(':image_link', $targetFile);
-                            $stmtUpdateLivre->bindParam(':id_livre', $id_livre);
-                            $stmtUpdateLivre->execute();
+                        }
+                        foreach($_FILES["folderToUpload"]["name"] as $key => $name){
+                            if($imageFileName === $name){
+                                if (move_uploaded_file($_FILES["folderToUpload"]["tmp_name"][$key], $targetFile)){
+                                    $stmtUpdateLivre = $conn->prepare("
+                                    UPDATE livre
+                                    SET img_couverture = :image_link
+                                    WHERE id_livre = :id_livre");
+                                    $stmtUpdateLivre->bindParam(':image_link', $targetFile);
+                                    $stmtUpdateLivre->bindParam(':id_livre', $id_livre['id_livre']);
+                                    $stmtUpdateLivre->execute();
+                                }
+                            }
                         }
                     }
                     
@@ -252,23 +252,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                 <li> Le nom de l'image doit correspondre au titre du livre, en remplacant les espaces par le caractère "_".</li>
                 <li> Dans le cas où plusieurs livres d'éditions différentes sont ajoutés, une seule image est nécessaire pour l'ensemble.</li>
             </ul>
+            <a class="btn_ex_csv" href="Exemple/exemple.csv" download = "exemple.csv"> <button>Télecharger Exemple Fichier </button></a>
         </div>
+        
     </div>
-    <form  method="post" enctype="multipart/form-data">
-        <input type="hidden" name="form" value="ajout_livre">
-        <img src="img/nouveau-fichier.png" alt="UploadFich">
-        <p>Veuillez déposer ici le fichier (.csv) :</p>
-        <input type="file" name="fileToUpload" id="fileToUpload">
 
-        <img src="img/dossier.png" alt="UploadDoss">
-                
-        <p>Veuillez déposer ici le dossier contenant les images (.png) :</p>
-        <input type="file" name="folderToUpload" id="folderToUpload" webkitdirectory directory multiple>
-        <button type="submit" value="Valider" name="envoyer" class="btn_valider_ajout">
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="form" value="ajout_livre">
+        <div class="drop-zones-container">
+            <div class="drop-zone" id="drop-zone-file">
+                <img src="img/nouveau-fichier.png" alt="UploadFich">
+                <label for="fileToUpload">Veuillez déposer ici le fichier (.csv) :</label>
+                <input type="file" name="fileToUpload" id="fileToUpload">
+            </div>
+            <div class="drop-zone" id="drop-zone-folder">
+                <img src="img/dossier.png" alt="UploadDoss">
+                <label for="folderToUpload[]">Veuillez déposer ici le dossier contenant les images (.png) :</label>
+                <input type="file" name="folderToUpload[]" id="folderToUpload" multiple directory="" webkitdirectory="" mozdirectory="">
+            </div>
+        </div>
+        <div class="btn_valider_ajout container">
+            <button type="submit" value="Valider" name="envoyer" class="btn_valider_ajout"> Valider </button>
+
+        </div>
     </form>
 </div>
 
 <script>
+
+
 document.addEventListener('DOMContentLoaded', function () {
     var dropZoneFile = document.getElementById('drop-zone-file');
     var fileInput = document.getElementById('fileToUpload');
@@ -296,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (e.dataTransfer.files.length) {
             fileInput.files = e.dataTransfer.files;
+            dropZoneFile.querySelector('p').textContent = fileInput.files[0].name;
         }
     });
 
@@ -329,58 +342,53 @@ document.addEventListener('DOMContentLoaded', function () {
         e.stopPropagation();
         dropZoneFolder.classList.remove('dragover');
 
-        if (e.dataTransfer.files.length) {
-            folderInput.files = e.dataTransfer.files;
-        }
+        var reader = e.dataTransfer.items[0].webkitGetAsEntry();
+        reader.createReader().readEntries(function(entries) {
+            var files = [];
+            for (var i = 0; i < entries.length; i++) {
+                if (entries[i].isFile) {
+                    entries[i].file(function(file) {
+                        files.push(file);   
+                        if (files.length === entries.length) {
+                            var dataTransfer = new DataTransfer();
+                            files.forEach(function(file) {
+                                dataTransfer.items.add(file);
+                            });
+                            folderInput.files = dataTransfer.files;
+                        }
+                    });
+                }
+            }
+        });
     });
 
     folderInput.addEventListener('change', function () {
         if (folderInput.files.length) {
-            dropZoneFolder.querySelector('p').textContent = folderInput.files[0].name;
+            dropZoneFolder.querySelector('label').textContent = folderInput.files[0].name;
         }
     });
 });
+
+
+function popup() {
+            let popup = document.createElement('div');
+            popup.className = 'popupGestion hidden';
+            popup.innerHTML = `
+                <div class="popupGestion-content">
+                    <h2>Erreur de Saisie</h2>
+                    <p>Veuillez séletionner un fichier ET un dossier d'images.......</p>
+                    <button class='popupGestionAnnuler'>Okay</button>
+                </div>
+            `;
+            const main = document.querySelector('main');
+            main.appendChild(popup);
+
+            const cancelButton = popup.querySelector('.popupGestionAnnuler');
+            cancelButton.addEventListener('click', () => {
+                main.removeChild(popup);
+            });
+        }
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <?php
 require_once "footer.php"
