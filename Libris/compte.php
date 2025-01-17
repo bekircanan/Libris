@@ -5,22 +5,22 @@
         header('Location: index.php');
         exit;
     }
+    if($_SERVER['REQUEST_METHOD'] == 'POST'){
         if(isset($_POST['pseudo']) && !empty($_POST['pseudo'])){
-            echo $_POST['pseudo'];
             $newPseudo = $_POST['pseudo'];
             $stmt = $conn->prepare("UPDATE utilisateur SET pseudo = ? WHERE id_util  = ?");
             $stmt->bindParam(1,$newPseudo);
             $stmt->bindParam(2,$_SESSION['id']);
             $stmt->execute();
             $_SESSION['user'] = $newPseudo;
-        }else if(isset($_POST['email']) && !empty($_POST['email'])){
+        }if(isset($_POST['email']) && !empty($_POST['email'])){
             $newEmail = $_POST['email'];
             $stmt = $conn->prepare("UPDATE utilisateur SET email = ? WHERE id_util  = ?");
             $stmt->bindParam(1,$newEmail);
             $stmt->bindParam(2,$_SESSION['id']);
             $stmt->execute();
             $_SESSION['email'] = $newEmail;
-        }else if(isset($_POST['amdp']) && !empty($_POST['amdp']) && isset($_POST['nmdp']) && !empty($_POST['nmdp'])){ 
+        }if(isset($_POST['amdp']) && !empty($_POST['amdp']) && isset($_POST['nmdp']) && !empty($_POST['nmdp'])){ 
             $newMdp = $_POST['nmdp'];
             $newMdp = password_hash($newMdp, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("SELECT mdp FROM utilisateur WHERE id_util  = ?");
@@ -35,7 +35,7 @@
             }else{
                 $errlog = "Mot de passe incorrect.";
             }
-        }else if(isset($_FILES["profil"]) && !empty($_FILES["profil"])){
+        }if(isset($_FILES["profil"]) && !empty($_FILES["profil"])){
             $imageFileType = strtolower(pathinfo($_FILES["profil"]["name"],PATHINFO_EXTENSION));
             $target_file =  "img/profil/" . $_SESSION['id'] . "." . $imageFileType;
             $uploadOk = 1;
@@ -60,10 +60,8 @@
                     $errlog = "Désolé, une erreur s'est produite lors du téléchargement de votre fichier.";
                 }
             }
-        }else{
-            $errlog = "Veuillez remplir les champs.";
-            print_r($_POST);
         }
+    }
     
 ?>
 <br>
