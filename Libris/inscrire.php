@@ -70,6 +70,7 @@
                             break;
                         case 'etudiant':
                             $_SESSION['categorie'] = 2;
+                            goto fini;
                             break;
                         case 'adulte':
                             $_SESSION['categorie'] = 3;
@@ -94,7 +95,7 @@
                     $_SESSION['date_expiration'] = $_POST['date_expiration'];
                     $_SESSION['cvv'] = $_POST['cvv'];
                     fini:
-                    $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, 'test',?, ?)");
+                    $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
                     $stmt->bindParam(1, $_SESSION['prenom']);
                     $stmt->bindParam(2, $_SESSION['nom']);
                     $stmt->bindParam(3, $_SESSION['adresse']);
@@ -109,10 +110,12 @@
                     $stmt->bindParam(1, $_SESSION['email']);
                     $stmt->execute();
                     $util = $stmt->fetch();
-                    $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
-                    $stmt->bindParam(1, $_SESSION['categorie']);
-                    $stmt->bindParam(2, $util['id_util']);
-                    $stmt->execute();
+                    if($_SESSION['categorie']!=4){
+                        $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
+                        $stmt->bindParam(1, $_SESSION['categorie']);
+                        $stmt->bindParam(2, $util['id_util']);
+                        $stmt->execute();
+                    }
                     $_SESSION['user'] = $_SESSION['pseudo'];
                     $_SESSION['email'] = $_SESSION['email'];
                     $_SESSION['admin']=0;

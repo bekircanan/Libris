@@ -40,13 +40,15 @@
                     exit();
                 }else{
                     $errlog .= "mot de passe incorrect.</p>";
-                    echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav(); popup(); });</script>";
-                    
+                    echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav();    popup(); });</script>";
                 }
             } else {
                 $errlog .= "Utilisateur non trouvé.</p>";
                 echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav(); popup(); });</script>";
             }
+        }else{
+            $errlog .= "Veuillez remplir tous les champs.</p>";
+            echo "<script>document.addEventListener('DOMContentLoaded', function() { ouvreNav(); popup(); });</script>";
         }
     }
 
@@ -125,11 +127,11 @@
     
     <script>
         function ouvreNav() {
-        document.getElementById("Sidebar").style.width = "300px";
+            document.getElementById("Sidebar").style.width = "300px";
         }
 
         function fermeNav() {
-        document.getElementById("Sidebar").style.width = "0";
+            document.getElementById("Sidebar").style.width = "0";
         }
         function popup() {
             var popup = document.getElementById("popup");
