@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : ven. 10 jan. 2025 à 12:35
+-- Généré le : lun. 20 jan. 2025 à 07:45
 -- Version du serveur : 8.3.0
 -- Version de PHP : 8.2.18
 
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `achat_ebook` (
   PRIMARY KEY (`id_achat`,`id_util`),
   KEY `id_util` (`id_util`),
   KEY `idEbook` (`id_ebook`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `auteur` (
   `biographie` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `img_tete` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_auteur`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `auteur`
@@ -87,7 +87,10 @@ INSERT INTO `auteur` (`id_auteur`, `nom_auteur`, `prenom_auteur`, `date_naissanc
 (1, 'Perbal', 'Sonia', '1980-05-15', 'Sonia Perbal est une auteure française connue pour ses livres de développement personnel. Elle aborde des thématiques autour de la psychologie et du bien-être.', 'https://i.imgur.com/DkG3C9L.jpg'),
 (2, 'Brichant', 'Christophe', '1975-03-30', 'Christophe Brichant est un écrivain français spécialisé dans les thrillers et les romans policiers. Son style captivant tient le lecteur en haleine jusqu’à la dernière page.', 'https://i.imgur.com/OPu7zV1.jpg'),
 (3, 'Koné', 'Océane', '1992-08-22', 'Océane Koné est une auteure émergente dans le domaine de la littérature jeunesse. Elle écrit des histoires captivantes pour les adolescents, abordant des sujets de société importants.', 'https://i.imgur.com/FO5dy4Y.jpg'),
-(4, 'Joulié', 'Jessica', '1988-11-12', 'Jessica Joulié est une autrice française qui écrit des romans romantiques et des récits inspirants. Son écriture sensible et douce touche de nombreux lecteurs.', 'https://i.imgur.com/fXOZf7h.jpg');
+(4, 'Joulié', 'Jessica', '1988-11-12', 'Jessica Joulié est une autrice française qui écrit des romans romantiques et des récits inspirants. Son écriture sensible et douce touche de nombreux lecteurs.', 'https://i.imgur.com/fXOZf7h.jpg'),
+(14, 'Dupont', 'Marie', '0000-00-00', '', ''),
+(15, 'Nguyen', 'Thierry', '0000-00-00', '', ''),
+(16, 'Lemoine', 'Sophie', '0000-00-00', '', '');
 
 -- --------------------------------------------------------
 
@@ -106,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `avis` (
   PRIMARY KEY (`id_avis`),
   KEY `id_livre` (`id_livre`),
   KEY `id_util` (`id_util`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `avis`
@@ -122,7 +125,9 @@ INSERT INTO `avis` (`id_avis`, `id_util`, `id_livre`, `note_avis`, `comment_avis
 (17, 11, 4, 5, 'Un vrai chef-d\'œuvre, à lire absolument !', '2024-11-07 10:00:00'),
 (18, 11, 3, 3, 'Une lecture agréable mais trop légère à mon goût.', '2024-11-08 15:20:00'),
 (19, 11, 3, 4, 'Une histoire bien écrite, mais quelques longueurs.', '2024-11-09 07:40:00'),
-(20, 11, 2, 5, 'Un livre incroyable, avec des personnages très bien développés.', '2024-11-10 17:00:00');
+(20, 11, 2, 5, 'Un livre incroyable, avec des personnages très bien développés.', '2024-11-10 17:00:00'),
+(21, 12, 2, 2, 'etst', '2025-01-13 18:47:24'),
+(22, 12, 2, 3, 'test2', '2025-01-13 18:50:06');
 
 -- --------------------------------------------------------
 
@@ -147,7 +152,10 @@ INSERT INTO `a_ecrit` (`id_auteur`, `id_livre`, `date_parution`) VALUES
 (1, 4, '2024-09-25'),
 (2, 4, '2024-09-25'),
 (3, 2, '2024-10-01'),
-(4, 3, '2024-11-17');
+(4, 3, '2024-11-17'),
+(14, 146, '2023-05-10'),
+(15, 147, '2020-11-15'),
+(16, 148, '2018-03-20');
 
 -- --------------------------------------------------------
 
@@ -160,6 +168,13 @@ CREATE TABLE IF NOT EXISTS `bibliotecaire` (
   `id_util` int NOT NULL,
   PRIMARY KEY (`id_util`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `bibliotecaire`
+--
+
+INSERT INTO `bibliotecaire` (`id_util`) VALUES
+(12);
 
 -- --------------------------------------------------------
 
@@ -197,7 +212,7 @@ CREATE TABLE IF NOT EXISTS `edition` (
   `id_edition` int NOT NULL AUTO_INCREMENT,
   `nom_edition` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_edition`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `edition`
@@ -317,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `genre` (
   `id_genre` int NOT NULL AUTO_INCREMENT,
   `nom_genre` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_genre`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `genre`
@@ -336,7 +351,10 @@ INSERT INTO `genre` (`id_genre`, `nom_genre`) VALUES
 (10, 'Humour'),
 (11, 'Non-fiction'),
 (12, 'Guide pratique'),
-(13, 'Philosophie');
+(13, 'Philosophie'),
+(19, 'Mystère'),
+(20, 'Histoire'),
+(21, 'Science');
 
 -- --------------------------------------------------------
 
@@ -346,7 +364,7 @@ INSERT INTO `genre` (`id_genre`, `nom_genre`) VALUES
 
 DROP TABLE IF EXISTS `isbn`;
 CREATE TABLE IF NOT EXISTS `isbn` (
-  `num_isbn` varchar(17) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `num_isbn` varchar(18) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_livre` int NOT NULL,
   `id_langue` int NOT NULL,
   `id_edition` int NOT NULL,
@@ -362,6 +380,9 @@ CREATE TABLE IF NOT EXISTS `isbn` (
 --
 
 INSERT INTO `isbn` (`num_isbn`, `id_livre`, `id_langue`, `id_edition`, `nb_pages`) VALUES
+('\n978-0-98-765432-0', 147, 1, 6, 245),
+('\n978-1-12-233445-0', 148, 1, 3, 198),
+('978-1-23-456789-0', 146, 1, 1, 320),
 ('978-2-01-000210-8', 2, 1, 2, 480),
 ('978-2-02-000320-8', 3, 1, 6, 250),
 ('978-2-07-000270-8', 2, 1, 1, 500),
@@ -383,7 +404,7 @@ CREATE TABLE IF NOT EXISTS `langue` (
   `id_langue` int NOT NULL AUTO_INCREMENT,
   `nom_langue` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_langue`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `langue`
@@ -416,7 +437,7 @@ CREATE TABLE IF NOT EXISTS `livre` (
   `img_couverture` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `resume` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_livre`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=149 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `livre`
@@ -425,7 +446,10 @@ CREATE TABLE IF NOT EXISTS `livre` (
 INSERT INTO `livre` (`id_livre`, `cote_livre`, `titre_livre`, `type_litteraire`, `img_couverture`, `resume`) VALUES
 (2, 'LIV001', 'Devenir mère une maternité sans langue de bois', 'Essai', 'https://i.imgur.com/IWHmNgD.jpeg', 'Un guide sans tabou sur la maternité, abordant tous les aspects physiques, émotionnels et psychologiques de devenir mère.'),
 (3, 'LIV002', '“Je t’avais dit de ne pas faire Koh-Lanta”', 'Essai', 'https://i.imgur.com/ttvGT0K.jpeg', 'Un récit humoristique et poignant sur l’aventure Koh-Lanta et les péripéties vécues par les participants.'),
-(4, 'LIV003', 'L’amitié selon Aristote', 'Philosophie', 'https://i.imgur.com/b6JkX6k.jpeg', 'Une réflexion sur le concept d’amitié selon Aristote, dans le cadre de sa philosophie éthique.');
+(4, 'LIV003', 'L’amitié selon Aristote', 'Philosophie', 'https://i.imgur.com/b6JkX6k.jpeg', 'Une réflexion sur le concept d’amitié selon Aristote, dans le cadre de sa philosophie éthique.'),
+(146, 'A123', 'Les Étoiles du Destin', ' Roman ', './img/img_couv/Les_Étoiles_du_Destin.png', 'Un récit captivant sur les luttes et triomphes d\'une jeune héroïne dans un monde fantastique.'),
+(147, 'B456', 'Le Mystère de l\'Orient', ' Nouvelle ', './img/img_couv/Le_Mystère_de_l\'Orient.png', 'Une plongée intrigante dans les secrets d\'une civilisation ancienne.'),
+(148, 'C789', 'Voyage au Centre du Temps', ' Essai ', './img/img_couv/Voyage_au_Centre_du_Temps.png', 'Une exploration des notions de temps et d\'espace à travers des anecdotes historiques.');
 
 -- --------------------------------------------------------
 
@@ -448,7 +472,13 @@ CREATE TABLE IF NOT EXISTS `livre_genre` (
 INSERT INTO `livre_genre` (`id_genre`, `id_livre`) VALUES
 (1, 2),
 (2, 3),
-(3, 4);
+(3, 4),
+(2, 146),
+(9, 146),
+(19, 147),
+(20, 147),
+(13, 148),
+(21, 148);
 
 -- --------------------------------------------------------
 
@@ -471,7 +501,11 @@ CREATE TABLE IF NOT EXISTS `livre_public` (
 INSERT INTO `livre_public` (`id_public`, `id_livre`) VALUES
 (1, 2),
 (3, 3),
-(5, 4);
+(5, 4),
+(2, 146),
+(3, 146),
+(3, 147),
+(25, 148);
 
 -- --------------------------------------------------------
 
@@ -484,7 +518,7 @@ CREATE TABLE IF NOT EXISTS `public_cible` (
   `id_public` int NOT NULL AUTO_INCREMENT,
   `type_public` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_public`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `public_cible`
@@ -500,7 +534,8 @@ INSERT INTO `public_cible` (`id_public`, `type_public`) VALUES
 (7, 'Lecteurs passionnés'),
 (8, 'Amateurs de sciences'),
 (9, 'Amateurs de philosophie'),
-(10, 'Familles');
+(10, 'Familles'),
+(25, 'Tous');
 
 -- --------------------------------------------------------
 
@@ -523,7 +558,10 @@ CREATE TABLE IF NOT EXISTS `reserver` (
 --
 
 INSERT INTO `reserver` (`num_isbn`, `id_util`, `date_reservation`) VALUES
-('978-2-01-000210-8', 11, '2025-01-04 18:06:46');
+('978-2-01-000210-8', 11, '2025-01-04 18:06:46'),
+('978-2-02-000320-8', 12, '2025-01-13 19:38:43'),
+('978-2-08-000280-8', 12, '2025-01-13 18:40:17'),
+('978-2-7470-0400-8', 12, '2025-01-13 19:12:09');
 
 -- --------------------------------------------------------
 
@@ -558,17 +596,19 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
   `pseudo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `mdp` varchar(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `img_profil` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `date_naissance` date NOT NULL,
-  PRIMARY KEY (`id_util`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  PRIMARY KEY (`id_util`),
+  UNIQUE KEY `pseudo` (`pseudo`,`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `utilisateur`
 --
 
 INSERT INTO `utilisateur` (`id_util`, `prenom_util`, `nom_util`, `adresse_util`, `tel_util`, `pseudo`, `mdp`, `img_profil`, `email`, `date_naissance`) VALUES
-(11, 'isi', 'ra', '27 chemin de la planchette', '0974837672', 'isira', '$2y$10$Wu45JADg382URcWjt8sFdO4/pWsyZtpaZAEePhVX8Ae5LIKmL354u', 'test', 'isira213213@gmail.com', '2005-03-08');
+(11, 'isi', 'ra', '27 chemin de la planchette', '0974837672', 'isira', '$2y$10$Wu45JADg382URcWjt8sFdO4/pWsyZtpaZAEePhVX8Ae5LIKmL354u', 'test', 'isira213213@gmail.com', '2005-03-08'),
+(12, 'Amadis', 'Senelet', '328 Rue Francis de Pressenssé', '0624512396', 'ama', '$2y$10$33sfKpQxB/qcQkwHWHi0iuBpro2Ol9Q1t.O1oNOzoc4bxXkvDsfEK', 'test', 'amadis.artemis@gmail.com', '1999-09-21');
 
 --
 -- Contraintes pour les tables déchargées
