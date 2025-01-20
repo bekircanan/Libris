@@ -296,6 +296,13 @@ $stmtSelectAllAvis = $conn->prepare(
                                 $stmtAiReserver->bindParam(1, $_SESSION['id']);
                                 $stmtAiReserver->execute();
                                 $reservations = $stmtAiReserver->fetchAll();
+                                $nbLignesTraitees = $stmtAiReserver->rowCount();
+                                $stmtAiEmprunter = $conn->prepare("SELECT * FROM emprunter WHERE id_util = ?");
+                                $stmtAiEmprunter->bindParam(1, $_SESSION['id']);
+                                $stmtAiEmprunter->execute();
+                                $emprunts = $stmtAiEmprunter->fetchAll();
+                                $nbLignesTraitees2 = $stmtAiEmprunter->rowCount();
+                                $nbLivresTota = $nbLignesTraitees + $nbLignesTraitees2;
                                 $testReserver = false;
                                 foreach($reservations as $rows){
                                     foreach($isbn as $row){
@@ -307,7 +314,7 @@ $stmtSelectAllAvis = $conn->prepare(
                                 if ($testReserver){
                                     echo 'disabled';
                                 }
-                                elseif (($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && ($nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() >= $stmtTestReservation->rowCount()) ){ 
+                                elseif (($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && ($nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() >= $stmtTestReservation->rowCount()) && $nbLivresTota <= 5 ){ 
                                     echo ''; 
                                 }
                                 else{
