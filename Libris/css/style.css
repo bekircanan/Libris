@@ -1487,4 +1487,23 @@ button.btn_valider_ajout {
     header{
         padding-left: 10px;
     }
+
+    /* Mes réservations */
+    .reservations-ebooks {
+        padding: 0 1rem;
+        margin-bottom: 2em;
+    }
+
+    .reservations-disponibles {
+        margin: 0 1rem;
+    }
+
+    .reservations-indisponibles {
+        margin: 2rem 1rem;
+    }
+
+    /* Mes e-books */
+    .mes-ebooks {
+        margin: 0 1rem 2rem 1rem;
+    }
 }
