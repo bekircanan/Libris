@@ -1076,6 +1076,39 @@ div.info_ebook_acheter p:nth-of-type(1){
     display: block;
 }
 
+/* Gestion des utilisateurs */
+.gestion-utilisateurs {
+    margin-bottom: 4em;
+    margin-left: 10em;
+    margin-right: 10em;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    font-size: small;
+}
+
+.gestion-utilisateurs h1{
+    font-size: 28px;
+    margin: 2em 0 0.5em 0;
+}
+
+#search-utilisateurs-input {
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    height: 2vw;
+    width: 20vw;
+    margin-bottom: 1vw;
+}
+.gestion-emprunts-reservations button, .gestion-utilisateurs button {
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
+    background-color: #FFDA89;
+    transition: 0.3s ease;
+}
+
 /* Info Livre*/
 
 /* General Section Styles */
