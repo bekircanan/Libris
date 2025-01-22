@@ -118,12 +118,15 @@
         </section>
         
         <!-- affichage du fond noire derrière la pop up -->
-        <div class="mask"></div>
-        <!-- pop up -->
-        <div class="modal">
-            <p>Un mail a été envoyé</p>
-            <i class="fa-solid fa-xmark fa-2xl close"></i>
+        <div class="mask">
+            <!-- pop up -->
+            <div class="modal">
+                <p>Un mail a été envoyé</p>
+                <i class="fa-solid fa-xmark fa-2xl close"></i>
+            </div>
         </div>
+        
+        
         
         <?php
             if ($prixTotal === 0){
@@ -156,7 +159,6 @@
             
             let mask = document.querySelector(".mask");
             let modal = document.querySelector(".modal");
-            let body = document.querySelector("body");
 
             let boutonFermer = document.querySelector(".close");
             boutonFermer.addEventListener('click',closePopUp);
@@ -174,7 +176,6 @@
                 modal.classList.toggle("modal_change");
                 mask.classList.toggle("mask_change");
                 localStorage.setItem("popUp", true);
-                body.style.overflow = hidden;
             }
 
             function closePopUp() {
@@ -182,7 +183,6 @@
                 modal.classList.toggle("modal_change");
                 mask.classList.toggle("mask_change");
                 localStorage.removeItem("popUp");  
-                body.style.overflow = scroll;
             }
     </script>
     
