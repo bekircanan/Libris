@@ -105,7 +105,7 @@
             <?php 
             if(isset($_SESSION['user'])){
                 if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
-                    echo '<li><a href="./gestion-comptes"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href="./gestion-utilisateurs"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
                     echo '<li><a href="./gestion-livres"><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
                     echo '<li><a href="./gestion-emprunts-reservations"><i class="fa-sharp fa-thin fa-books"></i> Gestion des emprunts/reservations</a></li>';
                 }else{
