@@ -81,6 +81,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerSuppres
     <body>
     <main class="gestion-utilisateurs">
 
+        <h1>Gestion des comptes</h1>
+
         <div class="onglet-gestion-content active-gestion" id="emprunts">
             <input type="text" id="search-utilisateurs-input" placeholder="Rechercher un utilisateur..." onkeyup="searchUtilisateurs()">
             <table class="table-gestion" id="table-utilisateurs">
@@ -109,7 +111,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerSuppres
                     echo "<td>". $utilisateur['nom_abonnement']. "</td>";
                     echo "<td>". convertirDate2($utilisateur['date_abonnement']). "</td>";
                     echo "<td>
-                        <button>Changez l'abonnement</button>
                         <button onclick=popupConfirmSuppression(".$utilisateur['id_util'].")>Supprimer</button>
                     </td>";
                     echo "</tr>";
