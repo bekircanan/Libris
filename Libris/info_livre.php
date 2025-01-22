@@ -103,8 +103,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
             echo '<script type="text/javascript">openEditionModal();</script>';
         }
         elseif(!isset($_POST['acheter']) && isset($_POST['edition'])){
-            echo 'test';
-            $selectedEdition = $_POST['edition'];
+                $selectedEdition = $_POST['edition'];
                 $stmtSelectExemplaire = $conn->prepare("SELECT ex.num_isbn FROM exemplaire ex JOIN isbn i ON ex.num_isbn = i.num_isbn WHERE i.id_edition = ? AND i.id_livre = ? And ex.id_exemplaire NOT IN (SELECT id_exemplaire FROM emprunter) And ex.num_isbn NOT IN (SELECT num_isbn FROM reserver)");
                 $stmtSelectExemplaire->bindParam(1, $selectedEdition);
                 $stmtSelectExemplaire->bindParam(2, $_SESSION['idLivreActuel']);
@@ -112,6 +111,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'res/acha' || $_P
                 $exemplaire = $stmtSelectExemplaire->fetch();
                 $idExemplaire = $exemplaire['num_isbn'];
                 $stmtInsertReservation = $conn->prepare("INSERT INTO reserver (num_isbn, id_util) VALUES (?, ?)");
+                echo $_SESSION['id'];
                 $stmtInsertReservation->bindParam(1, $idExemplaire);
                 $stmtInsertReservation->bindParam(2, $_SESSION['id']);
                 $stmtInsertReservation->execute();
@@ -249,10 +249,25 @@ $stmtSelectAllAvis = $conn->prepare(
                             echo '<p> Disponible en bibliothèque </p>';
                         } 
                         elseif(($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && ($nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() === $stmtTestReservation->rowCount())){
-                            $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter WHERE id_livre = {$_SESSION['idLivreActuel']}");
+                            $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter e Join exemplaire ex ON e.id_exemplaire = ex.id_exemplaire JOIN isbn i ON ex.num_isbn = i.num_isbn Join livre l ON i.id_livre = l.id_livre WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
                             $stmtSelectDateFinEmprunt->execute();
-                            $dateFinEmrpunt = $stmtSelectDateFinEmprunt->fetch();
-                            echo '<p> Disponible en réservation au maximum le </p>'.$dateFinEmprunt['date_fin_emprunt'];
+                            $dateFinEmprunt = $stmtSelectDateFinEmprunt->fetch();
+                            if ($dateFinEmprunt){
+                                echo '<p> Disponible en réservation au maximum le </p>'.$dateFinEmprunt['date_fin_emprunt'];
+                            }
+                            else{
+                                $stmtSelectDateReservation = $conn->prepare("SELECT date_reservation FROM reserver r Join isbn i ON r.num_isbn = i.num_isbn Join livre l ON i.id_livre = l.id_livre WHERE l.id_livre = {$_SESSION['idLivreActuel']} ORDER BY date_reservation DESC LIMIT 1");
+                                $stmtSelectDateReservation->execute();
+                                $dateReservation = $stmtSelectDateReservation->fetch();
+
+                                if ($dateReservation) {
+                                    $dateFinReservation = date('d-m-Y', strtotime($dateReservation['date_reservation'] . ' + 18 days'));
+                                    echo '<p> Disponible en réservation au maximum le ' . $dateFinReservation . '</p>';
+                                } else {
+                                    echo '<p> Indisponible pour le moment </p>';
+                                }
+                                echo '<p> Indisponible pour le moment </p>';
+                            }
                         }
                         else{
                             echo '<p> Indisponible pour le moment </p>';

@@ -1,6 +1,6 @@
 <?php
 require_once "header.php";
-
+$i=0;
 $stmt = $conn->prepare("SELECT id_livre,titre_livre,resume,img_couverture FROM livre");
 $stmt->execute();
 $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -194,13 +194,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             $stmtInsertIsbn = $conn->prepare("
                                 INSERT INTO isbn (num_isbn, id_livre, id_langue, id_edition, nb_pages)
                                 VALUES (:num_isbn, :id_livre, :id_langue, :id_edition, :nb_pages)");
+                            $num_isbn = str_replace(' ', '', $num_isbn);
                             $stmtInsertIsbn->bindParam(':num_isbn', $num_isbn);
                             $stmtInsertIsbn->bindParam(':id_livre', $id_livre['id_livre']);
                             $stmtInsertIsbn->bindParam(':id_langue', $id_langue['id_langue']);
                             $stmtInsertIsbn->bindParam(':id_edition', $id_edition['id_edition']);
                             $stmtInsertIsbn->bindParam(':nb_pages', $nb_pages);
                             $stmtInsertIsbn->execute();
+                            
                         }
+                        
+                        $stmtInsertExemplaire = $conn->prepare("
+                                INSERT INTO exemplaire (num_isbn)
+                                VALUES (:num_isbn)");
+                        $stmtInsertExemplaire->bindParam(':num_isbn', $num_isbn);
+                        $stmtInsertExemplaire->execute();
                         
                         foreach($nom_auteurs as $nom_auteur){
                             $prenom_auteur = array_shift($prenom_auteurs);
