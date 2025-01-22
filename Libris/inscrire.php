@@ -37,6 +37,10 @@
         switch ($etape) {
             case 1:
                 if (isset($_POST['date_naissance']) && !empty($_POST['date_naissance'])) {
+                    if (strtotime($_POST['date_naissance']) > strtotime(date("Y-m-d", strtotime("today")))) {
+                        $errlog = "<p>vous n'êtes pas né.</p>";
+                        $etape = 0;
+                    }
                     $_SESSION['date_naissance'] = $_POST['date_naissance'];
                 }else{
                     $errlog = "<p>La date de naissance est requise.</p>";
@@ -67,17 +71,18 @@
                     switch ($_POST['categorie']) {
                         case 'jeune':
                             $_SESSION['categorie'] = 1;
+                            $etape = 4;
                             break;
                         case 'etudiant':
                             $_SESSION['categorie'] = 2;
-                            goto fini;
+                            $etape = 4;
                             break;
                         case 'adulte':
                             $_SESSION['categorie'] = 3;
                             break;
                         case 'aucune':
                             $_SESSION['categorie'] = 4;
-                            goto fini;
+                            $etape = 4;
                             break;
                         default:
                             $errlog = "<p>Catégorie d'abonnement invalide.</p>";
@@ -95,37 +100,53 @@
                     $_SESSION['date_expiration'] = $_POST['date_expiration'];
                     $_SESSION['cvv'] = $_POST['cvv'];
                     //payer
-                    fini:
-                    $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
-                    $stmt->bindParam(1, $_SESSION['prenom']);
-                    $stmt->bindParam(2, $_SESSION['nom']);
-                    $stmt->bindParam(3, $_SESSION['adresse']);
-                    $stmt->bindParam(4, $_SESSION['tel']);
-                    $stmt->bindParam(5, $_SESSION['pseudo']);
-                    $_SESSION['mdp']=password_hash($_SESSION['mdp'], PASSWORD_DEFAULT);
-                    $stmt->bindParam(6, $_SESSION['mdp']);
-                    $stmt->bindParam(7, $_SESSION['email']);
-                    $stmt->bindParam(8, $_SESSION['date_naissance']);
-                    $stmt->execute();
-                    $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ?");
-                    $stmt->bindParam(1, $_SESSION['email']);
-                    $stmt->execute();
-                    $util = $stmt->fetch();
-                    if($_SESSION['categorie']!=4){
-                        $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
-                        $stmt->bindParam(1, $_SESSION['categorie']);
-                        $stmt->bindParam(2, $util['id_util']);
-                        $stmt->execute();
-                    }
-                    $_SESSION['user'] = $_SESSION['pseudo'];
-                    $_SESSION['email'] = $_SESSION['email'];
-                    $_SESSION['admin']=0;
-                    $_SESSION['id'] = $util['id_util'];
-                    header("Location: index.php");
-                    exit();
                 }else{
                     $errlog = "<p>Les informations de paiement sont requises.</p>";
                     $etape = 3;
+                }
+                break;
+            case 5:
+                if(isset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['email'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie'])){
+                    $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ? OR pseudo = ?");
+                    $stmt->bindParam(1, $_SESSION['email']);
+                    $stmt->bindParam(2, $_SESSION['pseudo']);
+                    $stmt->execute();
+                    $user = $stmt->fetch();
+                    if($user){
+                        $errlog = "<p>Utilisateur déjà existant.</p>";
+                        $etape = 0;
+                    }else{
+                        $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
+                        $stmt->bindParam(1, $_SESSION['prenom']);
+                        $stmt->bindParam(2, $_SESSION['nom']);
+                        $stmt->bindParam(3, $_SESSION['adresse']);
+                        $stmt->bindParam(4, $_SESSION['tel']);
+                        $stmt->bindParam(5, $_SESSION['pseudo']);
+                        $_SESSION['mdp']=password_hash($_SESSION['mdp'], PASSWORD_DEFAULT);
+                        $stmt->bindParam(6, $_SESSION['mdp']);
+                        $stmt->bindParam(7, $_SESSION['email']);
+                        $stmt->bindParam(8, $_SESSION['date_naissance']);
+                        $stmt->execute();
+                        $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ?");
+                        $stmt->bindParam(1, $_SESSION['email']);
+                        $stmt->execute();
+                        $util = $stmt->fetch();
+                        if($_SESSION['categorie']!=4){
+                            $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
+                            $stmt->bindParam(1, $_SESSION['categorie']);
+                            $stmt->bindParam(2, $util['id_util']);
+                            $stmt->execute();
+                        }
+                        $_SESSION['user'] = $_SESSION['pseudo'];
+                        $_SESSION['email'] = $_SESSION['email'];
+                        $_SESSION['admin']=0;
+                        $_SESSION['id'] = $util['id_util'];
+                        header("Location: index.php");
+                        exit();
+                    }
+                }else{
+                    $errlog = "<p>Informations manquantes.</p>";
+                    $etape = 0;
                 }
                 break;
             default:
@@ -156,10 +177,14 @@
     <form method="POST">
         <input type="hidden" name="form" value="inscrire">
         <?php 
-            echo "<h2>$etape_array[$etape]</h2>";
-            echo $errlog;
-            echo form($etape);
-            echo '<button class="background-violet" type="submit" name="etape" value="'.((int)$etape+1).'"> Valider</button>';
+            if($etape>=4){
+                echo "<h2>Fin</h2>";
+            }else{
+                echo "<h2>$etape_array[$etape]</h2>";
+            }
+                echo $errlog;
+                echo form($etape);
+                echo '<button class="background-violet" type="submit" name="etape" value="'.((int)$etape+1).'"> Valider</button>';
         ?>
     </form>
 </div>
