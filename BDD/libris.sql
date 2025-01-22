@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : lun. 20 jan. 2025 à 07:45
+-- Généré le : mer. 22 jan. 2025 à 12:09
 -- Version du serveur : 8.3.0
 -- Version de PHP : 8.2.18
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `abonnement` (
   `prix` double NOT NULL,
   `nom_abonnement` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_abonnement`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `abonnement`
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS `abonnement` (
 
 INSERT INTO `abonnement` (`id_abonnement`, `prix`, `nom_abonnement`) VALUES
 (1, 0, 'Pass Jeune'),
-(3, 0, 'Pass Culture'),
-(4, 18, 'Pass Lib');
+(2, 0, 'Pass Culture'),
+(3, 18, 'Pass Lib');
 
 -- --------------------------------------------------------
 
@@ -60,7 +60,14 @@ CREATE TABLE IF NOT EXISTS `achat_ebook` (
   PRIMARY KEY (`id_achat`,`id_util`),
   KEY `id_util` (`id_util`),
   KEY `idEbook` (`id_ebook`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `achat_ebook`
+--
+
+INSERT INTO `achat_ebook` (`id_achat`, `id_util`, `id_ebook`, `date_achat`, `regle`) VALUES
+(39, 13, 2, '2025-01-22 07:57:35', 1);
 
 -- --------------------------------------------------------
 
@@ -152,10 +159,7 @@ INSERT INTO `a_ecrit` (`id_auteur`, `id_livre`, `date_parution`) VALUES
 (1, 4, '2024-09-25'),
 (2, 4, '2024-09-25'),
 (3, 2, '2024-10-01'),
-(4, 3, '2024-11-17'),
-(14, 146, '2023-05-10'),
-(15, 147, '2020-11-15'),
-(16, 148, '2018-03-20');
+(4, 3, '2024-11-17');
 
 -- --------------------------------------------------------
 
@@ -174,7 +178,8 @@ CREATE TABLE IF NOT EXISTS `bibliotecaire` (
 --
 
 INSERT INTO `bibliotecaire` (`id_util`) VALUES
-(12);
+(12),
+(16);
 
 -- --------------------------------------------------------
 
@@ -281,7 +286,8 @@ CREATE TABLE IF NOT EXISTS `est_abonne` (
 --
 
 INSERT INTO `est_abonne` (`id_abonnement`, `id_util`, `date_abonnement`) VALUES
-(1, 11, '2025-01-10 12:21:56');
+(1, 11, '2025-01-10 12:21:56'),
+(2, 13, '2025-01-20 08:49:14');
 
 -- --------------------------------------------------------
 
@@ -380,9 +386,6 @@ CREATE TABLE IF NOT EXISTS `isbn` (
 --
 
 INSERT INTO `isbn` (`num_isbn`, `id_livre`, `id_langue`, `id_edition`, `nb_pages`) VALUES
-('\n978-0-98-765432-0', 147, 1, 6, 245),
-('\n978-1-12-233445-0', 148, 1, 3, 198),
-('978-1-23-456789-0', 146, 1, 1, 320),
 ('978-2-01-000210-8', 2, 1, 2, 480),
 ('978-2-02-000320-8', 3, 1, 6, 250),
 ('978-2-07-000270-8', 2, 1, 1, 500),
@@ -446,10 +449,7 @@ CREATE TABLE IF NOT EXISTS `livre` (
 INSERT INTO `livre` (`id_livre`, `cote_livre`, `titre_livre`, `type_litteraire`, `img_couverture`, `resume`) VALUES
 (2, 'LIV001', 'Devenir mère une maternité sans langue de bois', 'Essai', 'https://i.imgur.com/IWHmNgD.jpeg', 'Un guide sans tabou sur la maternité, abordant tous les aspects physiques, émotionnels et psychologiques de devenir mère.'),
 (3, 'LIV002', '“Je t’avais dit de ne pas faire Koh-Lanta”', 'Essai', 'https://i.imgur.com/ttvGT0K.jpeg', 'Un récit humoristique et poignant sur l’aventure Koh-Lanta et les péripéties vécues par les participants.'),
-(4, 'LIV003', 'L’amitié selon Aristote', 'Philosophie', 'https://i.imgur.com/b6JkX6k.jpeg', 'Une réflexion sur le concept d’amitié selon Aristote, dans le cadre de sa philosophie éthique.'),
-(146, 'A123', 'Les Étoiles du Destin', ' Roman ', './img/img_couv/Les_Étoiles_du_Destin.png', 'Un récit captivant sur les luttes et triomphes d\'une jeune héroïne dans un monde fantastique.'),
-(147, 'B456', 'Le Mystère de l\'Orient', ' Nouvelle ', './img/img_couv/Le_Mystère_de_l\'Orient.png', 'Une plongée intrigante dans les secrets d\'une civilisation ancienne.'),
-(148, 'C789', 'Voyage au Centre du Temps', ' Essai ', './img/img_couv/Voyage_au_Centre_du_Temps.png', 'Une exploration des notions de temps et d\'espace à travers des anecdotes historiques.');
+(4, 'LIV003', 'L’amitié selon Aristote', 'Philosophie', 'https://i.imgur.com/b6JkX6k.jpeg', 'Une réflexion sur le concept d’amitié selon Aristote, dans le cadre de sa philosophie éthique.');
 
 -- --------------------------------------------------------
 
@@ -472,13 +472,7 @@ CREATE TABLE IF NOT EXISTS `livre_genre` (
 INSERT INTO `livre_genre` (`id_genre`, `id_livre`) VALUES
 (1, 2),
 (2, 3),
-(3, 4),
-(2, 146),
-(9, 146),
-(19, 147),
-(20, 147),
-(13, 148),
-(21, 148);
+(3, 4);
 
 -- --------------------------------------------------------
 
@@ -501,11 +495,7 @@ CREATE TABLE IF NOT EXISTS `livre_public` (
 INSERT INTO `livre_public` (`id_public`, `id_livre`) VALUES
 (1, 2),
 (3, 3),
-(5, 4),
-(2, 146),
-(3, 146),
-(3, 147),
-(25, 148);
+(5, 4);
 
 -- --------------------------------------------------------
 
@@ -558,8 +548,10 @@ CREATE TABLE IF NOT EXISTS `reserver` (
 --
 
 INSERT INTO `reserver` (`num_isbn`, `id_util`, `date_reservation`) VALUES
-('978-2-01-000210-8', 11, '2025-01-04 18:06:46'),
+('978-2-01-000210-8', 13, '2025-01-22 08:50:06'),
 ('978-2-02-000320-8', 12, '2025-01-13 19:38:43'),
+('978-2-02-000320-8', 13, '2025-01-20 08:51:37'),
+('978-2-07-000270-8', 13, '2025-01-22 08:49:17'),
 ('978-2-08-000280-8', 12, '2025-01-13 18:40:17'),
 ('978-2-7470-0400-8', 12, '2025-01-13 19:12:09');
 
@@ -600,7 +592,7 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
   `date_naissance` date NOT NULL,
   PRIMARY KEY (`id_util`),
   UNIQUE KEY `pseudo` (`pseudo`,`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `utilisateur`
@@ -608,7 +600,9 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
 
 INSERT INTO `utilisateur` (`id_util`, `prenom_util`, `nom_util`, `adresse_util`, `tel_util`, `pseudo`, `mdp`, `img_profil`, `email`, `date_naissance`) VALUES
 (11, 'isi', 'ra', '27 chemin de la planchette', '0974837672', 'isira', '$2y$10$Wu45JADg382URcWjt8sFdO4/pWsyZtpaZAEePhVX8Ae5LIKmL354u', 'test', 'isira213213@gmail.com', '2005-03-08'),
-(12, 'Amadis', 'Senelet', '328 Rue Francis de Pressenssé', '0624512396', 'ama', '$2y$10$33sfKpQxB/qcQkwHWHi0iuBpro2Ol9Q1t.O1oNOzoc4bxXkvDsfEK', 'test', 'amadis.artemis@gmail.com', '1999-09-21');
+(12, 'Amadis', 'Senelet', '328 Rue Francis de Pressenssé', '0624512396', 'ama', '$2y$10$33sfKpQxB/qcQkwHWHi0iuBpro2Ol9Q1t.O1oNOzoc4bxXkvDsfEK', 'test', 'amadis.artemis@gmail.com', '1999-09-21'),
+(13, 'Arthur', 'Fourel', '9, avenue condorcet', '0679394272', 'Aström', '$2y$10$2in5GzRV5Sp2WPsych3UNugRHRXaxRntuj3vlNXd8WbP5QZ6O/Vfq', './img/profil/img_def.svg', 'arthur.fourel@gmail.com', '2005-11-23'),
+(16, 'Arthur', 'Fourel', '29, rue viret', '0679394272', 'Admin', '$2y$10$5tzNmHTajTWBmhv7TYfcquHWjLH4LR5Z0fz/hOtiegW3uLfFXZ1Yi', './img/profil/img_def.svg', 'admin@gmail.com', '2005-11-23');
 
 --
 -- Contraintes pour les tables déchargées
@@ -619,7 +613,7 @@ INSERT INTO `utilisateur` (`id_util`, `prenom_util`, `nom_util`, `adresse_util`,
 --
 ALTER TABLE `achat_ebook`
   ADD CONSTRAINT `achat_ebook_ibfk_3` FOREIGN KEY (`id_ebook`) REFERENCES `ebook` (`id_ebook`) ON DELETE CASCADE,
-  ADD CONSTRAINT `achat_ebook_ibfk_4` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`);
+  ADD CONSTRAINT `achat_ebook_ibfk_4` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `avis`
@@ -651,7 +645,7 @@ ALTER TABLE `ebook`
 -- Contraintes pour la table `emprunter`
 --
 ALTER TABLE `emprunter`
-  ADD CONSTRAINT `emprunter_ibfk_1` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `emprunter_ibfk_1` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`) ON DELETE CASCADE ON UPDATE RESTRICT,
   ADD CONSTRAINT `emprunter_ibfk_2` FOREIGN KEY (`id_exemplaire`) REFERENCES `exemplaire` (`id_exemplaire`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
@@ -671,9 +665,9 @@ ALTER TABLE `exemplaire`
 -- Contraintes pour la table `isbn`
 --
 ALTER TABLE `isbn`
-  ADD CONSTRAINT `isbn_ibfk_1` FOREIGN KEY (`id_livre`) REFERENCES `livre` (`id_livre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `isbn_ibfk_2` FOREIGN KEY (`id_langue`) REFERENCES `langue` (`id_langue`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `isbn_ibfk_3` FOREIGN KEY (`id_edition`) REFERENCES `edition` (`id_edition`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `isbn_ibfk_3` FOREIGN KEY (`id_edition`) REFERENCES `edition` (`id_edition`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `isbn_ibfk_4` FOREIGN KEY (`id_livre`) REFERENCES `livre` (`id_livre`) ON DELETE CASCADE;
 
 --
 -- Contraintes pour la table `livre_genre`
@@ -694,7 +688,7 @@ ALTER TABLE `livre_public`
 --
 ALTER TABLE `reserver`
   ADD CONSTRAINT `reserver_ibfk_1` FOREIGN KEY (`num_isbn`) REFERENCES `isbn` (`num_isbn`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `reserver_ibfk_2` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `reserver_ibfk_2` FOREIGN KEY (`id_util`) REFERENCES `utilisateur` (`id_util`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Contraintes pour la table `token`
