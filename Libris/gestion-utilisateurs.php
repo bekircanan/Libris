@@ -60,7 +60,6 @@ function convertirDate2($date) {
     return "$jour " . $mois[$moisNum] . " $annee";
 }
 
-var_dump($_POST);
 if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerSuppression')) {
     $id_util = $_POST['id_util'];
 
