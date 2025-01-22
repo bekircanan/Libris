@@ -1146,7 +1146,6 @@ div.info_ebook_acheter p:nth-of-type(1){
     background-color: #FFDA89;
     transition: 0.3s ease;
 }
-
 /* Info Livre*/
 
 /* General Section Styles */
@@ -1439,7 +1438,7 @@ section#livre {
 }
 
 .ajout_livre h1{
-    width: 50%;
+    width: 20%;
     padding: 20px;
 }
 
@@ -1517,15 +1516,9 @@ button.btn_valider_ajout {
     .filters {
         width: 100%;
     }
-
-    header form input::placeholder, header form input {
-        background-color: white;
-        color: transparent;
+    main{
+        display: block;
     }
-    header{
-        padding-left: 10px;
-    }
-
     /* Mes réservations */
     .reservations-ebooks {
         padding: 0 1rem;
@@ -1544,4 +1537,5 @@ button.btn_valider_ajout {
     .mes-ebooks {
         margin: 0 1rem 2rem 1rem;
     }
+
 }
