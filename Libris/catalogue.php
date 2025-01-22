@@ -78,10 +78,10 @@
                 array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
             }
             // Filtre par annee
-            // if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
-            //     $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
-            //     array_push($ListeParametres, $_GET['anneeDebut'], $_GET['anneeFin']);
-            // } 
+            if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
+                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                array_push($ListeParametres, $_GET['anneeDebut'], $_GET['anneeFin']);
+            } 
         }
     
     

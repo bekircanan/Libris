@@ -5,7 +5,6 @@
     $resultLangue = $conn->query("SELECT id_langue, nom_langue FROM langue");
     $resultCible = $conn->query("SELECT id_public, type_public FROM public_cible");
 
-    //ajouter edition, sujet, 
 ?>
         <div class="contenaire-recherche-avance">
            
@@ -24,7 +23,7 @@
                             <option value="auteur">Auteur</option>
                             <option value="genre">Genre</option>
                         </select>
-                        <input type="text" placeholder="Rechercher...">
+                        <input type="text" name="recherche-avance" placeholder="Rechercher...">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     
@@ -39,19 +38,21 @@
                         <input type="number" name="anneeDebut" placeholder="aaaa" min="1000" max="2025"> <p>à</p> 
                         <input type="number" name="anneeFin" placeholder="aaaa">
                     </div>
-                    <div class="groupe-genre">
+                    <div class="groupe">
                         <h4>Genres :</h4>
+                        <div class="groupe-genre">
                         <?php
                             foreach ($resultGenre as $genre){
-                                echo '<input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label>';
+                                echo '<div class="groupe-checkbox"><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
                             }
                         ?>
+                        </div>
                     </div>
                     <div class="groupe-langue">
                         <h4>Langues :</h4>
                         <?php
                             foreach ($resultLangue as $langue){
-                                echo '<input type="checkbox" name="langues[]" value="' . $langue['nom_langue'] . '"><label for="' . $langue['nom_langue'] . '">' . $langue['nom_langue'] . '</label>';
+                                echo '<div class="groupe-checkbox"><input type="checkbox" name="langues[]" value="' . $langue['nom_langue'] . '"><label for="' . $langue['nom_langue'] . '">' . $langue['nom_langue'] . '</label></div>';
                             }
                         ?>
                     </div>
