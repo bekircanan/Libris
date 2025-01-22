@@ -1189,11 +1189,19 @@ div.info_ebook_acheter p:nth-of-type(1){
     width: 20vw;
     margin-bottom: 1vw;
 }
-.gestion-emprunts-reservations button, .gestion-utilisateurs button {
+.gestion-emprunts-reservations button, .gestion-utilisateurs button,.gestion_livre button {
     border-radius: 15px;
     background-color: #FFDA89;
     cursor: pointer;
     transition: 0.3s ease;
+}
+.gestion_livre{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1% auto;
+    padding: 2%;
 }
 
 .gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
