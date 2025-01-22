@@ -71,6 +71,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Libris</title>
+    <link rel="icon" href="img/logo.png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="js/icon.js"></script>
@@ -104,7 +105,7 @@
             <?php 
             if(isset($_SESSION['user'])){
                 if(isset($_SESSION['admin']) && $_SESSION['admin']===1){
-                    echo '<li><a href="./gestion-comptes"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href="./gestion-utilisateurs"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
                     echo '<li><a href="./gestion-livres"><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
                     echo '<li><a href="./gestion-emprunts-reservations"><i class="fa-sharp fa-thin fa-books"></i> Gestion des emprunts/reservations</a></li>';
                 }else{

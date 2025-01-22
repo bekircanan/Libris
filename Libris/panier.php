@@ -5,6 +5,7 @@
     require '.\vendor\autoload.php';
     $errlog = '';
 
+   
     function smtp($email, $subject, $body){
         $mail = new PHPMailer();
         $mail->IsSMTP(); 
@@ -63,27 +64,28 @@
                     $stmtDeleteEbook = $conn->prepare("DELETE FROM achat_ebook WHERE id_achat = :idAchat");
                     $stmtDeleteEbook->execute([':idAchat' => $_POST['supprimer']]);
         
-                }else if(isset($_POST['payer']) && !isset($_POST['supprimer']) && !isset($achatEbook)){
+                }else if(isset($_POST['payer']) && !isset($_POST['supprimer']) && !empty($achatEbook)){
+                    
                     $stmtRecupEmail = $conn->prepare("SELECT email FROM utilisateur WHERE id_util = :idUtilisateur");
                     $stmtRecupEmail->execute([':idUtilisateur' => $_SESSION['id']]); 
                     $user = $stmtRecupEmail->fetch();
         
                     $stmtModifDateAchat = $conn->prepare("UPDATE achat_ebook SET regle = 1, date_achat = NOW() WHERE id_util = :idUtilisateur");
                     $stmtModifDateAchat->execute([':idUtilisateur' => $_SESSION['id']]);
-                    echo "<script> openPopUp() </script>";
-                    header("Refresh:0");
-        
+                    echo "<script>document.addEventListener('DOMContentLoaded', function() { openPopUp(); });</script>";        
+
                     // si l'utilisateur existe, on crée un token et on l'envoie par mail
                     if($user){
                         $token = bin2hex(random_bytes(16));
                         $expire = date('Y-m-d H:i:s', time() + 60 * 15);
                         $stmt = $conn->prepare("INSERT INTO token (nom_token, expire, id_util) VALUES (:nomToken, :expire, :idUtilisateur)");
                         $stmt->execute([':expire' => $expire, ':nomToken' => $token, ':idUtilisateur' => $_SESSION['id']]);
-                        $errlog = smtp($user['email'], 'Merci pour votre achat sur Libris !', 'Merci pour cette transaction sur Libris. Voici le lien de téléchargement de chaques livres : '. "\n" . $listeLienEbook);
+                        $errlog = smtp($user['email'], 'Merci pour votre achat sur Libris !', 'Merci pour cette transaction sur Libris. Voici le lien de téléchargement de chaques livres : '. "<br>" . $listeLienEbook);
                     } else {
                         $errlog ='Aucun compte n\'est associé à cet email.';
                     }
                 }
+                header("Refresh:0");
             }
         }
         
@@ -116,17 +118,19 @@
         </section>
         
         <!-- affichage du fond noire derrière la pop up -->
-        <div class="mask"></div>
-        <!-- pop up -->
-        <div class="modal">
-            <p>Un mail a été envoyé</p>
-            <i class="fa-solid fa-xmark fa-2xl close"></i>
+        <div class="mask">
+            <!-- pop up -->
+            <div class="modal">
+                <p>Un mail a été envoyé</p>
+                <i class="fa-solid fa-xmark fa-2xl close"></i>
+            </div>
         </div>
+        
+        
         
         <?php
             if ($prixTotal === 0){
-                echo '<h1>Votre panier est vide</h1>';
-                echo '<a href=".\catalogue.php">Choisir des ebooks</a>';
+                echo '<p class=panier_vide>Votre panier est vide</p>';
             }else{
                 foreach($achatEbook as $ebook){
                     $lesAuteurs = '';
@@ -155,12 +159,12 @@
             
             let mask = document.querySelector(".mask");
             let modal = document.querySelector(".modal");
-            let body = document.querySelector("body");
 
             let boutonFermer = document.querySelector(".close");
             boutonFermer.addEventListener('click',closePopUp);
             
             let boutonOuvrir = document.querySelector(".bouton_payer");
+            // boutonOuvrir.addEventListener('click',openPopUp);
             
 
             if(localStorage.getItem("popUp")){
@@ -172,7 +176,6 @@
                 modal.classList.toggle("modal_change");
                 mask.classList.toggle("mask_change");
                 localStorage.setItem("popUp", true);
-                body.style.overflow = hidden;
             }
 
             function closePopUp() {
@@ -180,7 +183,6 @@
                 modal.classList.toggle("modal_change");
                 mask.classList.toggle("mask_change");
                 localStorage.removeItem("popUp");  
-                body.style.overflow = scroll;
             }
     </script>
     

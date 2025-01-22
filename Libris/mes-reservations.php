@@ -1,6 +1,10 @@
 <?php
 require('header.php');
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5415ed6d23de4e9f719e973348b93a845cedc2c4
 $stmtReservationsUtil = $conn->prepare("
     SELECT l.titre_livre, l.img_couverture, l.id_livre, r.num_isbn, r.id_util
     FROM reserver r
