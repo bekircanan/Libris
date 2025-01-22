@@ -1522,11 +1522,13 @@ section#livre {
     display: flex;
     justify-content: space-around;
     margin-left: 40%;
-    margin-right: 40%;  
+    margin-right: 40%;
+      
 }
 
 button.btn_valider_ajout {
     width: 100%;
+    text-align: center;
     height: 50px;
     font-size: larger;
     font-style: bold;
@@ -1534,7 +1536,6 @@ button.btn_valider_ajout {
     color: black;
     border: none;
     border-radius: 5px;
-    padding: 10px 20px;
     margin-bottom: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
