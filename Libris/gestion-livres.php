@@ -1,6 +1,40 @@
 <?php
 require_once "header.php";
 
+$stmt = $conn->prepare("SELECT id_livre,titre_livre,resume,img_couverture FROM livre");
+$stmt->execute();
+$livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    if(isset($_POST['supprimeLivre'])){
+        $stmt = $conn->prepare("DELETE FROM livre WHERE id_livre = :id_livre");
+        $stmt->bindParam(':id_livre', $_POST['id_livre']);
+        $stmt->execute();
+    }elseif(isset($_POST['ModifieLivre'],$_POST['id_livre'], $_POST['titre_livre'], $_POST['resume']) && !empty($_POST['id_livre']) && !empty($_POST['titre_livre']) && !empty($_POST['type_litteraire']) && !empty($_POST['resume'])){
+        if(isset($_FILES['img_couverture']) && !empty($_FILES['img_couverture']['name'])){
+            $imageFileName = "{$_POST['titre_livre']}.png";
+            $imageFileName = str_replace(' ', '_', $imageFileName);
+            $targetDir = "./img/img_couv/";
+            $targetFile = $targetDir . basename($imageFileName);
+            if (file_exists($targetFile)) {
+                unlink($targetFile);
+            }
+            if (move_uploaded_file($_FILES["img_couverture"]["tmp_name"], $targetFile)){
+                $stmt = $conn->prepare("UPDATE livre SET titre_livre = :titre_livre, resume = :resume,img_couverture = :img_couverture WHERE id_livre = :id_livre");
+                $stmt->bindParam(':titre_livre', $_POST['titre_livre']);
+                $stmt->bindParam(':resume', $_POST['resume']);
+                $stmt->bindParam(':img_couverture', $targetFile);
+                $stmt->bindParam(':id_livre', $_POST['id_livre']);
+                $stmt->execute();
+            }
+        }else{
+            $stmt = $conn->prepare("UPDATE livre SET titre_livre = :titre_livre, resume = :resume WHERE id_livre = :id_livre");
+            $stmt->bindParam(':titre_livre', $_POST['titre_livre']);
+            $stmt->bindParam(':resume', $_POST['resume']);
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+        }
+    }
+}
 // Check if image file is an actual image or fake image
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['form'] === 'ajout_livre') {
     if (isset($_POST["envoyer"])) {
@@ -276,10 +310,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
 
         </div>
     </form>
+    <h1>Livres</h1>
+        <input type="text" id="search-reservations-input" placeholder="Rechercher une livre..." onkeyup="search()">
+        <table class="table-emprunts-reservations" id="table-reservations">
+            <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Resume</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($livres as $livre) {
+                echo "<tr>";
+                echo "<td>". $livre["titre_livre"] ."</td>";
+                echo "<td>". $livre["resume"]. "</td>";
+                echo "<td>
+                    <button onclick=\"popupModifie('".$livre["id_livre"]."','".$livre["titre_livre"]."','".$livre["resume"]."')\">Modifie</button>
+                    <button onclick=\"popupSupprime('".$livre["id_livre"]."')\">Supprime</button>";
+                echo "</td>";
+                echo "</tr>";
+            }
+            ?>
+            </tbody>
+        </table>
+        <br>
 </div>
 
 <script>
+function search() {
+        let input = document.getElementById('search-reservations-input').value.toLowerCase();
 
+        let table = document.querySelector('#table-reservations tbody');
+        let rows = table.getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            let cells = row.getElementsByTagName('td');
+            let rowText = "";
+            for (let j = 0; j < cells.length; j++) {
+                rowText += cells[j].innerText.toLowerCase() + " ";
+            }
+            if (rowText.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    }
 
 document.addEventListener('DOMContentLoaded', function () {
     var dropZoneFile = document.getElementById('drop-zone-file');
@@ -369,6 +447,61 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function popupSupprime(id_livre) {
+        let popup = document.createElement('div');
+        popup.className = 'popupGestion hidden';
+        popup.innerHTML = `
+            <div class="popupGestion-content">
+                <h2>Confirmation de suppression</h2>
+                <p>Êtes-vous sûr de vouloir supprime cette livre ?</p>
+                <form method="POST" action="gestion-emprunts-reservations.php">
+                    <input type="hidden" name="form" value="supprimeLivre">
+                    <input type="hidden" name="id_livre" value="${id_livre}">
+                    <button type="submit">OK</button>
+                </form>
+                <br>
+                <button class='popupGestionAnnuler'>Annuler</button>
+            </div>
+        `;
+        const main = document.querySelector('main');
+        main.appendChild(popup);
+
+        const cancelButton = popup.querySelector('.popupGestionAnnuler');
+        cancelButton.addEventListener('click', () => {
+            main.removeChild(popup);
+        });
+    }
+
+function popupModifie(id_livre,titre_livre,resume) {
+    let popup = document.createElement('div');
+    popup.className = 'popupGestion hidden';
+    popup.innerHTML = `
+        <div class="popupGestion-content">
+            <h2>Modification livre</h2>
+            <form method="POST" action="gestion-emprunts-reservations.php">
+                <input type="hidden" name="form" value="ModifieLivre">
+                <input type="hidden" name="id_livre" value="${id_livre}">
+                <label for="titre_livre">Titre</label>
+                <input type="text" name="titre_livre" value="${titre_livre}" size="${titre_livre.length}">
+                <label for="resume">Resume</label>
+                <textarea name="resume" cols="40" rows="5">${resume}</textarea>
+                <label for="img_couverture">Image</label>
+                <input type="file" name="img_couverture" id="img_couverture">
+                <br><br>
+                <button type="submit">OK</button>
+            </form>
+            <br>
+            <button class='popupGestionAnnuler'>Annuler</button>
+        </div>
+    `;
+    const main = document.querySelector('main');
+    main.appendChild(popup);
+
+    const cancelButton = popup.querySelector('.popupGestionAnnuler');
+    cancelButton.addEventListener('click', () => {
+        main.removeChild(popup);
+    });
+}
 
 function popup() {
             let popup = document.createElement('div');

@@ -94,6 +94,7 @@
                     $_SESSION['numero_carte'] = $_POST['numero_carte'];
                     $_SESSION['date_expiration'] = $_POST['date_expiration'];
                     $_SESSION['cvv'] = $_POST['cvv'];
+                    //payer
                     fini:
                     $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
                     $stmt->bindParam(1, $_SESSION['prenom']);

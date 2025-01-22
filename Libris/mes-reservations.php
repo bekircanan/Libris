@@ -1,75 +1,117 @@
 <?php
 require('header.php');
 
+$_SESSION['id'] = 13;
 
 $stmtReservationsUtil = $conn->prepare("
-    SELECT l.titre_livre, l.img_couverture, l.id_livre
-    FROM livre l
-    JOIN reserver r ON l.id_livre = r.id_livre
+    SELECT l.titre_livre, l.img_couverture, l.id_livre, r.num_isbn
+    FROM reserver r
+    JOIN isbn ON isbn.num_isbn = r.num_isbn
+    JOIN livre l ON l.id_livre = isbn.id_livre
     WHERE r.id_util = :idUtilisateur
 ");
 $stmtReservationsUtil->execute([':idUtilisateur' => $_SESSION['id']]);
 $reservationsUtil = $stmtReservationsUtil->fetchAll();
 
+$stmtNbExemplairesDisponibles = $conn->prepare("
+    SELECT 
+        l.id_livre,
+        l.titre_livre,
+        i.id_edition,
+        ed.nom_edition,
+        i.num_isbn,
+        COUNT(e.id_exemplaire) AS nb_exemplaires,
+        (COUNT(e.id_exemplaire) - COUNT(emp.id_exemplaire)) AS nb_exemplaires_disponibles
+    FROM 
+        exemplaire e
+    INNER JOIN 
+        isbn i ON e.num_isbn = i.num_isbn
+    INNER JOIN 
+        edition ed ON i.id_edition = ed.id_edition
+    INNER JOIN 
+        livre l ON i.id_livre = l.id_livre
+    LEFT JOIN 
+        emprunter emp ON e.id_exemplaire = emp.id_exemplaire
+    GROUP BY 
+        i.num_isbn, l.id_livre, l.titre_livre, i.id_edition, ed.nom_edition
+");
+$stmtNbExemplairesDisponibles->execute();
+$nbExemplairesDisponibles = $stmtNbExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
+
 $stmtExemplairesDisponibles = $conn->prepare("
     SELECT 
-        e.id_livre, 
-        e.nb_exemplaires, 
-        (e.nb_exemplaires - COUNT(emp.id_livre)) AS exemplaires_disponibles
+        e.num_isbn,
+        e.id_exemplaire
     FROM 
         exemplaire e
     LEFT JOIN 
-        emprunter emp ON e.id_livre = emp.id_livre
-    GROUP BY 
-        e.id_livre, e.nb_exemplaires
+        emprunter emp ON e.id_exemplaire = emp.id_exemplaire 
+        AND emp.date_fin_emprunt IS NULL
+    WHERE 
+        emp.id_exemplaire IS NULL
+    ORDER BY 
+        e.num_isbn
 ");
 $stmtExemplairesDisponibles->execute();
 $exemplairesDisponibles = $stmtExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
 
 $stmtEmprunts = $conn->prepare("
     SELECT 
-        livre.id_livre, 
-        livre.titre_livre, 
-        livre.cote_livre, 
-        utilisateur.id_util, 
-        utilisateur.nom_util, 
-        utilisateur.prenom_util, 
-        utilisateur.email, 
-        emprunter.date_debut_emprunt
+        l.id_livre, 
+        l.titre_livre, 
+        l.cote_livre, 
+        e.id_exemplaire,
+        e.num_isbn,
+        u.id_util, 
+        u.nom_util, 
+        u.prenom_util, 
+        u.email, 
+        emp.date_debut_emprunt, 
+        emp.date_fin_emprunt
     FROM 
-        emprunter
+        emprunter emp
     INNER JOIN 
-        livre ON emprunter.id_livre = livre.id_livre
+        exemplaire e ON emp.id_exemplaire = e.id_exemplaire
     INNER JOIN 
-        utilisateur ON emprunter.id_util = utilisateur.id_util
+        isbn i ON e.num_isbn = i.num_isbn
+    INNER JOIN 
+        livre l ON i.id_livre = l.id_livre
+    INNER JOIN 
+        utilisateur u ON emp.id_util = u.id_util
     ORDER BY
-        emprunter.id_livre, emprunter.date_debut_emprunt
+        l.id_livre, emp.date_debut_emprunt
 ");
 $stmtEmprunts->execute();
-$emprunts = $stmtEmprunts->fetchAll();
+$emprunts = $stmtEmprunts->fetchAll(PDO::FETCH_ASSOC);
+
 
 $stmtReservations = $conn->prepare("
     SELECT 
         reserver.date_reservation,
+        reserver.num_isbn,
         livre.id_livre, 
         livre.titre_livre, 
         livre.cote_livre, 
-        livre.disponibilite,
+        livre.type_litteraire, 
+        livre.img_couverture, 
         utilisateur.id_util, 
-        utilisateur.nom_util, 
         utilisateur.prenom_util, 
-        utilisateur.email
+        utilisateur.nom_util, 
+        utilisateur.email, 
+        utilisateur.pseudo
     FROM 
         reserver
     INNER JOIN 
-        livre ON reserver.id_livre = livre.id_livre
+        isbn ON reserver.num_isbn = isbn.num_isbn
+    INNER JOIN 
+        livre ON isbn.id_livre = livre.id_livre
     INNER JOIN 
         utilisateur ON reserver.id_util = utilisateur.id_util
     ORDER BY 
-        reserver.id_livre, reserver.date_reservation
+        reserver.date_reservation ASC, livre.titre_livre
 ");
 $stmtReservations->execute();
-$reservations = $stmtReservations->fetchAll();
+$reservations = $stmtReservations->fetchAll(PDO::FETCH_ASSOC);
 
 function calculerDateRetour($dateEmprunt) {
     $date = new DateTime($dateEmprunt);
@@ -89,11 +131,11 @@ function calculerPositionFileAttente($reservations, $id_livre) {
     }
 }
 
-function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $id_livre) {
+function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $id_util, $num_isbn) {
     // Créer la file d'attente des utilisateurs ayant réservé le livre
     $fileAttente = [];
     foreach ($reservations as $reservation) {
-        if ($reservation['id_livre'] == $id_livre) {
+        if ($reservation['num_isbn'] == $num_isbn) {
             array_push($fileAttente, $reservation['id_util']);
         }
     }
@@ -101,7 +143,7 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
     // Créer la file d'attente des dates de retour des emprunts pour ce livre
     $fileRetoursEmprunts = [];
     foreach ($emprunts as $emprunt) {
-        if ($emprunt['id_livre'] == $id_livre) {
+        if ($emprunt['num_isbn'] == $num_isbn) {
             array_push($fileRetoursEmprunts, calculerDateRetour($emprunt['date_debut_emprunt']));
         }
     }
@@ -109,43 +151,36 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
     // Récupérer le nombre d'exemplaires disponibles pour le livre
     $nbExemplairesDisponibles = 0;
     foreach ($exemplairesDisponibles as $exemplaire) {
-        if ($exemplaire['id_livre'] == $id_livre) {
-            $nbExemplairesDisponibles = $exemplaire['exemplaires_disponibles'];
+        if ($exemplaire['num_isbn'] == $num_isbn) {
+            $nbExemplairesDisponibles = $exemplaire['nb_exemplaires_disponibles'];
             break;
         }
     }
 
     $user = $fileAttente[0];
     $dateDisponibilite = "Disponible";
-    while ($user != $_SESSION['id']) {
-        $user = array_shift($fileAttente);
+    if ($user == $id_util) {
         if ($nbExemplairesDisponibles > 0) {
             $nbExemplairesDisponibles--;
         }
         else {
-            $dateDisponibilite = array_shift($fileRetoursEmprunts);
+            $dateDisponibilite = convertirDate(array_shift($fileRetoursEmprunts));
         }
     }
+    else {
+        while ($user != $id_util) {
+            $user = array_shift($fileAttente);
+            if ($nbExemplairesDisponibles > 0) {
+                $nbExemplairesDisponibles--;
+            }
+            else {
+                $dateDisponibilite = convertirDate(array_shift($fileRetoursEmprunts));
+            }
+        }
+    }
+
     return $dateDisponibilite;
 }
-
-$stmtReservationsDisponibles = $conn->prepare("
-    SELECT DISTINCT l.titre_livre, l.img_couverture, l.id_livre
-    FROM livre l
-    JOIN reserver r ON l.id_livre = r.id_livre
-    WHERE r.id_util = :idUtilisateur AND l.disponibilite > 0
-");
-$stmtReservationsDisponibles->execute([':idUtilisateur' => $_SESSION['id']]);
-$reservationsDisponibles = $stmtReservationsDisponibles->fetchAll();
-
-$stmtReservationsIndisponibles = $conn->prepare("
-    SELECT DISTINCT l.titre_livre, l.img_couverture, l.id_livre
-    FROM livre l
-    JOIN reserver r ON l.id_livre = r.id_livre
-    WHERE r.id_util = :idUtilisateur AND l.disponibilite = 0
-");
-$stmtReservationsIndisponibles->execute([':idUtilisateur' => $_SESSION['id']]);
-$reservationsIndisponibles = $stmtReservationsIndisponibles->fetchAll();
 
 function convertirDate($date) {
     $timestamp = strtotime($date);
@@ -164,77 +199,67 @@ function convertirDate($date) {
     return "$jour " . $mois[$moisNum] . " $annee";
 }
 ?>
+<div class="reservations-ebooks">
+    <h1>Mes Réservations</h1>
+    <?php
+    $hasDisponible = false;
+    foreach ($reservationsUtil as $reservation) {
+        if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) === 'Disponible') {
+            $hasDisponible = true;
+            break;
+        }
+    }
 
-<!DOCTYPE html>
-<html lang="FR">
-    <head>
-        <title>Mes réservations</title>
-        <meta charset="UTF-8">
-    </head>
-    <body>
-		<div class="reservations-ebooks">
-			<h1>Mes Réservations</h1>
-            <?php
-            $hasDisponible = false;
-            foreach ($reservationsUtil as $reservation) {
-                if (calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_livre']) === 'Disponible') {
-                    $hasDisponible = true;
-                    break;
-                }
-            }
+    $hasIndisponible = false;
+    foreach ($reservationsUtil as $reservation) {
+        if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) != 'Disponible') {
+            $hasIndisponible = true;
+            break;
+        }
+    }
 
-            $hasIndisponible = false;
-            foreach ($reservationsUtil as $reservation) {
-                if (calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_livre']) != 'Disponible') {
-                    $hasIndisponible = true;
-                    break;
-                }
-            }
+    if(!$hasIndisponible && !$hasDisponible) {
+        echo "<p>Vous n'avez aucune réservation.</p>";
+    }
 
-            if(!$hasIndisponible && !$hasDisponible) {
-                echo "<p>Vous n'avez aucune réservation.</p>";
-            }
-
-            // Si un livre disponible est trouvé, affichage de la section correspondante
-            if ($hasDisponible) {
-                echo '<div class="reservations-disponibles">';
-                echo '<h2>DISPONIBLE</h2>';
-                echo '<div class="livres">';
-                foreach ($reservationsUtil as $reservation) {
-                    if (calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_livre']) === 'Disponible') {
-                        echo '<div class="livre">';
-                        echo '<a href="info_livre.php?id_livre=' . $reservation['id_livre'] . '">';  /* Lien vers la page info-livre */
-                        echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
-                        echo "</a>";
-                        echo '<h3>'.$reservation['titre_livre'].'</h3>';
-                        echo '</div>';
-                    }
-                }
-                echo '</div>';
+    // Si un livre disponible est trouvé, affichage de la section correspondante
+    if ($hasDisponible) {
+        echo '<div class="reservations-disponibles">';
+        echo '<h2>DISPONIBLE</h2>';
+        echo '<div class="livres">';
+        foreach ($reservationsUtil as $reservation) {
+            if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) === 'Disponible') {
+                echo '<div class="livre">';
+                echo '<a href="info_livre.php?id_livre=' . $reservation['id_livre'] . '">';  /* Lien vers la page info-livre */
+                echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
+                echo "</a>";
+                echo '<h3>'.$reservation['titre_livre'].'</h3>';
                 echo '</div>';
             }
+        }
+        echo '</div>';
+        echo '</div>';
+    }
 
-            // Si un livre indisponible est trouvé, affichage de la section correspondante
-            if ($hasIndisponible) {
-                echo '<div class="reservations-indisponibles">';
-                echo '<h2>INDISPONIBLE</h2>';
-                echo '<div class="livres">';
-                foreach ($reservationsUtil as $reservation) {
-                    if (calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_livre']) != 'Disponible') {
-                        echo '<div class="livre">';
-                        echo '<a href="info_livre.php?id_livre=' . $reservation['id_livre'] . '">';  /* Lien vers la page info-livre */
-                        echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
-                        echo "</a>";
-                        echo '<h3>'.$reservation['titre_livre'].'</h3>';
-                        echo "<p>Disponible le <strong>" .convertirDate(calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservations, $reservation['id_livre'])).'</strong></p>';
-                        echo calculerPositionFileAttente($reservations, $reservation["id_livre"]). "e dans la file d'attente";
-                        echo '</div>';
-                    }
-                }
+    // Si un livre indisponible est trouvé, affichage de la section correspondante
+    if ($hasIndisponible) {
+        echo '<div class="reservations-indisponibles">';
+        echo '<h2>INDISPONIBLE</h2>';
+        echo '<div class="livres">';
+        foreach ($reservationsUtil as $reservation) {
+            if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) != 'Disponible') {
+                echo '<div class="livre">';
+                echo '<a href="info_livre.php?id_livre=' . $reservation['id_livre'] . '">';  /* Lien vers la page info-livre */
+                echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
+                echo "</a>";
+                echo '<h3>'.$reservation['titre_livre'].'</h3>';
+                echo "<p>Disponible le <strong>" .convertirDate(calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn'])).'</strong></p>';
+                echo calculerPositionFileAttente($reservations, $reservation["id_livre"]). "e dans la file d'attente";
+                echo '</div>';
             }
-            ?>
-		</div>
-    </body>
-</html>
+        }
+    }
+    ?>
+</div>
 
 <?php require("footer.php"); ?>
