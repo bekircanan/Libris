@@ -24,7 +24,8 @@
                             <option value="auteur">Auteur</option>
                             <option value="genre">Genre</option>
                         </select>
-                        <input type="text" placeholder="Rechercher..."><i class="fa-solid fa-plus" style="margin-top:1rem; margin-left: 1rem"></i>
+                        <input type="text" placeholder="Rechercher...">
+                        <i class="fa-solid fa-plus"></i>
                     </div>
                     
                 </section>
@@ -34,7 +35,8 @@
                     <h1>Limiter la recherche</h1>
                     <div class="groupe-annee">
                         <h4>Année de publication :</h4>
-                        <input type="number" name="anneeDebut" placeholder="aaaa" min="1000" max="2025"> à 
+                        <p>De</p>
+                        <input type="number" name="anneeDebut" placeholder="aaaa" min="1000" max="2025"> <p>à</p> 
                         <input type="number" name="anneeFin" placeholder="aaaa">
                     </div>
                     <div class="groupe-genre">

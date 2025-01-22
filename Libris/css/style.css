@@ -776,17 +776,37 @@ div.info_ebook_acheter p:nth-of-type(1){
     border-bottom: 2px solid #9e9c9c;
 }
 .exemple-recherche input{
-    width: 75%;
+    width: 70%;
     border: 2px solid #9e9c9c;
     
 }
 .exemple-recherche i{
-    margin: 1rem 0rem 0rem 0rem;
+    margin-top: 0.5rem;
 }
 .recherche-avance{
+    padding: 1rem;
     border-bottom: 2px solid #000000;
 }
 
+.limter-recherche{
+    padding: 1rem;
+
+}
+.groupe-annee{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 2rem;
+    
+    
+}
+.groupe-annee input{
+    width: 20%;
+    height: 10%;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border: 2px solid #9e9c9c;
+}
 /* .contenair-recherche {
     max-width: 900px;
     margin: 20px auto;
