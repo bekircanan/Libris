@@ -7,16 +7,16 @@
     function form($value){
         switch($value){
             case 0:
-                return '<input type="date" name="date_naissance" required>';
+                return '<input type="date" name="date_naissance" value="' . (isset($_SESSION["date_naissance"]) ? $_SESSION["date_naissance"] : "") . '" required>';
             case 1:
-                return '<input type="text" name="nom" placeholder="Nom" required>
-                        <input type="text" name="prenom" placeholder="Prénom" required>
-                        <input type="text" name="adresse" placeholder="Adresse" required>
-                        <input type="tel" name="tel" placeholder="Telephone" required>
-                        <input type="email" name="email" placeholder="Email" required>
-                        <input type="text" name="pseudo" placeholder="Pseudo" required>
+                return '<input type="text" name="nom" placeholder="Nom" value="' . (isset($_SESSION["nom"]) ? $_SESSION["nom"] : "") . '" required>
+                        <input type="text" name="prenom" placeholder="Prénom" value="' . (isset($_SESSION["prenom"]) ? $_SESSION["prenom"] : "") . '" required>
+                        <input type="text" name="adresse" placeholder="Adresse" value="' . (isset($_SESSION["adresse"]) ? $_SESSION["adresse"] : "") . '" required>
+                        <input type="tel" name="tel" placeholder="Telephone" value="' . (isset($_SESSION["tel"]) ? $_SESSION["tel"] : "") . '" required>
+                        <input type="email" name="email" placeholder="Email" value="' . (isset($_SESSION["email"]) ? $_SESSION["email"] : "") . '" required>
+                        <input type="text" name="pseudo" placeholder="Pseudo" value="' . (isset($_SESSION["pseudo"]) ? $_SESSION["pseudo"] : "") . '" required>
                         <input type="password" name="mdp" placeholder="Mot de passe" required>
-                        <input type="password" name="mdp2" placeholder="Confirmer mot de passe" required>';
+                        <input type="password" name="mdp2" placeholder="Confirmer mot de passe"  required>';
             case 2:
                 return '<select name="categorie" required>
                             <option value="jeune">Moins de 18 ans</option>
@@ -31,7 +31,17 @@
         }
     }
     if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form'] === 'inscrire') {
-        if (isset($_POST['etape'])) {
+        if(isset($_POST['retour'])){
+            echo $_POST['retour'];
+            echo $_SESSION['categorie'];
+            if((int)$_POST['retour'] >=3 && (int)$_SESSION['categorie'] != 2){
+                $etape =2;
+            }else{ 
+                $etape = (int)$_POST['retour'];
+            }
+            unset($_POST['retour']);
+            goto fini;
+        } else if (isset($_POST['etape'])) {
             $etape = (int)$_POST['etape'];
         }
         switch ($etape) {
@@ -141,6 +151,7 @@
                         $_SESSION['email'] = $_SESSION['email'];
                         $_SESSION['admin']=0;
                         $_SESSION['id'] = $util['id_util'];
+                        unset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['email'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie']);
                         header("Location: index.php");
                         exit();
                     }
@@ -153,6 +164,7 @@
                 $etape = 0;
                 break;
         }
+        fini:
     }
 
     echo "<div class='login-container'>";
@@ -164,9 +176,11 @@
         foreach($etape_array as $key => $value){
             if($key < $etape){
                 echo '<h2 class="active">'.($key+1)."</h2>";
+                if($key < 3){
+                    echo '<i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-arrow-right-long"></i>';
+                }
             }elseif($key == $etape){
                 echo "<h2 class='active'>".($key+1)."</h2>";
-                echo "<h2 class='text'>$value</h2>";
             }else{
                 echo "<h2>".($key+1)."</h2>";
             }
@@ -177,7 +191,7 @@
     <form method="POST">
         <input type="hidden" name="form" value="inscrire">
         <?php 
-            if($etape>=4){
+            if($etape>=4){  
                 echo "<h2>Fin</h2>";
             }else{
                 echo "<h2>$etape_array[$etape]</h2>";
@@ -185,8 +199,13 @@
                 echo $errlog;
                 echo form($etape);
                 echo '<button class="background-violet" type="submit" name="etape" value="'.((int)$etape+1).'"> Valider</button>';
+                if($etape>0){
+                    echo '<input type="hidden" name="form" value="inscrire">';
+                    echo '<button class="background-violet" type="button" onclick="retour2('.((int)$etape-1).')" name="retour"> Retour</button>';
+                }
         ?>
     </form>
+    
 </div>
 <div class="forfait">
     <h2>Liste des forfaits:</h2>
@@ -229,3 +248,10 @@
 <?php
     require_once 'footer.php';
 ?>
+
+<script>
+    function retour2(etape){
+        document.querySelector('.inscrire form').innerHTML += '<input type="hidden" name="retour" value="'+etape+'">';
+        document.querySelector('.inscrire form').submit();
+    }
+</script>
