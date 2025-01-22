@@ -1001,6 +1001,42 @@ div.info_ebook_acheter p:nth-of-type(1){
     margin: 0 2rem 4rem 2rem;
 }
 
+.btReservationsEbooks {
+    display: grid;
+    place-items: center;
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+}
+.btReservationsEbooks:hover {
+    background-color: black;
+    color: #FFDA89;
+    transition: 0.3s ease;
+}
+
+.btReservationsEbooks2 {
+    display: grid;
+    place-items: center;
+    background-color: #D0BDF6;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+}
+.btReservationsEbooks2:hover {
+    background-color: black;
+    color: #D0BDF6;
+    transition: 0.3s ease;
+}
+
 /* Gestion des emprunts et réservations */
 .gestion-emprunts-reservations {
     margin-bottom: 4em;
@@ -1051,17 +1087,6 @@ div.info_ebook_acheter p:nth-of-type(1){
 
 .table-gestion .border-vertical {
     border-left: 3px solid black; /* Ajustez l'épaisseur à votre convenance */
-}
-
-.gestion-emprunts-reservations button {
-    border-radius: 15px;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-
-.gestion-emprunts-reservations button:hover {
-    background-color: #FFDA89;
-    transition: 0.3s ease;
 }
 
 .popupGestion {
@@ -1166,12 +1191,14 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 .gestion-emprunts-reservations button, .gestion-utilisateurs button {
     border-radius: 15px;
+    background-color: #FFDA89;
     cursor: pointer;
     transition: 0.3s ease;
 }
 
 .gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
-    background-color: #FFDA89;
+    background-color: black;
+    color: #FFDA89;
     transition: 0.3s ease;
 }
 /* Info Livre*/
