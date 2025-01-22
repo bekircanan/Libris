@@ -280,9 +280,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             }
                         }
                     }
-                    
 
-                    
+
+
                 }
             }
         }
@@ -290,76 +290,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
 }
 ?>
 
-<div class="ajout_livre">
-    <h1>Ajout de livres :</h1>
-    <div class ="info-style-container">
-        <div class="info-style-fichier">
-            <p>Le fichier doit être au format .csv et doit respecter la structure suivante :</p>
-            <p>ISBN Cote Titre Type Littéraire "Résumé" Genre(s) Langue Public_cible(s) Edition Nombre_de_pages Nom(s)_Auteur Prenom(s)_Auteur Date_de_parution;</p>
-            <ul>
-                <li> Tous les paramètres doivent être séparés par un espace, le résumé sera encadré par des guillemets.</li>    
-                <li> Ne pas mettre de guillemets à l'intérieur de celui-ci.</li> 
-                <li> Ne pas inclure de ligne de test comme celle ci-dessus.</li>
-                <li> Les genres, public cibles et auteurs doivent être séparés par des virgules, si il y en a plusieurs.</li>
-            </ul> 
-            <p>Le dossier d'images doit respecter les conditions suivantes :</p>
-            <ul>
-                <li> Les images doivent être au format .png.</li>
-                <li> Le nom de l'image doit correspondre au titre du livre, en remplacant les espaces par le caractère "_".</li>
-                <li> Dans le cas où plusieurs livres d'éditions différentes sont ajoutés, une seule image est nécessaire pour l'ensemble.</li>
-            </ul>
-            <a class="btn_ex_csv" href="Exemple/exemple.csv" download = "exemple.csv"> <button>Télecharger Exemple Fichier </button></a>
-        </div>
-        
-    </div>
-
-    <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="form" value="ajout_livre">
-        <div class="drop-zones-container">
-            <div class="drop-zone" id="drop-zone-file">
-                <img src="img/nouveau-fichier.png" alt="UploadFich">
-                <label for="fileToUpload">Veuillez déposer ici le fichier (.csv) :</label>
-                <input type="file" name="fileToUpload" id="fileToUpload">
+<main class="gestion-livres">
+    <h1>Gestion des livres</h1>
+    <div class="ajout_livre">
+        <div class ="info-style-container">
+            <div class="info-style-fichier">
+                <p>Le fichier doit être au format .csv et doit respecter la structure suivante :</p>
+                <p>ISBN Cote Titre Type Littéraire "Résumé" Genre(s) Langue Public_cible(s) Edition Nombre_de_pages Nom(s)_Auteur Prenom(s)_Auteur Date_de_parution;</p>
+                <ul>
+                    <li> Tous les paramètres doivent être séparés par un espace, le résumé sera encadré par des guillemets.</li>
+                    <li> Ne pas mettre de guillemets à l'intérieur de celui-ci.</li>
+                    <li> Ne pas inclure de ligne de test comme celle ci-dessus.</li>
+                    <li> Les genres, public cibles et auteurs doivent être séparés par des virgules, si il y en a plusieurs.</li>
+                </ul>
+                <p>Le dossier d'images doit respecter les conditions suivantes :</p>
+                <ul>
+                    <li> Les images doivent être au format .png.</li>
+                    <li> Le nom de l'image doit correspondre au titre du livre, en remplacant les espaces par le caractère "_".</li>
+                    <li> Dans le cas où plusieurs livres d'éditions différentes sont ajoutés, une seule image est nécessaire pour l'ensemble.</li>
+                </ul>
+                <a class="btn_ex_csv" href="Exemple/exemple.csv" download = "exemple.csv"> <button>Télécharger exemple</button></a>
             </div>
-            <div class="drop-zone" id="drop-zone-folder">
-                <img src="img/dossier.png" alt="UploadDoss">
-                <label for="folderToUpload[]">Veuillez déposer ici le dossier contenant les images (.png) :</label>
-                <input type="file" name="folderToUpload[]" id="folderToUpload" multiple directory="" webkitdirectory="" mozdirectory="">
-            </div>
-        </div>
-        <div class="btn_valider_ajout container">
-            <button type="submit" value="Valider" name="envoyer" class="btn_valider_ajout"> Valider </button>
 
         </div>
-    </form>
-    <div class="gestion_livre">
-        <h1>Livres :</h1>
-        <input type="text" id="search-reservations-input" placeholder="Rechercher une livre..." onkeyup="search()">
-        <table class="table-emprunts-reservations table-gestion" id="table-reservations">
-            <thead>
-            <tr>
-                <th>Titre</th>
-                <th>Resume</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($livres as $livre) {
-                echo "<tr>";
-                echo "<td>". $livre["titre_livre"] ."</td>";
-                echo "<td>". $livre["resume"]. "</td>";
-                echo "<td>
-                    <button onclick=\"popupModifie('".$livre["id_livre"]."','".$livre["titre_livre"]."','".$livre["resume"]."')\">Modifie</button>
-                    <button onclick=\"popupSupprime('".$livre["id_livre"]."')\">Supprime</button>";
-                echo "</td>";
-                echo "</tr>";
-            }
-            ?>
-            </tbody>
-        </table>
+
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="form" value="ajout_livre">
+            <div class="drop-zones-container">
+                <div class="drop-zone" id="drop-zone-file">
+                    <img src="img/nouveau-fichier.png" alt="UploadFich">
+                    <label for="fileToUpload">Veuillez déposer ici le fichier (.csv) :</label>
+                    <input type="file" name="fileToUpload" id="fileToUpload">
+                </div>
+                <div class="drop-zone" id="drop-zone-folder">
+                    <img src="img/dossier.png" alt="UploadDoss">
+                    <label for="folderToUpload[]">Veuillez déposer ici le dossier contenant les images (.png) :</label>
+                    <input type="file" name="folderToUpload[]" id="folderToUpload" multiple directory="" webkitdirectory="" mozdirectory="">
+                </div>
+            </div>
+            <div class="btn_valider_ajout container">
+                <button type="submit" value="Valider" name="envoyer" class="btn_valider_ajout"> Valider </button>
+
+            </div>
+        </form>
+        <div class="gestion_livre">
+            <h1>Livres</h1>
+            <input type="text" id="search-reservations-input" placeholder="Rechercher une livre..." onkeyup="search()">
+            <table class="table-emprunts-reservations table-gestion" id="table-reservations">
+                <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Resume</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach ($livres as $livre) {
+                    echo "<tr>";
+                    echo "<td>". $livre["titre_livre"] ."</td>";
+                    echo "<td>". $livre["resume"]. "</td>";
+                    echo "<td>
+                    <button onclick=\"popupModifie('".$livre["id_livre"]."','".$livre["titre_livre"]."','".$livre["resume"]."')\">Modifier</button>
+                    <button onclick=\"popupSupprime('".$livre["id_livre"]."')\">Supprimer</button>";
+                    echo "</td>";
+                    echo "</tr>";
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+</main>
+
+
 
 <script>
 function search() {
