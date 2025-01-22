@@ -135,7 +135,7 @@ header .search-bar .advanced-search {
     display: block;
     transition: 0.3s;
 }
-.sidebar a:hover {
+.sidebar a:not(.active):hover {
     color: #FFDA89;
 }
 .sidebar .active {
