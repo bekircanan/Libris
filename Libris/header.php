@@ -14,6 +14,19 @@
     error_reporting(E_ALL);
 
     $pageActuelle = basename($_SERVER['PHP_SELF']);
+    $pageadmin = ['gestion-emprunts-reservation.php', 'gestion-livres.php', 'gestion-utilisateurs.php'];
+    $pc = explode(' ', php_uname());
+    $typePc = ['Windows', 'Linux', 'Mac'];
+    $pageUtil = ['mes-reservations.php', 'mes-ebooks.php', 'panier.php', 'compte.php'];
+
+    if ((!isset($_SESSION['user']) || $_SESSION['admin'] !== 1 || !in_array($pc[0],$typePc)) && in_array($pageActuelle, $pageadmin) ) {
+        header('Location: index.php');
+        exit();
+    }elseif((!isset($_SESSION['user']) || $_SESSION['admin'] !== 0)&& in_array($pageActuelle, $pageUtil)){
+        header('Location: index.php');
+        exit();
+    }
+
     $errlog = "<p style='color:red;'>";
     if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form']=== 'connect' ) {
         if( isset($_POST['mdp']) && isset($_POST['email'])){
