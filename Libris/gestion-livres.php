@@ -6,22 +6,21 @@ $stmt->execute();
 $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if(isset($_POST['form']) && $_POST['form']==='supprimeLivre'){
-        try{
-            $conn->beginTransaction();
-            $stmt = $conn->prepare("Delete from exemplaire join isbn on exemplaire.id_isbn = isbn.id_isbn where id_livre = :id_livre");
+            $stmt = $conn->prepare("Delete e From emprunter e INNER JOIN exemplaire ex ON ex.id_exemplaire = e.id_exemplaire INNER JOIN isbn i ON ex.num_isbn = i.num_isbn WHERE i.id_livre = :id_livre");
             $stmt->bindParam(':id_livre', $_POST['id_livre']);
             $stmt->execute();
-            $stmt = $conn->prepare("Delete from isbn where id_livre = :id_livre");
+            $stmt = $conn->prepare("Delete r FROM reserver r INNER JOIN isbn i ON r.num_isbn = i.num_isbn WHERE i.id_livre = :id_livre");
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+            $stmt = $conn->prepare("Delete e FROM exemplaire e INNER JOIN isbn i ON e.num_isbn = i.num_isbn WHERE i.id_livre = :id_livre");
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+            $stmt = $conn->prepare("Delete isbn from isbn where id_livre = :id_livre");
             $stmt->bindParam(':id_livre', $_POST['id_livre']);
             $stmt->execute();
             $stmt = $conn->prepare("DELETE FROM livre WHERE id_livre = :id_livre");
             $stmt->bindParam(':id_livre', $_POST['id_livre']);
             $stmt->execute();
-            $conn->commit();
-        }catch(Exception $e){
-            $conn->rollBack();
-
-        }
 
     }elseif(isset($_POST['form'],$_POST['id_livre'], $_POST['titre_livre'], $_POST['resume']) && $_POST['form']==='ModifieLivre'){
         if(isset($_FILES['img_couverture']) && !empty($_FILES['img_couverture']['name'])){
