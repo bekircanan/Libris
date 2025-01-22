@@ -239,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
     <div class ="info-style-container">
         <div class="info-style-fichier">
             <p>Le fichier doit être au format .csv et doit respecter la structure suivante :</p>
-            <p>ISBN Cote Titre Type Littéraire "Résumé" Genre(s) Langue Public_cible(s) Edition Nombre_de_pages Auteur(s) Date_de_parution;</p>
+            <p>ISBN Cote Titre Type Littéraire "Résumé" Genre(s) Langue Public_cible(s) Edition Nombre_de_pages Nom(s)_Auteur Prenom(s)_Auteur Date_de_parution;</p>
             <ul>
                 <li> Tous les paramètres doivent être séparés par un espace, le résumé sera encadré par des guillemets.</li>    
                 <li> Ne pas mettre de guillemets à l'intérieur de celui-ci.</li> 
