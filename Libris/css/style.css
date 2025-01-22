@@ -1102,6 +1102,25 @@ div.info_ebook_acheter p:nth-of-type(1){
     z-index: 1000;
 }
 
+.popupGestion button {
+    display: grid;
+    place-items: center;
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+    margin: 0 auto;
+}
+.popupGestion button:hover {
+    background-color: black;
+    color: #FFDA89;
+    transition: 0.3s ease;
+}
+
 .popupGestion-content {
     background-color: white;
     padding: 20px;
