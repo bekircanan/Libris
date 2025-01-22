@@ -764,6 +764,8 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 .exemple-recherche{
     margin-left: 2rem;
+    display: flex;
+    justify-content: space-around;
 }
 .exemple-recherche input, .exemple-recherche select{
     padding: 8px;
@@ -774,13 +776,17 @@ div.info_ebook_acheter p:nth-of-type(1){
     border-bottom: 2px solid #9e9c9c;
 }
 .exemple-recherche input{
-    width: 80%;
+    width: 75%;
     border: 2px solid #9e9c9c;
     
+}
+.exemple-recherche i{
+    margin: 1rem 0rem 0rem 0rem;
 }
 .recherche-avance{
     border-bottom: 2px solid #000000;
 }
+
 /* .contenair-recherche {
     max-width: 900px;
     margin: 20px auto;

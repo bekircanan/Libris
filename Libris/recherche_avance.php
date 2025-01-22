@@ -14,7 +14,6 @@
                 <section class="recherche-avance">
                     <h1>Recherche avancée</h1>
                     <div class="exemple-recherche">
-                        <label for="critaire">Et</label>
                         <select id="critaire">
                             <option value="titre">ET</option>
                             <option value="auteur">OU</option>
@@ -25,9 +24,9 @@
                             <option value="auteur">Auteur</option>
                             <option value="genre">Genre</option>
                         </select>
-                        <input type="text" placeholder="Rechercher...">
+                        <input type="text" placeholder="Rechercher..."><i class="fa-solid fa-plus" style="margin-top:1rem; margin-left: 1rem"></i>
                     </div>
-                    <i class="fa-solid fa-plus"></i>
+                    
                 </section>
                 
                 
