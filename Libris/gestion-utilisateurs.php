@@ -9,9 +9,13 @@ $stmtUtilisateurs = $conn->prepare("
     FROM UTILISATEUR u
     LEFT JOIN EST_ABONNE ea ON u.id_util = ea.id_util
     LEFT JOIN ABONNEMENT a ON ea.id_abonnement = a.id_abonnement
+    WHERE u.id_util NOT IN (
+        SELECT id_util FROM BIBLIOTECAIRE
+    )
 ");
 $stmtUtilisateurs->execute();
 $utilisateurs = $stmtUtilisateurs->fetchAll();
+
 
 
 function convertirDate($date) {

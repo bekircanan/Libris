@@ -23,11 +23,11 @@
                 echo '<div class="pre-livre"><a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']). '">'; 
                 echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
                 echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
-                echo '<p>by ' . htmlspecialchars($liv['auteurs']) . '</p>';
+                echo '<p>' . htmlspecialchars($liv['auteurs']) . '</p>';
                 echo '</a></div>'; 
             }
         } else {
-            echo '<p>Aucune Livre trouve</p>';
+            echo '<p>Aucun livre trouvé.</p>';
         }
         ?>
 
@@ -67,7 +67,7 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     echo '<a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']) . '">';
                     echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
                     echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
-                    echo '<p>by ' . htmlspecialchars($liv['auteurs']) . '</p>';
+                    echo '<p>' . htmlspecialchars($liv['auteurs']) . '</p>';
                     echo '</a></div>';
                  }
             } else {
