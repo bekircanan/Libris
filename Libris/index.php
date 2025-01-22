@@ -19,11 +19,11 @@
         <div class="slide">
         <?php 
         if($livres){
-            foreach($livres as $liv){
-                echo '<div class="pre-livre"><a href="./info_livre.php?id_livre=' . $liv['id_livre']. '">'; 
-                echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-                echo '<h2>' . $liv['titre_livre'] . '</h2>';
-                echo '<p>by ' . $liv['auteurs'] . '</p>';
+            foreach($livres as $liv){ 
+                echo '<div class="pre-livre"><a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']). '">'; 
+                echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
+                echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
+                echo '<p>by ' . htmlspecialchars($liv['auteurs']) . '</p>';
                 echo '</a></div>'; 
             }
         } else {
@@ -64,10 +64,10 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if ($livres) {
                 foreach ($livres as $liv) { 
                     echo '<div class="pre-livre">';
-                    echo '<a href="./info_livre.php?id_livre=' . $liv['id_livre'] . '">';
-                    echo '<img src="' . $liv['img_couverture'] . '" alt="' . $liv['titre_livre'] . '">';
-                    echo '<h2>' . $liv['titre_livre'] . '</h2>';
-                    echo '<p>by ' . $liv['auteurs'] . '</p>';
+                    echo '<a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']) . '">';
+                    echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
+                    echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
+                    echo '<p>by ' . htmlspecialchars($liv['auteurs']) . '</p>';
                     echo '</a></div>';
                  }
             } else {
@@ -123,15 +123,6 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
         };
 
         scrollButton.addEventListener('click', debounce(() => handleScroll('forward'), 300));
-
-        // container.addEventListener('wheel', debounce((evt) => {
-        //     evt.preventDefault();
-        //     if (evt.deltaY > 0) {
-        //         handleScroll('forward');
-        //     } else {
-        //         handleScroll('backward');
-        //     }
-        // }, 300));
     });
 </script>
 <?php
