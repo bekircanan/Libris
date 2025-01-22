@@ -1,5 +1,5 @@
 <?php
-    require_once 'header.php';   
+    require_once 'header.php';  
 
     $order = 'l.titre_livre ASC'; // Ordre par défaut (A-Z)
     $ListeConditions = [];
@@ -22,27 +22,76 @@
                 $ListeParametresVides = implode(',', array_fill(0, count($_POST['genres']), '?'));
                 $ListeConditions[] = "g.nom_genre IN ($ListeParametresVides)";
                 $ListeParametres = array_merge($ListeParametres, $_POST['genres']);
+                echo $ListeParametres[0];
+            }
+            // Filtre par langues
+            if(isset($_POST['langues']) && is_array($_POST['langues'])) {
+                $ListeParametresVides = implode(',', array_fill(0, count($_POST['langues']), '?'));
+                $ListeConditions[] = "lang.nom_langue IN ($ListeParametresVides)";
+                $ListeParametres = array_merge($ListeParametres, $_POST['langues']);
+            }
+            // Filtre par public
+            if(isset($_POST['public']) && is_array($_POST['public'])) {
+                $ListeParametresVides = implode(',', array_fill(0, count($_POST['public']), '?'));
+                $ListeConditions[] = "pc.type_public IN ($ListeParametresVides)";
+                $ListeParametres = array_merge($ListeParametres, $_POST['public']);
             }
             // Filtre par E-book
             if (isset($_POST['ebook']) && $_POST['ebook'] == '1') {
                 $ListeConditions[] = "eb.id_livre IS NOT NULL";
             }
             // Filtre par prix
-            if (isset($_POST['price']) && is_numeric($_POST['price'])) {
-                $ListeConditions[] = "eb.prix <= ?";
-                $params[] = $_POST['price'];
-            } 
+            if (isset($_POST['prix-min']) && is_numeric($_POST['prix-min']) && isset($_POST['prix-max'])&& is_numeric($_POST['prix-max'])) {
+                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                array_push($ListeParametres, $_POST['prix-min'], $_POST['prix-max']);
+            }
         }
-               
+            
     }
 
-    // Combinez les conditions dans la requête SQL
-    $whereClause = '';
+    if($_SERVER['REQUEST_METHOD'] == 'GET'){
+            // Filtre par genres
+            if(isset($_GET['genres']) && is_array($_GET['genres'])) {
+                $ListeParametresVides = implode(',', array_fill(0, count($_GET['genres']), '?'));
+                $ListeConditions[] = "g.nom_genre IN ($ListeParametresVides)";
+                $ListeParametres = array_merge($ListeParametres, $_GET['genres']);
+            }
+            // Filtre par langues
+            if(isset($_GET['langues']) && is_array($_GET['langues'])) {
+                $ListeParametresVides = implode(',', array_fill(0, count($_GET['langues']), '?'));
+                $ListeConditions[] = "lang.nom_langue IN ($ListeParametresVides)";
+                $ListeParametres = array_merge($ListeParametres, $_GET['langues']);
+            }
+            // Filtre par public
+            if(isset($_GET['public']) && is_array($_GET['public'])) {
+                $ListeParametresVides = implode(',', array_fill(0, count($_GET['public']), '?'));
+                $ListeConditions[] = "pc.type_public IN ($ListeParametresVides)";
+                $ListeParametres = array_merge($ListeParametres, $_GET['public']);
+            } 
+            // Filtre par E-book
+            if (isset($_GET['ebook']) && $_GET['ebook'] == '1') {
+                $ListeConditions[] = "eb.id_livre IS NOT NULL";
+            }
+            // Filtre par prix
+            if (isset($_GET['prix-min']) && is_numeric($_GET['prix-min']) && isset($_GET['prix-max'])&& is_numeric($_GET['prix-max'])) {
+                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
+            }
+            // Filtre par annee
+            if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
+                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                array_push($ListeParametres, $_GET['anneeDebut'], $_GET['anneeFin']);
+            } 
+        }
+    
+    
+    $whereClause = '';                                                                                                                                                        
     if (!empty($ListeConditions)) {
-        $whereClause = 'WHERE ' . implode(' AND ', $ListeConditions);
+        $whereClause = 'WHERE ' . implode(' OR ', $ListeConditions);
     }
     else{
-        if($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['recherche'])){
+        if($_SERVER['REQUEST_METHOD'] == 'GET'){
+            if(isset($_GET['recherche'])){
             $whereClause = 'WHERE pc.type_public LIKE "%' .$_GET['recherche']. '%"
                                 OR g.nom_genre LIKE "%' .$_GET['recherche']. '%" 
                                 OR l.titre_livre LIKE "%' .$_GET['recherche']. '%"  
@@ -51,10 +100,14 @@
                                 OR ed.nom_edition LIKE "%' .$_GET['recherche']. '%" 
                                 OR a.nom_auteur LIKE "%' .$_GET['recherche']. '%"
                                 OR l.cote_livre LIKE "%' .$_GET['recherche']. '%"';
-        }else{
-            $whereClause = '';
+            }else{
+                $whereClause = '';
+            } 
         }
     }
+
+    
+    
                                     
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
                                         FROM livre l LEFT OUTER JOIN ebook eb ON l.id_livre = eb.id_livre
@@ -67,6 +120,7 @@
                                             LEFT OUTER JOIN isbn i ON i.id_livre = l.id_livre
                                             LEFT OUTER JOIN langue lang ON i.id_langue = lang.id_langue
                                             LEFT OUTER JOIN edition ed ON ed.id_edition = ed.id_edition
+                         
                                         $whereClause
                                         ORDER BY $order"); 
     $stmtRecherche->execute($ListeParametres);
@@ -89,7 +143,7 @@
         <hr>
         <form id="filters-form" method="POST">
             <input type="hidden" name="form" value="filtre">
-            <section class="info-ebook>
+            <section class="info-ebook">
                 <h3>E-book</h3>
                 <input type="checkbox" id="ebook" name="ebook" value="1">
                 <label for="ebook">E-book</label>

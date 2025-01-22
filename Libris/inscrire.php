@@ -7,16 +7,16 @@
     function form($value){
         switch($value){
             case 0:
-                return '<input type="date" name="date_naissance" required>';
+                return '<input type="date" name="date_naissance" value="' . (isset($_SESSION["date_naissance"]) ? $_SESSION["date_naissance"] : "") . '" required>';
             case 1:
-                return '<input type="text" name="nom" placeholder="Nom" required>
-                        <input type="text" name="prenom" placeholder="Prénom" required>
-                        <input type="text" name="adresse" placeholder="Adresse" required>
-                        <input type="tel" name="tel" placeholder="Telephone" required>
-                        <input type="email" name="email" placeholder="Email" required>
-                        <input type="text" name="pseudo" placeholder="Pseudo" required>
+                return '<input type="text" name="nom" placeholder="Nom" value="' . (isset($_SESSION["nom"]) ? $_SESSION["nom"] : "") . '" required>
+                        <input type="text" name="prenom" placeholder="Prénom" value="' . (isset($_SESSION["prenom"]) ? $_SESSION["prenom"] : "") . '" required>
+                        <input type="text" name="adresse" placeholder="Adresse" value="' . (isset($_SESSION["adresse"]) ? $_SESSION["adresse"] : "") . '" required>
+                        <input type="tel" name="tel" placeholder="Telephone" value="' . (isset($_SESSION["tel"]) ? $_SESSION["tel"] : "") . '" required>
+                        <input type="email" name="email" placeholder="Email" value="' . (isset($_SESSION["email"]) ? $_SESSION["email"] : "") . '" required>
+                        <input type="text" name="pseudo" placeholder="Pseudo" value="' . (isset($_SESSION["pseudo"]) ? $_SESSION["pseudo"] : "") . '" required>
                         <input type="password" name="mdp" placeholder="Mot de passe" required>
-                        <input type="password" name="mdp2" placeholder="Confirmer mot de passe" required>';
+                        <input type="password" name="mdp2" placeholder="Confirmer mot de passe"  required>';
             case 2:
                 return '<select name="categorie" required>
                             <option value="jeune">Moins de 18 ans</option>
@@ -31,12 +31,26 @@
         }
     }
     if ($_SERVER["REQUEST_METHOD"] == "POST" && $_POST['form'] === 'inscrire') {
-        if (isset($_POST['etape'])) {
+        if(isset($_POST['retour'])){
+            echo $_POST['retour'];
+            echo $_SESSION['categorie'];
+            if((int)$_POST['retour'] >=3 && (int)$_SESSION['categorie'] != 2){
+                $etape =2;
+            }else{ 
+                $etape = (int)$_POST['retour'];
+            }
+            unset($_POST['retour']);
+            goto fini;
+        } else if (isset($_POST['etape'])) {
             $etape = (int)$_POST['etape'];
         }
         switch ($etape) {
             case 1:
                 if (isset($_POST['date_naissance']) && !empty($_POST['date_naissance'])) {
+                    if (strtotime($_POST['date_naissance']) > strtotime(date("Y-m-d", strtotime("today")))) {
+                        $errlog = "<p>vous n'êtes pas né.</p>";
+                        $etape = 0;
+                    }
                     $_SESSION['date_naissance'] = $_POST['date_naissance'];
                 }else{
                     $errlog = "<p>La date de naissance est requise.</p>";
@@ -67,17 +81,18 @@
                     switch ($_POST['categorie']) {
                         case 'jeune':
                             $_SESSION['categorie'] = 1;
+                            $etape = 4;
                             break;
                         case 'etudiant':
                             $_SESSION['categorie'] = 2;
-                            goto fini;
+                            $etape = 4;
                             break;
                         case 'adulte':
                             $_SESSION['categorie'] = 3;
                             break;
                         case 'aucune':
                             $_SESSION['categorie'] = 4;
-                            goto fini;
+                            $etape = 4;
                             break;
                         default:
                             $errlog = "<p>Catégorie d'abonnement invalide.</p>";
@@ -95,43 +110,61 @@
                     $_SESSION['date_expiration'] = $_POST['date_expiration'];
                     $_SESSION['cvv'] = $_POST['cvv'];
                     //payer
-                    fini:
-                    $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
-                    $stmt->bindParam(1, $_SESSION['prenom']);
-                    $stmt->bindParam(2, $_SESSION['nom']);
-                    $stmt->bindParam(3, $_SESSION['adresse']);
-                    $stmt->bindParam(4, $_SESSION['tel']);
-                    $stmt->bindParam(5, $_SESSION['pseudo']);
-                    $_SESSION['mdp']=password_hash($_SESSION['mdp'], PASSWORD_DEFAULT);
-                    $stmt->bindParam(6, $_SESSION['mdp']);
-                    $stmt->bindParam(7, $_SESSION['email']);
-                    $stmt->bindParam(8, $_SESSION['date_naissance']);
-                    $stmt->execute();
-                    $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ?");
-                    $stmt->bindParam(1, $_SESSION['email']);
-                    $stmt->execute();
-                    $util = $stmt->fetch();
-                    if($_SESSION['categorie']!=4){
-                        $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
-                        $stmt->bindParam(1, $_SESSION['categorie']);
-                        $stmt->bindParam(2, $util['id_util']);
-                        $stmt->execute();
-                    }
-                    $_SESSION['user'] = $_SESSION['pseudo'];
-                    $_SESSION['email'] = $_SESSION['email'];
-                    $_SESSION['admin']=0;
-                    $_SESSION['id'] = $util['id_util'];
-                    header("Location: index.php");
-                    exit();
                 }else{
                     $errlog = "<p>Les informations de paiement sont requises.</p>";
                     $etape = 3;
+                }
+                break;
+            case 5:
+                if(isset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['email'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie'])){
+                    $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ? OR pseudo = ?");
+                    $stmt->bindParam(1, $_SESSION['email']);
+                    $stmt->bindParam(2, $_SESSION['pseudo']);
+                    $stmt->execute();
+                    $user = $stmt->fetch();
+                    if($user){
+                        $errlog = "<p>Utilisateur déjà existant.</p>";
+                        $etape = 0;
+                    }else{
+                        $stmt = $conn->prepare("INSERT INTO utilisateur (prenom_util, nom_util, adresse_util, tel_util, pseudo, mdp, img_profil, email, date_naissance) VALUES (?, ?, ?, ?, ?, ?, './img/profil/img_def.svg',?, ?)");
+                        $stmt->bindParam(1, $_SESSION['prenom']);
+                        $stmt->bindParam(2, $_SESSION['nom']);
+                        $stmt->bindParam(3, $_SESSION['adresse']);
+                        $stmt->bindParam(4, $_SESSION['tel']);
+                        $stmt->bindParam(5, $_SESSION['pseudo']);
+                        $_SESSION['mdp']=password_hash($_SESSION['mdp'], PASSWORD_DEFAULT);
+                        $stmt->bindParam(6, $_SESSION['mdp']);
+                        $stmt->bindParam(7, $_SESSION['email']);
+                        $stmt->bindParam(8, $_SESSION['date_naissance']);
+                        $stmt->execute();
+                        $stmt = $conn->prepare("SELECT id_util FROM utilisateur WHERE email = ?");
+                        $stmt->bindParam(1, $_SESSION['email']);
+                        $stmt->execute();
+                        $util = $stmt->fetch();
+                        if($_SESSION['categorie']!=4){
+                            $stmt = $conn->prepare("INSERT INTO est_abonne (id_abonnement, id_util) VALUES (?, ?)");
+                            $stmt->bindParam(1, $_SESSION['categorie']);
+                            $stmt->bindParam(2, $util['id_util']);
+                            $stmt->execute();
+                        }
+                        $_SESSION['user'] = $_SESSION['pseudo'];
+                        $_SESSION['email'] = $_SESSION['email'];
+                        $_SESSION['admin']=0;
+                        $_SESSION['id'] = $util['id_util'];
+                        unset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['email'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie']);
+                        header("Location: index.php");
+                        exit();
+                    }
+                }else{
+                    $errlog = "<p>Informations manquantes.</p>";
+                    $etape = 0;
                 }
                 break;
             default:
                 $etape = 0;
                 break;
         }
+        fini:
     }
 
     echo "<div class='login-container'>";
@@ -143,9 +176,11 @@
         foreach($etape_array as $key => $value){
             if($key < $etape){
                 echo '<h2 class="active">'.($key+1)."</h2>";
+                if($key < 3){
+                    echo '<i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-horizontal-rule"></i><i class="fa-solid fa-arrow-right-long"></i>';
+                }
             }elseif($key == $etape){
                 echo "<h2 class='active'>".($key+1)."</h2>";
-                echo "<h2 class='text'>$value</h2>";
             }else{
                 echo "<h2>".($key+1)."</h2>";
             }
@@ -156,12 +191,21 @@
     <form method="POST">
         <input type="hidden" name="form" value="inscrire">
         <?php 
-            echo "<h2>$etape_array[$etape]</h2>";
-            echo $errlog;
-            echo form($etape);
-            echo '<button class="background-violet" type="submit" name="etape" value="'.((int)$etape+1).'"> Valider</button>';
+            if($etape>=4){  
+                echo "<h2>Fin</h2>";
+            }else{
+                echo "<h2>$etape_array[$etape]</h2>";
+            }
+                echo $errlog;
+                echo form($etape);
+                echo '<button class="background-violet" type="submit" name="etape" value="'.((int)$etape+1).'"> Valider</button>';
+                if($etape>0){
+                    echo '<input type="hidden" name="form" value="inscrire">';
+                    echo '<button class="background-violet" type="button" onclick="retour2('.((int)$etape-1).')" name="retour"> Retour</button>';
+                }
         ?>
     </form>
+    
 </div>
 <div class="forfait">
     <h2>Liste des forfaits:</h2>
@@ -204,3 +248,10 @@
 <?php
     require_once 'footer.php';
 ?>
+
+<script>
+    function retour2(etape){
+        document.querySelector('.inscrire form').innerHTML += '<input type="hidden" name="retour" value="'+etape+'">';
+        document.querySelector('.inscrire form').submit();
+    }
+</script>

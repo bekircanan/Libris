@@ -3,9 +3,7 @@ html, body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    font-family: "Montserrat", sans-serif; 
-    overflow: scroll; 
-    overflow-x: hidden;  
+    font-family: "Montserrat", sans-serif;  
 }
 /* Header */
 header {
@@ -541,6 +539,12 @@ hr {
     background-color:#FFDA89;
     cursor: not-allowed;
 }
+.panier_vide{
+    margin-top: 2em;
+    font-weight: bold;
+    font-size: 30px;
+
+}
 .ebook_acheter{
     background-color: #FFDA89;
     min-width: 55rem;
@@ -747,7 +751,71 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 
 /* recherche avancé */
-.contenair-recherche {
+
+.contenaire-recherche-avance{
+    background-color: #D0BDF6;
+    margin: 5% 15% 5% 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3%;
+    padding-top: 1%;
+    border-radius: 35px;
+}
+.exemple-recherche{
+    margin-left: 2rem;
+    display: flex;
+    justify-content: space-around;
+}
+.exemple-recherche input, .exemple-recherche select{
+    padding: 8px;
+    font-size: 14px;
+}
+.exemple-recherche select{
+    width: 10%;
+    border-bottom: 2px solid #9e9c9c;
+}
+.exemple-recherche input{
+    width: 70%;
+    border: 2px solid #9e9c9c;
+    
+}
+.exemple-recherche i{
+    margin-top: 0.5rem;
+}
+.recherche-avance{
+    padding: 1rem;
+    border-bottom: 2px solid #000000;
+}
+
+.limter-recherche{
+    padding: 1rem;
+
+}
+.groupe-annee{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 2rem;   
+}
+.groupe-annee p{
+    margin-left: 1rem;
+}
+.groupe-annee input{
+    width: 20%;
+    height: 10%;
+    margin-left: 1rem;
+    border: 2px solid #9e9c9c;
+}
+.groupe-genre {
+    margin-left: 2rem;
+    display: grid;
+    column-gap: 10rem;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+}
+/* .contenair-recherche {
     max-width: 900px;
     margin: 20px auto;
     padding: 20px;
@@ -755,9 +823,9 @@ div.info_ebook_acheter p:nth-of-type(1){
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     flex: 1;
-}
+} */
 
-.contenair-recherche h1 {
+/* .contenair-recherche h1 {
     text-align: center;
     font-size: 24px;
     color: #444;
@@ -851,7 +919,7 @@ div.info_ebook_acheter p:nth-of-type(1){
     margin-top: 20px;
     margin-bottom: 1rem;
     padding: 10px;
-}
+} */
 
 /* Mes réservations */
 .reservations-ebooks {
@@ -933,6 +1001,42 @@ div.info_ebook_acheter p:nth-of-type(1){
     margin: 0 2rem 4rem 2rem;
 }
 
+.btReservationsEbooks {
+    display: grid;
+    place-items: center;
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+}
+.btReservationsEbooks:hover {
+    background-color: black;
+    color: #FFDA89;
+    transition: 0.3s ease;
+}
+
+.btReservationsEbooks2 {
+    display: grid;
+    place-items: center;
+    background-color: #D0BDF6;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+}
+.btReservationsEbooks2:hover {
+    background-color: black;
+    color: #D0BDF6;
+    transition: 0.3s ease;
+}
+
 /* Gestion des emprunts et réservations */
 .gestion-emprunts-reservations {
     margin-bottom: 4em;
@@ -983,17 +1087,6 @@ div.info_ebook_acheter p:nth-of-type(1){
 
 .table-gestion .border-vertical {
     border-left: 3px solid black; /* Ajustez l'épaisseur à votre convenance */
-}
-
-.gestion-emprunts-reservations button {
-    border-radius: 15px;
-    cursor: pointer;
-    transition: 0.3s ease;
-}
-
-.gestion-emprunts-reservations button:hover {
-    background-color: #FFDA89;
-    transition: 0.3s ease;
 }
 
 .popupGestion {
@@ -1096,14 +1189,24 @@ div.info_ebook_acheter p:nth-of-type(1){
     width: 20vw;
     margin-bottom: 1vw;
 }
-.gestion-emprunts-reservations button, .gestion-utilisateurs button {
+.gestion-emprunts-reservations button, .gestion-utilisateurs button,.gestion_livre button {
     border-radius: 15px;
+    background-color: #FFDA89;
     cursor: pointer;
     transition: 0.3s ease;
 }
+.gestion_livre{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1% auto;
+    padding: 2%;
+}
 
 .gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
-    background-color: #FFDA89;
+    background-color: black;
+    color: #FFDA89;
     transition: 0.3s ease;
 }
 /* Info Livre*/

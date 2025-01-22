@@ -5,11 +5,25 @@ $stmt = $conn->prepare("SELECT id_livre,titre_livre,resume,img_couverture FROM l
 $stmt->execute();
 $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-    if(isset($_POST['supprimeLivre'])){
-        $stmt = $conn->prepare("DELETE FROM livre WHERE id_livre = :id_livre");
-        $stmt->bindParam(':id_livre', $_POST['id_livre']);
-        $stmt->execute();
-    }elseif(isset($_POST['ModifieLivre'],$_POST['id_livre'], $_POST['titre_livre'], $_POST['resume']) && !empty($_POST['id_livre']) && !empty($_POST['titre_livre']) && !empty($_POST['type_litteraire']) && !empty($_POST['resume'])){
+    if(isset($_POST['form']) && $_POST['form']==='supprimeLivre'){
+        try{
+            $conn->beginTransaction();
+            $stmt = $conn->prepare("Delete from exemplaire join isbn on exemplaire.id_isbn = isbn.id_isbn where id_livre = :id_livre");
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+            $stmt = $conn->prepare("Delete from isbn where id_livre = :id_livre");
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+            $stmt = $conn->prepare("DELETE FROM livre WHERE id_livre = :id_livre");
+            $stmt->bindParam(':id_livre', $_POST['id_livre']);
+            $stmt->execute();
+            $conn->commit();
+        }catch(Exception $e){
+            $conn->rollBack();
+
+        }
+
+    }elseif(isset($_POST['form'],$_POST['id_livre'], $_POST['titre_livre'], $_POST['resume']) && $_POST['form']==='ModifieLivre'){
         if(isset($_FILES['img_couverture']) && !empty($_FILES['img_couverture']['name'])){
             $imageFileName = "{$_POST['titre_livre']}.png";
             $imageFileName = str_replace(' ', '_', $imageFileName);
@@ -318,9 +332,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
 
         </div>
     </form>
-    <h1>Livres</h1>
+    <div class="gestion_livre">
+        <h1>Livres :</h1>
         <input type="text" id="search-reservations-input" placeholder="Rechercher une livre..." onkeyup="search()">
-        <table class="table-emprunts-reservations" id="table-reservations">
+        <table class="table-emprunts-reservations table-gestion" id="table-reservations">
             <thead>
             <tr>
                 <th>Titre</th>
@@ -343,7 +358,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
             ?>
             </tbody>
         </table>
-        <br>
+    </div>
 </div>
 
 <script>
@@ -462,7 +477,7 @@ function popupSupprime(id_livre) {
             <div class="popupGestion-content">
                 <h2>Confirmation de suppression</h2>
                 <p>Êtes-vous sûr de vouloir supprime cette livre ?</p>
-                <form method="POST" action="gestion-emprunts-reservations.php">
+                <form method="POST" action="gestion-livres.php">
                     <input type="hidden" name="form" value="supprimeLivre">
                     <input type="hidden" name="id_livre" value="${id_livre}">
                     <button type="submit">OK</button>
@@ -486,7 +501,7 @@ function popupModifie(id_livre,titre_livre,resume) {
     popup.innerHTML = `
         <div class="popupGestion-content">
             <h2>Modification livre</h2>
-            <form method="POST" action="gestion-emprunts-reservations.php">
+            <form method="POST" action="gestion-livres.php">
                 <input type="hidden" name="form" value="ModifieLivre">
                 <input type="hidden" name="id_livre" value="${id_livre}">
                 <label for="titre_livre">Titre</label>

@@ -64,15 +64,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerSuppres
     $id_util = $_POST['id_util'];
 
     if (!empty($id_util)) {
-        $stmt = $conn->prepare("
-            DELETE FROM emprunter WHERE id_util = :id_util;
-            DELETE FROM reserver WHERE id_util = :id_util;
-            DELETE FROM est_abonne WHERE id_util = :id_util;
-            DELETE FROM avis WHERE id_util = :id_util;
-            DELETE FROM achat_ebook WHERE id_util = :id_util;
-            DELETE FROM bibliothecaire WHERE id_util = :id_util;
-            DELETE FROM utilisateur WHERE id_util = :id_util;
-        ");
+        $stmt = $conn->prepare("DELETE FROM utilisateur WHERE id_util = :id_util;");
         $stmt->bindParam(':id_util', $id_util, PDO::PARAM_INT);
 
         $stmt->execute();

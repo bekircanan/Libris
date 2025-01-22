@@ -5,127 +5,70 @@
     $resultLangue = $conn->query("SELECT id_langue, nom_langue FROM langue");
     $resultCible = $conn->query("SELECT id_public, type_public FROM public_cible");
 
-    $genres = '';
-    $langues = '';
-    $public = '';
-    $anneeDebut = '';
-    $anneeFin = '';
-    $ebook = false;
-    $prixMax = "50";
-    $prixMin = "0";
-    
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-        // vérifie quel trie est choisie
-        if ($_POST['form'] === 'filtre'){
-            // Filtre par annee
-            if (isset($_POST['anneeDebut'])) {
-                $anneeDebut = $anneeDebut . $_POST['anneeDebut'];
-            }
-            if (isset($_POST['anneeFin'])) {
-                $anneeFin = $anneeFin . $_POST['anneeFin'];
-            }
-            // Filtre par genre
-            if (isset($_POST['genres']) && is_array($_POST['genres'])) {
-                for($i = 0; $i < count($_POST['genres']); $i++){
-                    if($i === count($_POST['genres']) -1){
-                        $genres = $genres . $_POST['genres'][$i];
-                    }else{
-                        $genres = $genres . $_POST['genres'][$i] . ",";
-                    }
-                }
-            }
-            // Filtre par langue
-            if (isset($_POST['langue']) && is_array($_POST['langue'])) {
-                for($i = 0; $i < count($_POST['langue']); $i++){
-                    if($i === count($_POST['langue']) -1){
-                        $langues = $langues . $_POST['langue'][$i];
-                    }else{
-                        $langues = $langues . $_POST['langue'][$i] . ",";
-                    }
-                }
-            }
-            // Filtre par public cible
-            if (isset($_POST['public']) && is_array($_POST['public'])) {
-                for($i = 0; $i < count($_POST['public']); $i++){
-                    if($i === count($_POST['public']) -1){
-                        $public = $public . $_POST['public'][$i];
-                    }else{
-                        $public = $public . $_POST['public'][$i] . ",";
-                    }
-                }
-            }
-            // Filtre par E-book
-            if (isset($_POST['ebook']) && $_POST['ebook'] == '1') {
-                $ebook = true;
-            }
-            // Filtre par prix
-            if (isset($_POST['prix-max']) ) {
-                $prixMax = $_POST['prix-max'];
-            } 
-            if (isset($_POST['prix-min']) ) {
-                $prixMin = $_POST['prix-min'];
-            } 
-        }
-               
-    }
-
-    $url = $anneeDebut . ";" . $anneeFin . ";" . $genres . ";" . $langues . ";" . $public . ";" . $ebook . ";" . $prixMin . ";" . $prixMax;
-    //ajouter edition, sujet, 
 ?>
-        <div class="contenair-recherche">
-            <h1>Recherche avancée</h1>
-            
+        <div class="contenaire-recherche-avance">
+           
+            <form method="GET" action="./catalogue.php">
+                
                 <section class="recherche-avance">
-                    <div class="group-critaire">
-                        <label for="criteria1">Et</label>
-                        <select id="criteria1">
-                            <option value="title">Titre</option>
-                            <option value="author">Auteur</option>
+                    <h1>Recherche avancée</h1>
+                    <div class="exemple-recherche">
+                        <select id="critaire">
+                            <option value="titre">ET</option>
+                            <option value="auteur">OU</option>
+                            <option value="genre">SAUF</option>
+                        </select>
+                        <select id="critaire">
+                            <option value="titre">Titre</option>
+                            <option value="auteur">Auteur</option>
                             <option value="genre">Genre</option>
                         </select>
-                        <input type="text" placeholder="Rechercher...">
+                        <input type="text" name="recherche-avance" placeholder="Rechercher...">
+                        <i class="fa-solid fa-plus"></i>
                     </div>
+                    
                 </section>
-                <button class="button-recherche-avance">ajouter...</button>
-            <form method="POST">
-            <input type="hidden" name="form" value="filtre">
-                <section class="filtre">
-                    <h2>Limiter la recherche</h2>
-                    <div class="filtre-groupe">
-                        <label>Année de publication :</label>
-                        <input type="number" name="anneeDebut" placeholder="aaaa" min="1000" max="2025"> à 
+                
+                
+                <section class="limter-recherche">
+                    <h1>Limiter la recherche</h1>
+                    <div class="groupe-annee">
+                        <h4>Année de publication :</h4>
+                        <p>De</p>
+                        <input type="number" name="anneeDebut" placeholder="aaaa" min="1000" max="2025"> <p>à</p> 
                         <input type="number" name="anneeFin" placeholder="aaaa">
                     </div>
-                    <div class="filtre-groupe">
-                        <h3>Genre du document :</h3>
+                    <div class="groupe">
+                        <h4>Genres :</h4>
+                        <div class="groupe-genre">
                         <?php
                             foreach ($resultGenre as $genre){
-                                echo '<input type="checkbox" name="genres[]" value="' . $genre['id_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label>';
+                                echo '<div class="groupe-checkbox"><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
                             }
                         ?>
+                        </div>
                     </div>
-                    <div class="filtre-groupe">
-                        <h3>Langue :</h3>
+                    <div class="groupe-langue">
+                        <h4>Langues :</h4>
                         <?php
                             foreach ($resultLangue as $langue){
-                                echo '<input type="checkbox" name="langue[]" value="' . $langue['id_langue'] . '"><label for="' . $langue['nom_langue'] . '">' . $langue['nom_langue'] . '</label>';
+                                echo '<div class="groupe-checkbox"><input type="checkbox" name="langues[]" value="' . $langue['nom_langue'] . '"><label for="' . $langue['nom_langue'] . '">' . $langue['nom_langue'] . '</label></div>';
                             }
                         ?>
                     </div>
-                    <div class="filtre-groupe">
-                        <h3>Public cible :</h3>
+                    <div class="groupe-public">
+                        <h4>Public cible :</h4>
                         <?php
                             foreach ($resultCible as $public){
-                                echo '<input type="checkbox" name="public[]" value="' . $public['id_public'] . '"><label for="' . $public['type_public'] . '">' . $public['type_public'] . '</label>';
+                                echo '<input type="checkbox" name="public[]" value="' . $public['type_public'] . '"><label for="' . $public['type_public'] . '">' . $public['type_public'] . '</label>';
                             }
                         ?>
                     </div>
-                    <div class="filtre-groupe">
-                        <h3>E-book :</h3>
+                    <div class="groupe-ebook">
+                        <h4>E-book :</h4>
                         <label><input type="checkbox" name="ebook" value="1"> E-book</label>
 
-                        <div class="sliders-control">
+                        <div class="groupe-prix">
                             <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
                             <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
                             <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>

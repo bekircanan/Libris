@@ -246,6 +246,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerRetour'
 
         $stmt->execute();
         header('Location: gestion-emprunts-reservations.php');
+        exit;
     }
 }
 
@@ -260,6 +261,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'annulerReservati
 
         $stmt->execute();
         header('Location: gestion-emprunts-reservations.php');
+        exit;
     }
 }
 
@@ -298,6 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
         $stmtValider->execute();
 
         header('Location: gestion-emprunts-reservations.php');
+        exit;
     }
 }
 
