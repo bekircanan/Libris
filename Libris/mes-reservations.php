@@ -1,10 +1,8 @@
 <?php
 require('header.php');
 
-$_SESSION['id'] = 13;
-
 $stmtReservationsUtil = $conn->prepare("
-    SELECT l.titre_livre, l.img_couverture, l.id_livre, r.num_isbn
+    SELECT l.titre_livre, l.img_couverture, l.id_livre, r.num_isbn, r.id_util
     FROM reserver r
     JOIN isbn ON isbn.num_isbn = r.num_isbn
     JOIN livre l ON l.id_livre = isbn.id_livre
@@ -198,6 +196,21 @@ function convertirDate($date) {
 
     return "$jour " . $mois[$moisNum] . " $annee";
 }
+
+if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerAnnulation')) {
+    $num_isbn = $_POST['num_isbn'];
+    $id_util = $_POST['id_util'];
+
+    if (!empty($num_isbn) && !empty($id_util)) {
+        $stmt = $conn->prepare("DELETE FROM reserver WHERE num_isbn = :num_isbn AND id_util = :id_util");
+        $stmt->bindParam(':num_isbn', $num_isbn, PDO::PARAM_STR);
+        $stmt->bindParam(':id_util', $id_util, PDO::PARAM_INT);
+
+        $stmt->execute();
+        header('Location: mes-reservations.php');
+        exit;
+    }
+}
 ?>
 <div class="reservations-ebooks">
     <h1>Mes Réservations</h1>
@@ -234,6 +247,7 @@ function convertirDate($date) {
                 echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
                 echo "</a>";
                 echo '<h3>'.$reservation['titre_livre'].'</h3>';
+                echo "<button class='btReservationsEbooks2' onclick=popupConfirmAnnulation('".$reservation['num_isbn']."',".$_SESSION['id'].")>Annuler</button>";
                 echo '</div>';
             }
         }
@@ -253,13 +267,40 @@ function convertirDate($date) {
                 echo '<img class="imgCouverture" src="'.$reservation['img_couverture'].'" alt="Couverture du livre">';
                 echo "</a>";
                 echo '<h3>'.$reservation['titre_livre'].'</h3>';
-                echo "<p>Disponible le <strong>" .convertirDate(calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn'])).'</strong></p>';
+                echo "<p>Disponible le <strong>" .calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']).'</strong></p>';
                 echo calculerPositionFileAttente($reservations, $reservation["id_livre"]). "e dans la file d'attente";
+                echo "<button class='btReservationsEbooks' onclick=popupConfirmAnnulation('".$reservation['num_isbn']."',".$_SESSION['id'].")>Annuler</button>";
                 echo '</div>';
             }
         }
     }
     ?>
 </div>
+<script>
+    function popupConfirmAnnulation(num_isbn, id_util) {
+        let popup = document.createElement('div');
+        popup.className = 'popupGestion hidden';
+        popup.innerHTML = `
+                <div class="popupGestion-content">
+                    <h2>Annulation de la réservation</h2>
+                    <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+                    <form method="POST" action="mes-reservations.php">
+                        <input type="hidden" name="form" value="confirmerAnnulation">
+                        <input type="hidden" name="num_isbn" value="${num_isbn}">
+                        <input type="hidden" name="id_util" value="${id_util}">
+                        <button type="submit">OK</button>
+                    </form>
+                    <button class='popupGestionAnnuler'>Annuler</button>
+                </div>
+            `;
+        const main = document.querySelector('main');
+        main.appendChild(popup);
+
+        const cancelButton = popup.querySelector('.popupGestionAnnuler');
+        cancelButton.addEventListener('click', () => {
+            main.removeChild(popup);
+        });
+    }
+</script>
 
 <?php require("footer.php"); ?>
