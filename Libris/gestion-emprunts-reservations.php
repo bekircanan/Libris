@@ -303,89 +303,111 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
 
 ?>
 
-<!DOCTYPE html>
-<html lang="FR">
-<head>
-    <title>Gestion des emprunts et réservations</title>
-    <meta charset="UTF-8">
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="FR">
+    <head>
+        <title>Gestion des emprunts et des réservations</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
     <main class="gestion-emprunts-reservations">
-        <h1>Emprunts</h1>
-        <input type="text" id="search-emprunts-input" placeholder="Rechercher un emprunt..." onkeyup="searchEmprunts()">
-        <table class="table-emprunts-reservations" id="table-emprunts">
-            <thead>
-            <tr>
-                <th>Utilisateur</th>
-                <th>Livre</th>
-                <th>ISBN</th>
-                <th>ID exemplaire</th>
-                <th>Date de début</th>
-                <th>Date de retour prévu</th>
-                <th>Statut</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($emprunts as $emprunt) {
-                echo "<tr>";
-                echo "<td>". $emprunt['prenom_util']." ". $emprunt['nom_util'] ."</td>";
-                echo "<td>". $emprunt['titre_livre']. "</td>";
-                echo "<td>". $emprunt['num_isbn']. "</td>";
-                echo "<td>". $emprunt['id_exemplaire']. "</td>";
-                echo "<td>". convertirDate($emprunt['date_debut_emprunt']). "</td>";
-                echo "<td>". convertirDate(calculerDateRetour($emprunt['date_debut_emprunt']))  . "</td>";
-                echo "<td class='col-statut'>". calculerStatut($emprunt['date_debut_emprunt']) ."</td>";
-                echo "<td>
-                    <button onclick=popupConfirmRetour(".$emprunt['id_exemplaire'].",".$emprunt['id_util'].")>Retour</button>
-                </td>";
-                echo "</tr>";
-            }
-            ?>
-            </tbody>
-        </table>
-        <h1>Réservations</h1>
-        <input type="text" id="search-reservations-input" placeholder="Rechercher une réservation..." onkeyup="searchReservations()">
-        <table class="table-emprunts-reservations" id="table-reservations">
-            <thead>
-            <tr>
-                <th>Utilisateur</th>
-                <th>Livre</th>
-                <th>Cote</th>
-                <th>ISBN</th>
-                <th>Disponibilité édition</th>
-                <th>Date de réservation</th>
-                <th>Date de disponibilité</th>
-                <th>Position file d'attente</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($reservations as $reservation) {
-                echo "<tr>";
-                echo "<td>". $reservation['prenom_util']." ". $reservation['nom_util'] ."</td>";
-                echo "<td>". $reservation['titre_livre']. "</td>";
-                echo "<td>". $reservation['cote_livre']. "</td>";
-                echo "<td>". $reservation['num_isbn']. "</td>";
-                echo "<td class='col-disponibilite'>". calculerDisponibilite($reservation['num_isbn'], $nbExemplairesDisponibles). "</td>";
-                echo "<td>". convertirDate($reservation['date_reservation']). "</td>";
-                echo "<td class='col-date-disponibilite'>". calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) . "</td>";
-                echo "<td>". calculerPositionFileAttente($reservations, $reservation['id_util'], $reservation['num_isbn']) ."</td>";
-                echo "<td>
-                    <button onclick=popupConfirmSuppression('".$reservation['num_isbn']."',".$reservation['id_util'].")>Supprimer</button>";
-                if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) == "Disponible") {
-                    echo "<button onclick=popupConfirmEmprunt('".$reservation['num_isbn']."',".$reservation['id_util'].")>Accepter</button>";
+
+        <div class="onglets-gestion">
+            <div class="onglet-gestion active-gestion" id="onglet-gestion-emprunts" onclick="openTab('emprunts')">Emprunts</div>
+            <div class="onglet-gestion" id="onglet-gestion-reservations" onclick="openTab('reservations')">Réservations</div>
+        </div>
+
+        <div class="onglet-gestion-content active-gestion" id="emprunts">
+            <input type="text" id="search-emprunts-input" placeholder="Rechercher un emprunt..." onkeyup="searchEmprunts()">
+            <table class="table-gestion" id="table-emprunts">
+                <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Livre</th>
+                    <th>ISBN</th>
+                    <th>ID exemplaire</th>
+                    <th>Date de début</th>
+                    <th>Date de retour prévu</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach ($emprunts as $emprunt) {
+                    echo "<tr>";
+                    echo "<td>". $emprunt['prenom_util']." ". $emprunt['nom_util'] ."</td>";
+                    echo "<td>". $emprunt['titre_livre']. "</td>";
+                    echo "<td>". $emprunt['num_isbn']. "</td>";
+                    echo "<td>". $emprunt['id_exemplaire']. "</td>";
+                    echo "<td>". convertirDate($emprunt['date_debut_emprunt']). "</td>";
+                    echo "<td>". convertirDate(calculerDateRetour($emprunt['date_debut_emprunt']))  . "</td>";
+                    echo "<td class='col-statut'>". calculerStatut($emprunt['date_debut_emprunt']) ."</td>";
+                    echo "<td>
+                        <button onclick=popupConfirmRetour(".$emprunt['id_exemplaire'].",".$emprunt['id_util'].")>Retour</button>
+                    </td>";
+                    echo "</tr>";
                 }
-                echo "</td>";
-                echo "</tr>";
-            }
-            ?>
-            </tbody>
-        </table>
+                ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="onglet-gestion-content" id="reservations">
+            <input type="text" id="search-reservations-input" placeholder="Rechercher une réservation..." onkeyup="searchReservations()">
+            <table class="table-gestion" id="table-reservations">
+                <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Livre</th>
+                    <th>Cote</th>
+                    <th>ISBN</th>
+                    <th>Disponibilité édition</th>
+                    <th>Date de réservation</th>
+                    <th>Date de disponibilité</th>
+                    <th>Position file d'attente</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach ($reservations as $reservation) {
+                    echo "<tr>";
+                    echo "<td>". $reservation['prenom_util']." ". $reservation['nom_util'] ."</td>";
+                    echo "<td>". $reservation['titre_livre']. "</td>";
+                    echo "<td>". $reservation['cote_livre']. "</td>";
+                    echo "<td>". $reservation['num_isbn']. "</td>";
+                    echo "<td class='col-disponibilite'>". calculerDisponibilite($reservation['num_isbn'], $nbExemplairesDisponibles). "</td>";
+                    echo "<td>". convertirDate($reservation['date_reservation']). "</td>";
+                    echo "<td class='col-date-disponibilite'>". calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) . "</td>";
+                    echo "<td>". calculerPositionFileAttente($reservations, $reservation['id_util'], $reservation['num_isbn']) ."</td>";
+                    echo "<td>
+                        <button onclick=popupConfirmSuppression('".$reservation['num_isbn']."',".$reservation['id_util'].")>Supprimer</button>";
+                    if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $reservation['id_util'], $reservation['num_isbn']) == "Disponible") {
+                        echo "<button onclick=popupConfirmEmprunt('".$reservation['num_isbn']."',".$reservation['id_util'].")>Accepter</button>";
+                    }
+                    echo "</td>";
+                    echo "</tr>";
+                }
+                ?>
+                </tbody>
+            </table>
+        </div>
     </main>
     <script>
+
+        // Fonction pour ouvrir l'onglet sélectionné
+        function openTab(tabId) {
+            // Supprime la classe active des onglets
+            document.querySelectorAll('.onglet-gestion').forEach(tab => tab.classList.remove('active-gestion'));
+            // Supprime la classe active des contenus
+            document.querySelectorAll('.onglet-gestion-content').forEach(content => content.classList.remove('active-gestion'));
+
+            // Active l'onglet cliqué
+            document.querySelector(`[onclick="openTab('${tabId}')"]`).classList.add('active-gestion');
+            // Active le contenu correspondant
+            document.getElementById(tabId).classList.add('active-gestion');
+        }
+
         function searchEmprunts() {
             let input = document.getElementById('search-emprunts-input').value.toLowerCase();
 
@@ -551,7 +573,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
             });
         });
     </script>
-</body>
-</html>
+    </body>
+    </html>
 
 <?php require("footer.php"); ?>

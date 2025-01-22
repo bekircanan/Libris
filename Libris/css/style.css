@@ -890,7 +890,9 @@ div.info_ebook_acheter p:nth-of-type(1){
 /* Mes réservations */
 .reservations-ebooks {
 	padding: 0 10rem;
-	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif"
+	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    display: flex;
+    flex-direction: column;
 }
 .reservations-ebooks h1 {
 	font-size: 28px;
@@ -939,6 +941,7 @@ div.info_ebook_acheter p:nth-of-type(1){
 	display: flex;
     flex-wrap: wrap;
 	margin: 1rem 0 0 0;
+    flex: 1;
 }
 
 .livre {
@@ -948,6 +951,7 @@ div.info_ebook_acheter p:nth-of-type(1){
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+    flex: 1;
 }
 
 .livre p {
@@ -986,32 +990,32 @@ div.info_ebook_acheter p:nth-of-type(1){
     margin-bottom: 1vw;
 }
 
-.table-emprunts-reservations {
+.table-gestion {
     width: 100%;
     border-collapse: collapse;
     border: solid 3px black;
 }
 
-.table-emprunts-reservations thead th {
+.table-gestion thead th {
     background-color: #FFDA89;
     text-align: center;
     padding: 10px;
 }
 
-.table-emprunts-reservations tbody td {
+.table-gestion tbody td {
     text-align: center;
     padding: 10px;
 }
 
-.table-emprunts-reservations tbody tr:nth-child(odd) {
+.table-gestion tbody tr:nth-child(odd) {
     background-color: #F2F2F2;
 }
 
-.table-emprunts-reservations tbody tr:nth-child(even) {
+.table-gestion tbody tr:nth-child(even) {
     background-color: #E6E6E6;
 }
 
-.table-emprunts-reservations .border-vertical {
+.table-gestion .border-vertical {
     border-left: 3px solid black; /* Ajustez l'épaisseur à votre convenance */
 }
 
@@ -1072,6 +1076,8 @@ div.info_ebook_acheter p:nth-of-type(1){
     border-right: 2px solid black;
     border-left: 2px solid black;
     font-size: 18px;
+    transition: height 0.3s ease-out;
+    background-color: #FFDA89;
 }
 
 .onglet-gestion::before {
@@ -1083,14 +1089,7 @@ div.info_ebook_acheter p:nth-of-type(1){
     line-height: 1.2;
 }
 
-.onglet-gestion:not(.active-gestion) {
-    color: black;
-    background-color: #FFDA89;
-    transition: height 0.3s ease-out;
-}
-
 .onglet-gestion.active-gestion {
-    background-color: #D0BDF6;
     color: black;
     transition: height 0.3s ease-out;
     height: 4vw;
@@ -1108,6 +1107,38 @@ div.info_ebook_acheter p:nth-of-type(1){
 
 .onglet-gestion-content.active-gestion {
     display: block;
+}
+/* Gestion des utilisateurs */
+.gestion-utilisateurs {
+    margin-bottom: 4em;
+    margin-left: 10em;
+    margin-right: 10em;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    font-size: small;
+}
+
+.gestion-utilisateurs h1{
+    font-size: 28px;
+    margin: 2em 0 0.5em 0;
+}
+
+#search-utilisateurs-input {
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    height: 2vw;
+    width: 20vw;
+    margin-bottom: 1vw;
+}
+.gestion-emprunts-reservations button, .gestion-utilisateurs button {
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
+    background-color: #FFDA89;
+    transition: 0.3s ease;
 }
 
 /* Info Livre*/
@@ -1402,7 +1433,7 @@ section#livre {
 }
 
 .ajout_livre h1{
-    width: 20%;
+    width: 50%;
     padding: 20px;
 }
 
@@ -1479,5 +1510,32 @@ button.btn_valider_ajout {
 
     .filters {
         width: 100%;
+    }
+
+    header form input::placeholder, header form input {
+        background-color: white;
+        color: transparent;
+    }
+    header{
+        padding-left: 10px;
+    }
+
+    /* Mes réservations */
+    .reservations-ebooks {
+        padding: 0 1rem;
+        margin-bottom: 2em;
+    }
+
+    .reservations-disponibles {
+        margin: 0 1rem;
+    }
+
+    .reservations-indisponibles {
+        margin: 2rem 1rem;
+    }
+
+    /* Mes e-books */
+    .mes-ebooks {
+        margin: 0 1rem 2rem 1rem;
     }
 }
