@@ -1687,8 +1687,7 @@ button.btn_valider_ajout {
         margin: 0 1rem 2rem 1rem;
     }
 
-    div.search-bar form input, div.search-bar input::placeholder{
-        color: transparent;
+    div.search-bar form input{
         background-color: white;
     }
     .slide-container{
@@ -1698,5 +1697,16 @@ button.btn_valider_ajout {
     .affichage_avis div.affichage_avis{
         display: block;
     }
-
+    header form button{
+        display: none;
+    }
+    header div img{
+        margin-right: 0;
+    }
+    header{
+        padding: 0 1rem;
+    }
+    header .search-bar-container{
+        width: 100%;
+    }
 }
