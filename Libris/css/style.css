@@ -1282,6 +1282,13 @@ section#livre {
     margin: 10px 0;
     line-height: 1.6;
 }
+.actions p:nth-child(2){
+    color: #567CDC;
+}
+
+.green{
+    color: #27A724;
+}
 
 .actions a {
     color: #0073e6;

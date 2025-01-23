@@ -212,7 +212,7 @@ $stmtSelectAllAvis = $conn->prepare(
         </div>
         <div class="actions"> 
             <h2><?php echo $infoLivre['titre_livre']?></h2>
-            <p>Auteurs : 
+            <p>
             <?php 
                 $stmtSelectAuteur->execute();
                 $auteurs = [];
@@ -243,10 +243,9 @@ $stmtSelectAllAvis = $conn->prepare(
                         }
                         echo '</div>';
                         echo '<p>Nombre d\'avis : ' . $totalAvis . '</p>';
-                        echo '<a href="#avis-form">Donner un avis</a>';
                         echo '</div>';
                         if (($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && $nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() > $stmtTestReservation->rowCount()){
-                            echo '<p> Disponible en bibliothèque </p>';
+                            echo '<p class="green"> Disponible en bibliothèque </p>';
                         } 
                         elseif(($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && ($nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() === $stmtTestReservation->rowCount())){
                             $stmtSelectDateFinEmprunt = $conn->prepare("SELECT date_fin_emprunt FROM emprunter e Join exemplaire ex ON e.id_exemplaire = ex.id_exemplaire JOIN isbn i ON ex.num_isbn = i.num_isbn Join livre l ON i.id_livre = l.id_livre WHERE l.id_livre = {$_SESSION['idLivreActuel']}");
@@ -278,7 +277,7 @@ $stmtSelectAllAvis = $conn->prepare(
                         $infoEbook = $stmtSelectEbook->fetch();
                         if (!empty($infoEbook)){
                             $_SESSION['idEbook'] = $infoEbook['id_ebook'];
-                            echo '<p> E-BOOK | '.$infoEbook['prix'];
+                            echo '<p> E-BOOK | '.$infoEbook['prix'].' €';
                             if (isset($_SESSION['id'])){
                                 $stmtTestEbookPanier = $conn->prepare("SELECT * FROM achat_ebook WHERE id_util = {$_SESSION['id']} and id_ebook = {$infoEbook['id_ebook']}");
                                 $stmtTestEbookPanier->execute();
