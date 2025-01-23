@@ -112,6 +112,7 @@ header .search-bar .advanced-search {
     overflow-x: hidden;
     transition: 0.3s;
     padding-top: 2%;
+    border-right: solid 2px #AAA7AF;
 }
 .sidebar ul:first-child{
     box-shadow: 1px 7px 5px 0px #AAA7AF
@@ -134,8 +135,8 @@ header .search-bar .advanced-search {
     display: block;
     transition: 0.3s;
 }
-.sidebar a:hover {
-    color: #f1f1f1;
+.sidebar a:not(.active):hover {
+    color: #FFDA89;
 }
 .sidebar .active {
     background-color: #D0BDF6;
@@ -250,8 +251,7 @@ main {
 /* index */
 .pre-container{
     background-color: white;
-    border: solid 1px black;
-    border-radius: 50px 50px 50px 50px / 25px 25px 25px 25px;
+    border-radius: 25px;
     margin: 1%;
     box-shadow: -1px 2px 5px 0px black;
 }
@@ -317,10 +317,9 @@ main {
 .pre-livre {
     width:20rem;
     height: 23rem;
-    border: 1px solid #ccc;
     padding: 10px;
     box-sizing: border-box;
-    border-radius: 50px 50px 50px 50px / 25px 25px 25px 25px;
+    border-radius: 25px;
     box-shadow: 1px 3px 5px 0px #FFDA89, -1px 3px 5px 0px #FFDA89;
     display: flex;
     flex-direction: column;
@@ -1102,6 +1101,25 @@ div.info_ebook_acheter p:nth-of-type(1){
     z-index: 1000;
 }
 
+.popupGestion button {
+    display: grid;
+    place-items: center;
+    background-color: #FFDA89;
+    border: 2px solid black;
+    border-radius: 25px;
+    padding: 0.2em 0;
+    width: 8rem;
+    text-decoration: None;
+    color: black;
+    transition: 0.3s ease;
+    margin: 0 auto;
+}
+.popupGestion button:hover {
+    background-color: black;
+    color: #FFDA89;
+    transition: 0.3s ease;
+}
+
 .popupGestion-content {
     background-color: white;
     padding: 20px;
@@ -1198,13 +1216,12 @@ div.info_ebook_acheter p:nth-of-type(1){
 .gestion_livre{
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    margin: 1% auto;
-    padding: 2%;
 }
 
-.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
+
+.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover, .gestion_livre button:hover {
     background-color: black;
     color: #FFDA89;
     transition: 0.3s ease;
@@ -1479,6 +1496,21 @@ section#livre {
 
 /* Gestion des livres*/
 
+.gestion-livres {
+    margin-bottom: 4em;
+    margin-left: 10em;
+    margin-right: 10em;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    font-size: small;
+}
+
+.gestion-livres h1{
+    font-size: 28px;
+    margin: 2em 0 0.5em 0;
+}
+.ajout_livre {
+    padding: 10px;
+}
 .drop-zone {
     border: 2px dashed #D0BDF6;
     border-radius: 10px;
@@ -1500,16 +1532,11 @@ section#livre {
     display: none;
 }
 
-.ajout_livre h1{
-    width: 20%;
-    padding: 20px;
-}
-
 .drop-zones-container {
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
-    margin: 20px;
+    margin: 2vw 2vw;
     gap: 20px; /* Adjust the gap as needed */
 }
 .drop-zone label {
@@ -1541,17 +1568,20 @@ button.btn_valider_ajout {
     transition: background-color 0.3s ease;
 }
 
+
+
 .drop-zone img{
     width: 100px;
 }
 
 .info-style-fichier{
-    
     border: 2px solid #D0BDF6;
-    width: 70%;
     border-radius: 10px;
     background-color: #D0BDF6;
     padding: 20px;
+    width: 100%;
+    margin: 0 2vw;
+    font-size: 18px;
 }
 
 .info-style-container{
@@ -1572,6 +1602,11 @@ button.btn_valider_ajout {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
+    .text-container{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
     #page_catalogue {
         flex-direction: column;
         gap: 10px;

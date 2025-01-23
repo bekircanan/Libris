@@ -295,9 +295,9 @@ $stmtSelectAllAvis = $conn->prepare(
                     <form method="post">
                         <input type="hidden" name="form" value="res/acha">
                         <?php   
-                        if (!empty($infoEbook) && empty($testEbook)) {
+                        if (!empty($infoEbook) && empty($testEbook)  && $_SESSION['admin'] === 0) {
                             echo '<button type="submit" name="acheter" id="btn_achat">Ajouter au panier</button>';
-                        } elseif (!empty($infoEbook) && !empty($testEbook)) {
+                        } elseif ((!empty($infoEbook) && !empty($testEbook))  ||  $_SESSION['admin'] === 1) {
                             echo '<button type="submit" name="acheter" id="btn_achat" disabled>Ajouter au panier</button>';
                         }
                         ?>
@@ -326,7 +326,7 @@ $stmtSelectAllAvis = $conn->prepare(
                                         }
                                     }
                                 }
-                                if ($testReserver){
+                                if ($testReserver  || $_SESSION['admin'] === 1){
                                     echo 'disabled';
                                 }
                                 elseif (($stmtTestDisponibilite->rowCount() < $nbExemplaires['nb_exemplaires']) && ($nbExemplaires['nb_exemplaires']- $stmtTestDisponibilite->rowCount() >= $stmtTestReservation->rowCount()) && $nbLivresTota <= 5 ){ 
