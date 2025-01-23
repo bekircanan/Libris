@@ -13,17 +13,17 @@
                 <section class="recherche-avance">
                     <h1>Recherche avancée</h1>
                     <div class="exemple-recherche">
-                        <select id="critaire">
-                            <option value="titre">ET</option>
-                            <option value="auteur">OU</option>
-                            <option value="genre">SAUF</option>
+                        <select name="critaireOption[]">
+                            <option value="ET">ET</option>
+                            <option value="OU">OU</option>
+                            <option value="SAUF">SAUF</option>
                         </select>
-                        <select id="critaire">
+                        <select name="critaireValue[]">
                             <option value="titre">Titre</option>
                             <option value="auteur">Auteur</option>
                             <option value="genre">Genre</option>
                         </select>
-                        <input type="text" name="recherche-avance" placeholder="Rechercher...">
+                        <input type="text" name="recherche-avance[]" placeholder="Rechercher...">
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     
@@ -43,7 +43,7 @@
                         <div class="groupe-genre">
                         <?php
                             foreach ($resultGenre as $genre){
-                                echo '<div class="groupe-checkbox"><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
+                                echo '<div class="groupe-checkbox"><input id="' . $genre['id_genre'] . '" type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['id_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
                             }
                         ?>
                         </div>
@@ -66,9 +66,10 @@
                     </div>
                     <div class="groupe-ebook">
                         <h4>E-book :</h4>
-                        <label><input type="checkbox" name="ebook" value="1"> E-book</label>
+                        <label><input type="checkbox" name="ebook"> E-book</label>
 
                         <div class="groupe-prix">
+                            <input type="checkbox" name="prix"> 
                             <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
                             <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
                             <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>
@@ -81,7 +82,7 @@
         </div>
 
         <script>
-            let bouton = document.querySelector(".button-recherche-avance");
+            let bouton = document.querySelector(".fa-plus");
             let slideMin = document.querySelector("#prix-min");
             let slideMax = document.querySelector("#prix-max");
             let valeurSlideMin = document.querySelector("#valeurMin");
@@ -89,9 +90,11 @@
 
             bouton.addEventListener('click',() =>{
                 let parent = document.querySelector(".recherche-avance");
-                let newEnfant = document.querySelector(".group-critaire").cloneNode(true);
+                let newEnfant = document.querySelector(".exemple-recherche").cloneNode(true);
+                let boutonAdd = newEnfant.querySelector(".fa-plus");
+                newEnfant.removeChild(boutonAdd);
                 let boutonSupp = document.createElement("i");
-                boutonSupp.setAttribute("class", "fa-solid fa-xmark fa-2xl");
+                boutonSupp.setAttribute("class", "fa-solid fa-xmark");
                 boutonSupp.addEventListener('click', () => {
                     parent.removeChild(newEnfant);
                 });

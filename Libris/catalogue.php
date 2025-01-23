@@ -2,13 +2,17 @@
     require_once 'header.php';  
 
     $order = 'l.titre_livre ASC'; // Ordre par défaut (A-Z)
+    $whereClause = '';
     $ListeConditions = [];
+    $ListeConditionsRechercheAvance = [];
     $ListeParametres = [];
-
+    
     if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         // vérifie quel trie est choisie
         if ($_POST['form']=== 'tri' || $_POST['form'] === 'filtre'){
             if (isset($_POST['tri'])) {
+                $whereClause = $_POST['whereCause'];
+                $ListeParametres = explode(';',$_POST['listePram']);
                 if ($_POST['tri'] == 'z-a') {
                     $order = 'l.titre_livre DESC'; // Z-A
                 } elseif ($_POST['tri'] == 'prix-croissant') {
@@ -22,7 +26,6 @@
                 $ListeParametresVides = implode(',', array_fill(0, count($_POST['genres']), '?'));
                 $ListeConditions[] = "g.nom_genre IN ($ListeParametresVides)";
                 $ListeParametres = array_merge($ListeParametres, $_POST['genres']);
-                echo $ListeParametres[0];
             }
             // Filtre par langues
             if(isset($_POST['langues']) && is_array($_POST['langues'])) {
@@ -37,13 +40,14 @@
                 $ListeParametres = array_merge($ListeParametres, $_POST['public']);
             }
             // Filtre par E-book
-            if (isset($_POST['ebook']) && $_POST['ebook'] == '1') {
+            if (isset($_POST['ebook'])) {
                 $ListeConditions[] = "eb.id_livre IS NOT NULL";
             }
             // Filtre par prix
-            if (isset($_POST['prix-min']) && is_numeric($_POST['prix-min']) && isset($_POST['prix-max'])&& is_numeric($_POST['prix-max'])) {
+            if (isset($_POST['prix']) && isset($_POST['prix-min']) && isset($_POST['prix-max'])){
                 $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
                 array_push($ListeParametres, $_POST['prix-min'], $_POST['prix-max']);
+                
             }
         }
             
@@ -69,44 +73,104 @@
                 $ListeParametres = array_merge($ListeParametres, $_GET['public']);
             } 
             // Filtre par E-book
-            if (isset($_GET['ebook']) && $_GET['ebook'] == '1') {
+            if (isset($_GET['ebook'])) {
                 $ListeConditions[] = "eb.id_livre IS NOT NULL";
             }
             // Filtre par prix
-            if (isset($_GET['prix-min']) && is_numeric($_GET['prix-min']) && isset($_GET['prix-max'])&& is_numeric($_GET['prix-max'])) {
+            if (isset($_GET['prix']) && isset($_GET['prix-min']) && isset($_GET['prix-max'])){
                 $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
                 array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
+                
             }
+            
             // Filtre par annee
             if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
-                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
-                array_push($ListeParametres, $_GET['anneeDebut'], $_GET['anneeFin']);
+                if (!empty($_GET['anneeDebut']) && !empty($_GET['anneeFin'])){
+                    $ListeConditions[] = "ae.date_parution BETWEEN ? AND ?";
+                    array_push($ListeParametres, $_GET['anneeDebut'], $_GET['anneeFin']);
+                }
             } 
-        }
-    
-    
-    $whereClause = '';                                                                                                                                                        
-    if (!empty($ListeConditions)) {
-        $whereClause = 'WHERE ' . implode(' OR ', $ListeConditions);
-    }
-    else{
-        if($_SERVER['REQUEST_METHOD'] == 'GET'){
-            if(isset($_GET['recherche'])){
-            $whereClause = 'WHERE pc.type_public LIKE "%' .$_GET['recherche']. '%"
-                                OR g.nom_genre LIKE "%' .$_GET['recherche']. '%" 
-                                OR l.titre_livre LIKE "%' .$_GET['recherche']. '%"  
-                                OR l.type_litteraire LIKE "%' .$_GET['recherche']. '%" 
-                                OR lang.nom_langue LIKE "%' .$_GET['recherche']. '%" 
-                                OR ed.nom_edition LIKE "%' .$_GET['recherche']. '%" 
-                                OR a.nom_auteur LIKE "%' .$_GET['recherche']. '%"
-                                OR l.cote_livre LIKE "%' .$_GET['recherche']. '%"';
-            }else{
-                $whereClause = '';
-            } 
-        }
-    }
+            // Filtre par recherche-avance
+            if (isset($_GET['recherche-avance'])){
+                if($_GET['recherche-avance'][0] !== ''){
+                    $conditionCritaire = ''; 
+                    $conditions = '';
+                    for($i = 0; $i < sizeof($_GET['recherche-avance']); $i++){
+                        switch(strtolower($_GET['critaireValue'][$i])){
+                            case "titre":
+                                $conditionCritaire = "l.titre_livre";
+                                break;
+                            case "auteur":
+                                $conditionCritaire = "a.nom_auteur";
+                                break;
+                            case "edition":
+                                $conditionCritaire = "ed.nom_edition";
+                                break;
+                            case "isbn":
+                                $conditionCritaire = "i.num_isbn";
+                                break;
+                            case "sujet":
+                                $conditionCritaire = "l.resume";
+                                break;
+                            default:
+                                break;
+                        }
+                        if ($i != 0 OR strtolower($_GET['critaireOption'][0]) === "sauf"){
+                            switch(strtolower($_GET['critaireOption'][$i])){
+                                case "et":
+                                    $conditions = "AND" .' '. $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                    break;
+                                case "ou":
+                                    $conditions = "OR" .' '. $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                    break;
+                                case "sauf":
+                                    if($i===0){
+                                        $conditions = $conditionCritaire . ' NOT LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                    }else{
+                                        $conditions = ' AND ' . $conditionCritaire . ' NOT LIKE "%'.$_GET['recherche-avance'][$i].'%"';
 
-    
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                        }else{
+                            $conditions = $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                        }
+                        array_push($ListeConditionsRechercheAvance, $conditions);
+                    }
+                
+                }
+                
+            }
+        }
+        
+    if ($whereClause === ''){                                                                                                                 
+        if (!empty($ListeConditions) && empty($ListeConditionsRechercheAvance)) {
+            $whereClause = 'WHERE ' . implode(' OR ', $ListeConditions);
+        }else if(empty($ListeConditions) && !empty($ListeConditionsRechercheAvance)){
+            $whereClause = 'WHERE ' . implode(' ', $ListeConditionsRechercheAvance);
+        }else if(!empty($ListeConditions) && !empty($ListeConditionsRechercheAvance)){
+            $whereClause = 'WHERE ' . implode(' ', $ListeConditionsRechercheAvance);
+            $whereClause = $whereClause . ' OR ' . implode(' OR ', $ListeConditions);
+        }else{
+            if($_SERVER['REQUEST_METHOD'] == 'GET'){
+                if(isset($_GET['recherche'])){
+                    $whereClause = 'WHERE pc.type_public LIKE "%' .$_GET['recherche']. '%"
+                                        OR g.nom_genre LIKE "%' .$_GET['recherche']. '%" 
+                                        OR l.titre_livre LIKE "%' .$_GET['recherche']. '%"  
+                                        OR l.type_litteraire LIKE "%' .$_GET['recherche']. '%" 
+                                        OR lang.nom_langue LIKE "%' .$_GET['recherche']. '%" 
+                                        OR ed.nom_edition LIKE "%' .$_GET['recherche']. '%" 
+                                        OR a.nom_auteur LIKE "%' .$_GET['recherche']. '%"
+                                        OR l.cote_livre LIKE "%' .$_GET['recherche']. '%"';
+                }else{
+                    $whereClause = '';
+                } 
+            }   
+        }
+    }
     
                                     
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
@@ -145,10 +209,14 @@
             <input type="hidden" name="form" value="filtre">
             <section class="info-ebook">
                 <h3>E-book</h3>
-                <input type="checkbox" id="ebook" name="ebook" value="1">
+                <input type="checkbox" id="ebook" name="ebook">
                 <label for="ebook">E-book</label>
-                <label for="price">Prix :</label>
-                <input type="range" name="prix" id="price" min="0" max="50" value="25">
+                <input type="checkbox" name="prix"> 
+                <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
+                <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
+                <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>
+                <input id="prix-max" name="prix-max" type="range" value="25" min="25" max="50"/>
+                    
             </section>
             <section>
                 <h3>Genre de livres</h3>
@@ -160,17 +228,6 @@
                     ?>
                 </ul>
             </section>
-            <!-- <section>
-                <h3>Note</h3>
-                <input type="checkbox" id="plus3etoiles" name="note">
-                <label for="plus3etoiles">Plus de 3 étoiles</label>
-                <input type="checkbox" id="moins3etoiles" name="note">
-                <label for="moins3etoiles">Moins de 3 étoiles</label>
-            </section> -->
-            <!-- <section>
-                <label for="parution">Date de parution :</label>
-                <input type="range" id="parution" min="0" max="50" value="10">
-            </section> -->
             <button type="submit">Appliquer les filtres</button>
         </form>
     </section>
@@ -178,6 +235,15 @@
          
         <form method="POST">
             <input type="hidden" name="form" value="tri">
+            <input type="hidden" name="whereCause" value="<?php echo $whereClause?>"></label>
+            <input type="hidden" name="listePram" value=
+            <?php 
+                $value = ""; 
+                for($i = 0; $i < sizeof($ListeParametres); $i++){
+                    ($i===0)? $value = $ListeParametres[$i] :$value = $value . ";" .$ListeParametres[$i];
+                }
+                echo $value;
+            ?>></label>
             <label for="tri-select">Trier par :</label>
             <select name="tri" id="tri-select" onchange="this.form.submit()">
                 <option value="a-z" <?php 
@@ -205,6 +271,9 @@
 
         <div class="liste-ebook">
             <?php
+            if (empty($livreRecherche)){
+                echo '<p>Aucun Résultat</p>';
+            }else{
                 foreach($livreRecherche as $livre){
                     $lesAuteurs = '';
                     echo '<div class="book-item"><a href="./info_livre.php?id_livre=' . $livre['id_livre']. '">';
@@ -213,8 +282,12 @@
                     
                     $stmtAuteur->execute([':id_livre' => $livre['id_livre']]);
                     $Auteurs = $stmtAuteur->fetchAll();
-                    foreach($Auteurs as $aut){
-                        $lesAuteurs = $lesAuteurs . $aut['prenom_auteur'] . " " . $aut['nom_auteur'];
+                    for($i =0; $i < sizeOf($Auteurs); $i++){
+                        if($i ===0){
+                            $lesAuteurs = $Auteurs[$i]['prenom_auteur'] . " " . $Auteurs[$i]['nom_auteur'];
+                        }else{
+                            $lesAuteurs = $lesAuteurs .' | '. $Auteurs[$i]['prenom_auteur'] . " " . $Auteurs[$i]['nom_auteur'];
+                        }
                     }
                     echo '<p>' . $lesAuteurs . '</p>';
 
@@ -228,36 +301,26 @@
                     
                     echo '</a></div>';
                 }
+            }
             ?>
         </div>
     </section>
 </div>
 
 <script>
-    function filtre_recherche(requestData){
-            fetch("catalogue.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .then(data => {
-            if (data.success) {
-                button.textContent = action === "add" ? "remove" : "add";
-            } else {
-                console.error(data.message);
-            }
-            })
-            .catch(error => {
-            console.error("Error:", error);
-            });
-            window.location.reload();
-        }
+    let slideMin = document.querySelector("#prix-min");
+    let slideMax = document.querySelector("#prix-max");
+    let valeurSlideMin = document.querySelector("#valeurMin");
+    let valeurSlideMax = document.querySelector("#valeurMax");
 
-
+    slideMax.addEventListener('input', () =>{
+        valeurSlideMax.innerHTML = slideMax.value;
+    })
+    slideMin.addEventListener('input', () =>{
+        valeurSlideMin.innerHTML = slideMin.value;
+    })
 </script>
+
 <?php
     require_once 'footer.php';
 ?>

@@ -112,6 +112,7 @@ header .search-bar .advanced-search {
     overflow-x: hidden;
     transition: 0.3s;
     padding-top: 2%;
+    border-right: solid 2px #AAA7AF;
 }
 .sidebar ul:first-child{
     box-shadow: 1px 7px 5px 0px #AAA7AF
@@ -134,8 +135,8 @@ header .search-bar .advanced-search {
     display: block;
     transition: 0.3s;
 }
-.sidebar a:hover {
-    color: #f1f1f1;
+.sidebar a:not(.active):hover {
+    color: #FFDA89;
 }
 .sidebar .active {
     background-color: #D0BDF6;
@@ -1215,13 +1216,12 @@ div.info_ebook_acheter p:nth-of-type(1){
 .gestion_livre{
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    margin: 1% auto;
-    padding: 2%;
 }
 
-.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover {
+
+.gestion-emprunts-reservations button:hover, .gestion-utilisateurs button:hover, .gestion_livre button:hover {
     background-color: black;
     color: #FFDA89;
     transition: 0.3s ease;
@@ -1496,6 +1496,21 @@ section#livre {
 
 /* Gestion des livres*/
 
+.gestion-livres {
+    margin-bottom: 4em;
+    margin-left: 10em;
+    margin-right: 10em;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+    font-size: small;
+}
+
+.gestion-livres h1{
+    font-size: 28px;
+    margin: 2em 0 0.5em 0;
+}
+.ajout_livre {
+    padding: 10px;
+}
 .drop-zone {
     border: 2px dashed #D0BDF6;
     border-radius: 10px;
@@ -1517,16 +1532,11 @@ section#livre {
     display: none;
 }
 
-.ajout_livre h1{
-    width: 20%;
-    padding: 20px;
-}
-
 .drop-zones-container {
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
-    margin: 20px;
+    margin: 2vw 2vw;
     gap: 20px; /* Adjust the gap as needed */
 }
 .drop-zone label {
@@ -1558,17 +1568,20 @@ button.btn_valider_ajout {
     transition: background-color 0.3s ease;
 }
 
+
+
 .drop-zone img{
     width: 100px;
 }
 
 .info-style-fichier{
-    
     border: 2px solid #D0BDF6;
-    width: 70%;
     border-radius: 10px;
     background-color: #D0BDF6;
     padding: 20px;
+    width: 100%;
+    margin: 0 2vw;
+    font-size: 18px;
 }
 
 .info-style-container{
