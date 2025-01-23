@@ -282,7 +282,7 @@ main {
 }
 .slide-container{
     display: grid;
-    grid-template-columns: 1fr 20%;
+    grid-template-columns: 1fr 5%;
     justify-content: center;
     align-items: center;
 }
@@ -1635,6 +1635,18 @@ button.btn_valider_ajout {
     /* Mes e-books */
     .mes-ebooks {
         margin: 0 1rem 2rem 1rem;
+    }
+
+    div.search-bar form input, div.search-bar input::placeholder{
+        color: transparent;
+        background-color: white;
+    }
+    .slide-container{
+        grid-template-columns: 1fr 20%;
+    }
+
+    .affichage_avis div.affichage_avis{
+        display: block;
     }
 
 }
