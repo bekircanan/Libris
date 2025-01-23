@@ -184,15 +184,15 @@
                                             LEFT OUTER JOIN isbn i ON i.id_livre = l.id_livre
                                             LEFT OUTER JOIN langue lang ON i.id_langue = lang.id_langue
                                             LEFT OUTER JOIN edition ed ON ed.id_edition = ed.id_edition
-                         
+                            
                                         $whereClause
                                         ORDER BY $order"); 
     $stmtRecherche->execute($ListeParametres);
     $livreRecherche = $stmtRecherche->fetchAll();
 
-    $stmtNbAvis = $conn->prepare("SELECT COUNT(id_avis) as avis
-                                    FROM avis
-                                    WHERE id_livre = :id_livre");
+    $stmtSelectAllAvis = $conn->prepare("SELECT * 
+                                         FROM avis
+                                         WHERE id_livre = :id_livre");
                                                     
     $stmtAuteur = $conn->prepare("SELECT DISTINCT a.nom_auteur, a.prenom_auteur 
                                     FROM auteur a LEFT OUTER JOIN a_ecrit ae ON a.id_auteur = ae.id_auteur
@@ -208,22 +208,29 @@
         <form id="filters-form" method="POST">
             <input type="hidden" name="form" value="filtre">
             <section class="info-ebook">
-                <h3>E-book</h3>
-                <input type="checkbox" id="ebook" name="ebook">
-                <label for="ebook">E-book</label>
-                <input type="checkbox" name="prix"> 
-                <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
-                <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
-                <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>
-                <input id="prix-max" name="prix-max" type="range" value="25" min="25" max="50"/>
-                    
+                <h3>E-book</h3> 
+                <ul>
+                    <div class="groupe-checkbox">
+                        <input type="checkbox" id="ebook" name="ebook">
+                        <label for="ebook">E-book</label>
+                    </div>
+                    <div class="groupe-checkbox">
+                        <input type="checkbox" name="prix"> 
+                        
+                    </div>
+                    <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
+                    <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
+                    <br>
+                    <label for="prix-max">Prix max <span id="valeurMax">50</span>:</label>
+                    <input id="prix-max" name="prix-max" type="range" value="50" min="25" max="50"/>
+                </ul>
             </section>
             <section>
                 <h3>Genre de livres</h3>
                 <ul>
                     <?php
                         foreach ($resultGenre as $genre){
-                            echo '<li><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></li>';
+                            echo '<div class="groupe-checkbox"><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
                         }
                     ?>
                 </ul>
@@ -291,14 +298,36 @@
                     }
                     echo '<p>' . $lesAuteurs . '</p>';
 
-                    if($livre['prix'] != null){
-                        echo '<p><span class="price"> Prix : ' . $livre['prix'] . '</span></p>';
+                    $stmtSelectAllAvis->execute([':id_livre' => $livre['id_livre']]);
+                    $allAvis = $stmtSelectAllAvis->fetchAll();
+                    $totalAvis = count($allAvis);
+                    $sumAvis = 0;
+
+                    foreach ($allAvis as $avis) {
+                        $sumAvis += $avis['note_avis'];
                     }
 
-                    $stmtNbAvis->execute([':id_livre' => $livre['id_livre']]);
-                    $NbAvis = $stmtNbAvis->fetch();
-                    echo '<p> avis : ' . $NbAvis['avis'] . '</p>';
+                    $averageAvis = $totalAvis ? $sumAvis / $totalAvis : 0;
+                    $averageAvis = round($averageAvis, 1);
+                    $etoiles = '';
+
+                    echo '<div class="star-rating">';
+                    for ($i = 1; $i <= 5; $i++) {
+                        if ($i <= $averageAvis) {
+                            $etoiles =  $etoiles.'<span class="star filled">★</span>';
+                        }
+                    }
+                    echo $etoiles;
+
+                    echo '</div>';
+                    //<echo '<p> (' . $totalAvis . ')</p>';
                     
+                    
+
+                    if($livre['prix'] != null){
+                        echo '<p><span class="price"> E-BOOK | ' . $livre['prix'] . '€</span></p>';
+                    }
+
                     echo '</a></div>';
                 }
             }
@@ -308,6 +337,7 @@
 </div>
 
 <script>
+    let checkbox = document.getElementById("ebook");
     let slideMin = document.querySelector("#prix-min");
     let slideMax = document.querySelector("#prix-max");
     let valeurSlideMin = document.querySelector("#valeurMin");
@@ -319,6 +349,8 @@
     slideMin.addEventListener('input', () =>{
         valeurSlideMin.innerHTML = slideMin.value;
     })
+    
+    
 </script>
 
 <?php

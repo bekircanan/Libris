@@ -21,7 +21,9 @@
                         <select name="critaireValue[]">
                             <option value="titre">Titre</option>
                             <option value="auteur">Auteur</option>
-                            <option value="genre">Genre</option>
+                            <option value="edition">Edition</option>
+                            <option value="sujet">Sujet</option>
+                            <option value="isbn">ISBN</option>
                         </select>
                         <input type="text" name="recherche-avance[]" placeholder="Rechercher...">
                         <i class="fa-solid fa-plus"></i>
@@ -47,37 +49,55 @@
                             }
                         ?>
                         </div>
-                    </div>
-                    <div class="groupe-langue">
+
                         <h4>Langues :</h4>
+                        <div class="groupe-langue">
                         <?php
                             foreach ($resultLangue as $langue){
                                 echo '<div class="groupe-checkbox"><input type="checkbox" name="langues[]" value="' . $langue['nom_langue'] . '"><label for="' . $langue['nom_langue'] . '">' . $langue['nom_langue'] . '</label></div>';
                             }
                         ?>
-                    </div>
-                    <div class="groupe-public">
+                        </div>
+                    
                         <h4>Public cible :</h4>
-                        <?php
-                            foreach ($resultCible as $public){
-                                echo '<input type="checkbox" name="public[]" value="' . $public['type_public'] . '"><label for="' . $public['type_public'] . '">' . $public['type_public'] . '</label>';
-                            }
-                        ?>
-                    </div>
-                    <div class="groupe-ebook">
+                        <div class="groupe-public">
+                            <?php
+                                foreach ($resultCible as $public){
+                                    echo '<div class="groupe-checkbox"><input type="checkbox" name="public[]" value="' . $public['type_public'] . '"><label for="' . $public['type_public'] . '">' . $public['type_public'] . '</label></div>';
+                                }
+                            ?>
+                        </div>
                         <h4>E-book :</h4>
-                        <label><input type="checkbox" name="ebook"> E-book</label>
-
+                        <div class="groupe-ebook">
+                            <div class="groupe-checkbox">
+                                <input id="ebook" type="checkbox" name="ebook"><label for="ebook">E-book</label>
+                            </div>
+                        </div>
                         <div class="groupe-prix">
-                            <input type="checkbox" name="prix"> 
-                            <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
-                            <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
-                            <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>
-                            <input id="prix-max" name="prix-max" type="range" value="25" min="25" max="50"/>
+                            <div class="groupe-checkbox">
+                                <input type="checkbox" name="prix"> prendre en compte le prix
+                            </div>  
+                                <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
+                                <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>
+                                <label for="prix-max">Prix max <span id="valeurMax">25</span>:</label>
+                                <input id="prix-max" name="prix-max" type="range" value="25" min="25" max="50"/>
+                                <!-- <div class="wrapper">
+                                    <div class="container">
+                                        <div class="slider-track"></div>
+                                        <input type="range" min="0" max="100" value="30" id="slider-1" oninput="slideOne()">
+                                        <input type="range" min="0" max="100" value="70" id="slider-2" oninput="slideTwo()">
+                                    </div>
+                                </div> -->
+                            
+                                
+                            
                         </div>
                     </div>
+                
+                <div class="conteneur-button">
+                    <button type="submit" class="button-recherche-avance">Chercher</button>
+                </div>
                 </section>
-                <button type="submit" class="button-recherche-avance">Chercher</button>
             </form>
         </div>
 
