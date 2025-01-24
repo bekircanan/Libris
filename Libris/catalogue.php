@@ -6,16 +6,23 @@
     $ListeConditions = [];
     $ListeConditionsRechercheAvance = [];
     $ListeParametres = [];
+    $Argument = 0;
     
     if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         // vérifie quel trie est choisie
         if ($_POST['form']=== 'tri' || $_POST['form'] === 'filtre'){
             if (isset($_POST['tri'])) {
                 
-                $ListeParametres = explode(';',$_POST['listePram']);
-                // if($ListeParametres == ""){
-                //     $whereClause = '';
-                // } 
+                
+                
+                    if($_POST['listcond'] === 1){
+                        $ListeParametres = explode(';',$_POST['listePram']);
+                        $Argument = 1;
+                    }else{
+                        $ListeParametres = [];
+                        $Argument = 0;
+                    }
+                
                 $whereClause = $_POST['whereCause'];
                 if ($_POST['tri'] == 'z-a') {
                     $order = 'l.titre_livre DESC'; // Z-A
@@ -122,16 +129,16 @@
                         if ($i != 0 OR strtolower($_GET['critaireOption'][0]) === "sauf"){
                             switch(strtolower($_GET['critaireOption'][$i])){
                                 case "et":
-                                    $conditions = "AND" .' '. $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                    $conditions = "AND" .' '. $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     break;
                                 case "ou":
-                                    $conditions = "OR" .' '. $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                    $conditions = "OR" .' '. $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     break;
                                 case "sauf":
                                     if($i===0){
-                                        $conditions = $conditionCritaire . ' NOT LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                        $conditions = $conditionCritaire . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     }else{
-                                        $conditions = ' AND ' . $conditionCritaire . ' NOT LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                                        $conditions = ' AND ' . $conditionCritaire . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
 
                                     }
                                     break;
@@ -140,7 +147,7 @@
                                     break;
                             }
                         }else{
-                            $conditions = $conditionCritaire . ' LIKE "%'.$_GET['recherche-avance'][$i].'%"';
+                            $conditions = $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                         }
                         array_push($ListeConditionsRechercheAvance, $conditions);
                     }
@@ -176,13 +183,14 @@
             }
         }
     }
-
+    
     if(empty($whereClause)){
         $ListeParametres = [];
     }
-    if(sizeof($ListeParametres) === 0){
+    if(empty($ListeParametres) && $Argument){
         $whereClause = '';
-    }       
+    }  
+     
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
                                         FROM livre l LEFT OUTER JOIN ebook eb ON l.id_livre = eb.id_livre
                                             LEFT OUTER JOIN a_ecrit ae ON l.id_livre = ae.id_livre
@@ -256,6 +264,7 @@
         <form method="POST">
             <input type="hidden" name="form" value="tri">
             <input type="hidden" name="whereCause" value="<?php echo empty($whereClause) ? "" : $whereClause ?>"></label>
+            <input type="hidden" name="listcond" value="<?php echo empty($ListeConditionsRechercheAvance) ? 1 : 0 ?>"></label>
             <input type="hidden" name="listePram" value=
             <?php 
                 $value = ""; 
