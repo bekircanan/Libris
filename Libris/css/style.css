@@ -706,11 +706,22 @@ div.info_ebook_acheter p:nth-of-type(1){
     grid-template-columns: 1fr 1fr 1fr;
     gap: 4rem;
 }
+.book-item h3{
+    margin-left:1rem;
+}
+.etoile{
+    margin-left: 1rem;
+}
 .book-item p:nth-of-type(1) {
     margin-top: 5px;
     margin-bottom: 0;
+    margin-left: 1rem;
     font-size: 14px;
     color: #567CDC;
+}
+.book-item a:last-child{
+    background-color: red;
+    margin-left: 1rem;
 }
 .book-item p:nth-of-type(2){
 
@@ -774,8 +785,7 @@ div.info_ebook_acheter p:nth-of-type(1){
 }
 .exemple-recherche input{
     width: 70%;
-    border: 2px solid #9e9c9c;
-    
+    border: 2px solid #9e9c9c;  
 }
 .exemple-recherche i{
     margin-top: 0.5rem;
@@ -815,7 +825,6 @@ div.info_ebook_acheter p:nth-of-type(1){
 .groupe-checkbox label {
     font-size: 16px;
     cursor: pointer;
-
 }
 .groupe-annee{
     display: flex;
@@ -857,6 +866,21 @@ div.info_ebook_acheter p:nth-of-type(1){
 .button-recherche-avance:hover {
     background-color: #fdc44a;    
     cursor: pointer;
+}
+#btnfil, #btnCa, #btnAv {
+    display: none;
+}
+
+#btnfil:checked + label > form,
+#btnCa:checked + label > form,
+#btnAv:checked + label > *:not(h2) {
+    display: none;
+}
+
+#btnfil:checked + label > h2::after,
+#btnCa:checked + label > h2::after,
+#btnAv:checked + label > h2::after {
+    content: "▲";
 }
 /* .wrapper {
     position: relative;
@@ -1652,19 +1676,8 @@ button.btn_valider_ajout {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-    .text-container{
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    #page_catalogue {
-        flex-direction: column;
-        gap: 10px;
-    }
+    
 
-    .filters {
-        width: 100%;
-    }
     main{
         display: block;
     }
@@ -1697,6 +1710,80 @@ button.btn_valider_ajout {
 
     .affichage_avis div.affichage_avis{
         display: block;
+    }
+    /* Catalogue */
+    .liste-ebook{
+        display: flex;
+        flex-direction: column;
+    }
+    #page_catalogue {
+        flex-direction: column;
+        gap: 10px;
+    }
+    /* recherche avancé */
+    .exemple-recherche{
+        display: flex;
+        flex-direction: column;
+    }
+    .exemple-recherche input {
+        width: 18.9rem;
+    }
+    .recherche-avance {
+        padding: 1rem;
+    }
+    .limter-recherche {
+        padding: 1rem;
+    }
+    .contenaire-recherche-avance {
+        background-color: #D0BDF6;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0;
+        padding-top:0;
+        border-radius: 0;
+    }
+    .exemple-recherche select {
+        width: 15rem;
+        border-bottom: 2px solid #9e9c9c;
+    }
+    .exemple-recherche input{
+        width: 13.8rem;
+    }
+    .groupe-annee {
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+    }
+    .groupe-annee p{
+        margin-left: 0rem;
+    }
+    .groupe-annee input{
+        width: 20%;
+        height: 10%;
+        margin-left: 0;
+    }
+    .groupe-genre, .groupe-langue, .groupe-public {
+        margin-left: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 1rem;
+        column-gap: 0rem;
+    }
+    .groupe-ebook{
+        padding: 1rem;
+        margin-left: 0;
+    } 
+    .groupe-prix{
+        padding: 1rem;
+        margin-left: 0;
+    }
+    .groupe-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0; 
+        width: 10rem;
     }
 
 }

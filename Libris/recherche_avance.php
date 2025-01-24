@@ -75,7 +75,7 @@
                         </div>
                         <div class="groupe-prix">
                             <div class="groupe-checkbox">
-                                <input type="checkbox" name="prix"> prendre en compte le prix
+                                <input type="checkbox" name="prix"> (prendre en compte le prix)
                             </div>  
                                 <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
                                 <input id="prix-min" name="prix-min" type="range" value="0" min="0" max="25"/>

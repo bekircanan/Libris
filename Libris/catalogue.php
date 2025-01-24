@@ -11,8 +11,12 @@
         // vérifie quel trie est choisie
         if ($_POST['form']=== 'tri' || $_POST['form'] === 'filtre'){
             if (isset($_POST['tri'])) {
-                $whereClause = $_POST['whereCause'];
+                
                 $ListeParametres = explode(';',$_POST['listePram']);
+                // if($ListeParametres == ""){
+                //     $whereClause = '';
+                // } 
+                $whereClause = $_POST['whereCause'];
                 if ($_POST['tri'] == 'z-a') {
                     $order = 'l.titre_livre DESC'; // Z-A
                 } elseif ($_POST['tri'] == 'prix-croissant') {
@@ -144,8 +148,7 @@
                 }
                 
             }
-        }
-        
+        } 
     if ($whereClause === ''){                                                                                                                 
         if (!empty($ListeConditions) && empty($ListeConditionsRechercheAvance)) {
             $whereClause = 'WHERE ' . implode(' OR ', $ListeConditions);
@@ -165,14 +168,21 @@
                                         OR ed.nom_edition LIKE "%' .$_GET['recherche']. '%" 
                                         OR a.nom_auteur LIKE "%' .$_GET['recherche']. '%"
                                         OR l.cote_livre LIKE "%' .$_GET['recherche']. '%"';
+                    $ListeParametres = [];
                 }else{
                     $whereClause = '';
+                    $ListeParametres = [];
                 } 
-            }   
+            }
         }
     }
-    
-                                    
+
+    if(empty($whereClause)){
+        $ListeParametres = [];
+    }
+    if(sizeof($ListeParametres) === 0){
+        $whereClause = '';
+    }       
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
                                         FROM livre l LEFT OUTER JOIN ebook eb ON l.id_livre = eb.id_livre
                                             LEFT OUTER JOIN a_ecrit ae ON l.id_livre = ae.id_livre
@@ -203,6 +213,7 @@
 
 <div id="page_catalogue">
     <section class="filters">
+    <input type="checkbox" id="btnfil" hidden/><label for="btnfil">
         <h1>Filtre</h1>
         <hr>
         <form id="filters-form" method="POST">
@@ -237,12 +248,14 @@
             </section>
             <button type="submit">Appliquer les filtres</button>
         </form>
+    </label>
     </section>
+    
     <section id="catalogue">
          
         <form method="POST">
             <input type="hidden" name="form" value="tri">
-            <input type="hidden" name="whereCause" value="<?php echo $whereClause?>"></label>
+            <input type="hidden" name="whereCause" value="<?php echo empty($whereClause) ? "" : $whereClause ?>"></label>
             <input type="hidden" name="listePram" value=
             <?php 
                 $value = ""; 
@@ -311,7 +324,7 @@
                     $averageAvis = round($averageAvis, 1);
                     $etoiles = '';
 
-                    echo '<div class="star-rating">';
+                    echo '<div class="star-rating etoile">';
                     for ($i = 1; $i <= 5; $i++) {
                         if ($i <= $averageAvis) {
                             $etoiles =  $etoiles.'<span class="star filled">★</span>';
@@ -320,7 +333,6 @@
                     echo $etoiles;
 
                     echo '</div>';
-                    //<echo '<p> (' . $totalAvis . ')</p>';
                     
                     
 
@@ -337,7 +349,6 @@
 </div>
 
 <script>
-    let checkbox = document.getElementById("ebook");
     let slideMin = document.querySelector("#prix-min");
     let slideMax = document.querySelector("#prix-max");
     let valeurSlideMin = document.querySelector("#valeurMin");
@@ -349,8 +360,6 @@
     slideMin.addEventListener('input', () =>{
         valeurSlideMin.innerHTML = slideMin.value;
     })
-    
-    
 </script>
 
 <?php
