@@ -1676,8 +1676,85 @@ button.btn_valider_ajout {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-    
-
+    .text-container{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    /* Catalogue */
+    .liste-ebook{
+        display: flex;
+        flex-direction: column;
+    }
+    #page_catalogue {
+        flex-direction: column;
+        gap: 10px;
+    }
+    /* recherche avancé */
+    .exemple-recherche{
+        display: flex;
+        flex-direction: column;
+    }
+    .exemple-recherche input {
+        width: 18.9rem;
+    }
+    .recherche-avance {
+        padding: 1rem;
+    }
+    .limter-recherche {
+        padding: 1rem;
+    }
+    .contenaire-recherche-avance {
+        background-color: #D0BDF6;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0;
+        padding-top:0;
+        border-radius: 0;
+    }
+    .exemple-recherche select {
+        width: 15rem;
+        border-bottom: 2px solid #9e9c9c;
+    }
+    .exemple-recherche input{
+        width: 13.8rem;
+    }
+    .groupe-annee {
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+    }
+    .groupe-annee p{
+        margin-left: 0rem;
+    }
+    .groupe-annee input{
+        width: 20%;
+        height: 10%;
+        margin-left: 0;
+    }
+    .groupe-genre, .groupe-langue, .groupe-public {
+        margin-left: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 1rem;
+        column-gap: 0rem;
+    }
+    .groupe-ebook{
+        padding: 1rem;
+        margin-left: 0;
+    } 
+    .groupe-prix{
+        padding: 1rem;
+        margin-left: 0;
+    }
+    .groupe-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0; 
+        width: 10rem;
+    }
     main{
         display: block;
     }
