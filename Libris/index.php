@@ -46,6 +46,7 @@ SELECT l.id_livre, l.titre_livre, l.img_couverture,
         JOIN auteur a ON a.id_auteur = ae.id_auteur
         LEFT JOIN avis av ON l.id_livre = av.id_livre
         GROUP BY l.id_livre, l.titre_livre, l.img_couverture
+        having moy>1
         ORDER BY moy DESC LIMIT 25
 ");
 $stmt->execute();
@@ -62,13 +63,13 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="slide">
             <?php 
             if ($livres) {
-                foreach ($livres as $liv) { 
-                    echo '<div class="pre-livre">';
-                    echo '<a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']) . '">';
-                    echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
-                    echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
-                    echo '<p>' . htmlspecialchars($liv['auteurs']) . '</p>';
-                    echo '</a></div>';
+                foreach ($livres as $liv) {
+                        echo '<div class="pre-livre">';
+                        echo '<a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']) . '">';
+                        echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
+                        echo '<h2>' . htmlspecialchars($liv['titre_livre']) . '</h2>';
+                        echo '<p>' . htmlspecialchars($liv['auteurs']) . '</p>';
+                        echo '</a></div>';
                  }
             } else {
                 echo '<p>No books found with sufficient ratings.</p>';

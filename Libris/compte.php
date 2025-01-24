@@ -35,7 +35,8 @@
             }else{
                 $errlog = "Mot de passe incorrect.";
             }
-        }if(isset($_FILES["profil"]) && !empty($_FILES["profil"])){
+        }if(isset($_FILES["profil"]) && $_FILES["profil"]["error"] == 0){
+            echo 'test';
             $imageFileType = strtolower(pathinfo($_FILES["profil"]["name"],PATHINFO_EXTENSION));
             $target_file =  "img/profil/" . $_SESSION['id'] . "." . $imageFileType;
             $uploadOk = 1;

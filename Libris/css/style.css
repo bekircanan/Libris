@@ -1700,8 +1700,7 @@ button.btn_valider_ajout {
         margin: 0 1rem 2rem 1rem;
     }
 
-    div.search-bar form input, div.search-bar input::placeholder{
-        color: transparent;
+    div.search-bar form input{
         background-color: white;
     }
     .slide-container{
@@ -1711,79 +1710,16 @@ button.btn_valider_ajout {
     .affichage_avis div.affichage_avis{
         display: block;
     }
-    /* Catalogue */
-    .liste-ebook{
-        display: flex;
-        flex-direction: column;
+    header form button{
+        display: none;
     }
-    #page_catalogue {
-        flex-direction: column;
-        gap: 10px;
+    header div img{
+        margin-right: 0;
     }
-    /* recherche avancé */
-    .exemple-recherche{
-        display: flex;
-        flex-direction: column;
+    header{
+        padding: 0 1rem;
     }
-    .exemple-recherche input {
-        width: 18.9rem;
+    header .search-bar-container{
+        width: 100%;
     }
-    .recherche-avance {
-        padding: 1rem;
-    }
-    .limter-recherche {
-        padding: 1rem;
-    }
-    .contenaire-recherche-avance {
-        background-color: #D0BDF6;
-        margin: 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding: 0;
-        padding-top:0;
-        border-radius: 0;
-    }
-    .exemple-recherche select {
-        width: 15rem;
-        border-bottom: 2px solid #9e9c9c;
-    }
-    .exemple-recherche input{
-        width: 13.8rem;
-    }
-    .groupe-annee {
-        display: flex;
-        flex-direction: column;
-        margin-left: 0;
-    }
-    .groupe-annee p{
-        margin-left: 0rem;
-    }
-    .groupe-annee input{
-        width: 20%;
-        height: 10%;
-        margin-left: 0;
-    }
-    .groupe-genre, .groupe-langue, .groupe-public {
-        margin-left: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        padding: 1rem;
-        column-gap: 0rem;
-    }
-    .groupe-ebook{
-        padding: 1rem;
-        margin-left: 0;
-    } 
-    .groupe-prix{
-        padding: 1rem;
-        margin-left: 0;
-    }
-    .groupe-checkbox {
-        display: flex;
-        align-items: center;
-        gap: 0; 
-        width: 10rem;
-    }
-
 }
