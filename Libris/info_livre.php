@@ -401,16 +401,16 @@ $stmtSelectAllAvis = $conn->prepare(
                 <input type="hidden" name="form" value="avis">
                 <h3>Laisser un avis :</h3>
                 <div class="note">
-                    <input type="radio" id="etoile1" name="note" value="1" />
-                    <label for="etoile1" title="1 étoiles">★</label>
-                    <input type="radio" id="etoile2" name="note" value="2" />
-                    <label for="etoile2" title="2 étoiles">★</label>
-                    <input type="radio" id="etoile3" name="note" value="3" />
-                    <label for="etoile3" title="3 étoiles">★</label>
+                    <input type="radio" id="etoile5" name="note" value="5" />
+                    <label for="etoile5" title="5 étoiles">★</label>
                     <input type="radio" id="etoile4" name="note" value="4" />
                     <label for="etoile4" title="4 étoiles">★</label>
-                    <input type="radio" id="etoile5" name="note" value="5" />
-                    <label for="etoile5" title="5 étoile">★</label>
+                    <input type="radio" id="etoile3" name="note" value="3" />
+                    <label for="etoile3" title="3 étoiles">★</label>
+                    <input type="radio" id="etoile2" name="note" value="2" />
+                    <label for="etoile2" title="2 étoiles">★</label>
+                    <input type="radio" id="etoile1" name="note" value="1" />
+                    <label for="etoile1" title="1 étoile">★</label>
                 </div>
 
                 <textarea name="new_avis" rows="5" required></textarea>
