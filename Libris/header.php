@@ -19,18 +19,32 @@
 
     // Définir les pages actuelles et les pages administratives
     $pageActuelle = basename($_SERVER['PHP_SELF']);
-    $pageadmin = ['gestion-emprunts-reservation.php', 'gestion-livres.php', 'gestion-utilisateurs.php'];
-    $pc = explode(' ', php_uname());
-    $typePc = ['Windows', 'Linux', 'Mac'];
+    $pageadmin = ['gestion-emprunts-reservations.php', 'gestion-livres.php', 'gestion-utilisateurs.php'];
+    $pc = $_SERVER['HTTP_USER_AGENT'];
+    $typePc = ['Windows', 'Mac'];
     $pageUtil = ['mes-reservations.php', 'mes-ebooks.php', 'panier.php', 'compte.php'];
-
+    $allow=true;
+    if((stripos($pc, $typePc[1]) || stripos($pc, $typePc[0]) )){
+        $allow=false;
+    }
     // Rediriger les utilisateurs non autorisés
-    if ((!isset($_SESSION['user']) || $_SESSION['admin'] !== 1 || !in_array($pc[0],$typePc)) && in_array($pageActuelle, $pageadmin) ) {
+    if ((!isset($_SESSION['user']) || $_SESSION['admin'] !== 1 || $allow) && in_array($pageActuelle, $pageadmin) ) {
         header('Location: index.php');
         exit();
-    } elseif((!isset($_SESSION['user']) || $_SESSION['admin'] !== 0) && in_array($pageActuelle, $pageUtil)){
+    }elseif((!isset($_SESSION['user']) || $_SESSION['admin'] !== 0) && in_array($pageActuelle, $pageUtil)){
         header('Location: index.php');
         exit();
+    }elseif(isset($_SESSION['user']) && $pageActuelle === 'inscrire.php'){
+        header('Location: index.php');
+        exit();
+    }elseif(isset($_SESSION['user'])){
+        $stmt = $conn->prepare("SELECT regle from achat_ebook where id_util = ? and regle = 0");
+        $stmt->bindParam(1, $_SESSION['id']);
+        $stmt->execute();
+        $regle = $stmt->fetch();
+        if($regle){
+            $notif='style = "color: red;"';
+        }
     }
 
     $errlog = "<p style='color:red;'>";
@@ -90,11 +104,16 @@
 </head>
 <body>
     <header>
-        <span class="open" onclick="ouvreNav()">
-            <span></span>
-            <span></span>
-            <span></span>
-        </span>
+        <?php
+            if(isset($notif)){
+                $notif2='style = "background-color: red;"';
+            }
+        ?>
+            <span class="open" onclick="ouvreNav()">
+                <span <?php echo isset($notif2) ? $notif2 : ''; ?>></span>
+                <span <?php echo isset($notif2) ? $notif2 : ''; ?>></span>
+                <span <?php echo isset($notif2) ? $notif2 : ''; ?>></span>
+            </span>
         <div class="search-bar-container">
             <div class="search-bar">
                 <form method="get" action="./catalogue.php">
@@ -124,7 +143,7 @@
                 } else {
                     echo '<li><a href="./mes-reservations.php"><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
                     echo '<li><a href="./mes-ebooks.php"><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
-                    echo '<li><a href="./panier.php"><i class="fa-regular fa-basket-shopping"></i> Mon panier</a></li>';
+                    echo '<li><a href="./panier.php"><i class="fa-regular fa-basket-shopping"'.(isset($notif) ? $notif : '').'></i> Mon panier</a></li>';
                 }    
             }?>
         </ul>
