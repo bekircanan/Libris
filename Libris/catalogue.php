@@ -1,6 +1,7 @@
 <?php
     require_once 'header.php';  
 
+    // initialisation des variables
     $order = 'l.titre_livre ASC'; // Ordre par défaut (A-Z)
     $whereClause = '';
     $ListeConditions = [];
@@ -8,20 +9,19 @@
     $ListeParametres = [];
     $Argument = 0;
     
+    // Vérifie si une requête POST a été envoyée
     if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         // vérifie quel trie est choisie
         if ($_POST['form']=== 'tri' || $_POST['form'] === 'filtre'){
             if (isset($_POST['tri'])) {
-                
-                
-                
-                    if($_POST['listcond'] === 1){
-                        $ListeParametres = explode(';',$_POST['listePram']);
-                        $Argument = 1;
-                    }else{
-                        $ListeParametres = [];
-                        $Argument = 0;
-                    }
+                // Vérifie si une recherche avancée a été effectuée
+                if($_POST['listcond'] === 1){
+                    $ListeParametres = explode(';',$_POST['listePram']);
+                    $Argument = 1;
+                }else{
+                    $ListeParametres = [];
+                    $Argument = 0;
+                }
                 
                 $whereClause = $_POST['whereCause'];
                 if ($_POST['tri'] == 'z-a') {
@@ -64,6 +64,7 @@
             
     }
 
+    // Vérifie si une requête GET a été envoyée
     if($_SERVER['REQUEST_METHOD'] == 'GET'){
             // Filtre par genres
             if(isset($_GET['genres']) && is_array($_GET['genres'])) {
@@ -106,6 +107,7 @@
                 if($_GET['recherche-avance'][0] !== ''){
                     $conditionCritaire = ''; 
                     $conditions = '';
+                    // Boucle pour chaque critaire de recherche avancée
                     for($i = 0; $i < sizeof($_GET['recherche-avance']); $i++){
                         switch(strtolower($_GET['critaireValue'][$i])){
                             case "titre":
@@ -126,6 +128,7 @@
                             default:
                                 break;
                         }
+                        // Vérifie si le critaire est différent de la première valeur
                         if ($i != 0 OR strtolower($_GET['critaireOption'][0]) === "sauf"){
                             switch(strtolower($_GET['critaireOption'][$i])){
                                 case "et":
@@ -156,7 +159,8 @@
                 
             }
         } 
-    if ($whereClause === ''){                                                                                                                 
+    if ($whereClause === ''){       
+        // Vérifie si une condition de recherche avancée a été effectuée                                                                                                          
         if (!empty($ListeConditions) && empty($ListeConditionsRechercheAvance)) {
             $whereClause = 'WHERE ' . implode(' OR ', $ListeConditions);
         }else if(empty($ListeConditions) && !empty($ListeConditionsRechercheAvance)){
@@ -191,6 +195,7 @@
         $whereClause = '';
     }  
      
+    // Requête pour récupérer les livres
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
                                         FROM livre l LEFT OUTER JOIN ebook eb ON l.id_livre = eb.id_livre
                                             LEFT OUTER JOIN a_ecrit ae ON l.id_livre = ae.id_livre
@@ -208,10 +213,12 @@
     $stmtRecherche->execute($ListeParametres);
     $livreRecherche = $stmtRecherche->fetchAll();
 
+    // Requête pour récupérer les avis
     $stmtSelectAllAvis = $conn->prepare("SELECT * 
                                          FROM avis
                                          WHERE id_livre = :id_livre");
                                                     
+    // Requête pour récupérer les auteurs
     $stmtAuteur = $conn->prepare("SELECT DISTINCT a.nom_auteur, a.prenom_auteur 
                                     FROM auteur a LEFT OUTER JOIN a_ecrit ae ON a.id_auteur = ae.id_auteur
                                     WHERE id_livre = :id_livre");
@@ -248,6 +255,7 @@
                 <h3>Genre de livres</h3>
                 <ul>
                     <?php
+                        // Afficher les genres
                         foreach ($resultGenre as $genre){
                             echo '<div class="groupe-checkbox"><input type="checkbox" name="genres[]" value="' . $genre['nom_genre'] . '"><label for="' . $genre['nom_genre'] . '">' . $genre['nom_genre'] . '</label></div>';
                         }
@@ -267,6 +275,7 @@
             <input type="hidden" name="listcond" value="<?php echo empty($ListeConditionsRechercheAvance) ? 1 : 0 ?>"></label>
             <input type="hidden" name="listePram" value=
             <?php 
+                // Boucle pour chaque paramètre de recherche avancée
                 $value = ""; 
                 for($i = 0; $i < sizeof($ListeParametres); $i++){
                     ($i===0)? $value = $ListeParametres[$i] :$value = $value . ";" .$ListeParametres[$i];
@@ -275,6 +284,7 @@
             ?>></label>
             <label for="tri-select">Trier par :</label>
             <select name="tri" id="tri-select" onchange="this.form.submit()">
+                <!--Ajout des options de tri -->
                 <option value="a-z" <?php 
                                         if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tri'])){
                                             if ($_POST['tri'] == 'a-z') echo 'selected';
@@ -303,6 +313,7 @@
             if (empty($livreRecherche)){
                 echo '<p>Aucun Résultat</p>';
             }else{
+                // Afficher les livres
                 foreach($livreRecherche as $livre){
                     $lesAuteurs = '';
                     echo '<div class="book-item"><a href="./info_livre.php?id_livre=' . $livre['id_livre']. '">';
@@ -320,11 +331,11 @@
                     }
                     echo '<p>' . $lesAuteurs . '</p>';
 
+                    // Calculer la moyenne des avis
                     $stmtSelectAllAvis->execute([':id_livre' => $livre['id_livre']]);
                     $allAvis = $stmtSelectAllAvis->fetchAll();
                     $totalAvis = count($allAvis);
                     $sumAvis = 0;
-
                     foreach ($allAvis as $avis) {
                         $sumAvis += $avis['note_avis'];
                     }
@@ -334,6 +345,7 @@
                     $etoiles = '';
 
                     echo '<div class="star-rating etoile">';
+                    // Afficher les étoiles
                     for ($i = 1; $i <= 5; $i++) {
                         if ($i <= $averageAvis) {
                             $etoiles =  $etoiles.'<span class="star filled">★</span>';
@@ -344,7 +356,7 @@
                     echo '</div>';
                     
                     
-
+                    // Afficher le prix
                     if($livre['prix'] != null){
                         echo '<p><span class="price"> E-BOOK | ' . $livre['prix'] . '€</span></p>';
                     }
@@ -358,11 +370,13 @@
 </div>
 
 <script>
+    // Récupérer les éléments
     let slideMin = document.querySelector("#prix-min");
     let slideMax = document.querySelector("#prix-max");
     let valeurSlideMin = document.querySelector("#valeurMin");
     let valeurSlideMax = document.querySelector("#valeurMax");
 
+    // Afficher la valeur des sliders
     slideMax.addEventListener('input', () =>{
         valeurSlideMax.innerHTML = slideMax.value;
     })

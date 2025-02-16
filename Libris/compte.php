@@ -1,11 +1,21 @@
 <?php
     require_once 'header.php';
+    // Autoriser les téléchargements de fichiers
     ini_set('file_uploads', '1');
     if(!isset($_SESSION['user'])){
         header('Location: index.php');
         exit;
     }
+
+    $stmt = $conn->prepare("SELECT img_profil FROM utilisateur WHERE id_util = ?");
+    $stmt->bindParam(1,$_SESSION['id']);
+    $stmt->execute();
+    $user = $stmt->fetch();
+
+    // Traitement du formulaire de modification
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        // Vérifier si les champs sont remplis
+        // pour pseudo
         if(isset($_POST['pseudo']) && !empty($_POST['pseudo'])){
             $newPseudo = $_POST['pseudo'];
             $stmt = $conn->prepare("UPDATE utilisateur SET pseudo = ? WHERE id_util  = ?");
@@ -13,6 +23,7 @@
             $stmt->bindParam(2,$_SESSION['id']);
             $stmt->execute();
             $_SESSION['user'] = $newPseudo;
+        // pour email
         }if(isset($_POST['email']) && !empty($_POST['email'])){
             $newEmail = $_POST['email'];
             $stmt = $conn->prepare("UPDATE utilisateur SET email = ? WHERE id_util  = ?");
@@ -20,6 +31,7 @@
             $stmt->bindParam(2,$_SESSION['id']);
             $stmt->execute();
             $_SESSION['email'] = $newEmail;
+        // pour mot de passe
         }if(isset($_POST['amdp']) && !empty($_POST['amdp']) && isset($_POST['nmdp']) && !empty($_POST['nmdp'])){ 
             $newMdp = $_POST['nmdp'];
             $newMdp = password_hash($newMdp, PASSWORD_DEFAULT);
@@ -35,8 +47,8 @@
             }else{
                 $errlog = "Mot de passe incorrect.";
             }
+        // pour image de profil
         }if(isset($_FILES["profil"]) && $_FILES["profil"]["error"] == 0){
-            echo 'test';
             $imageFileType = strtolower(pathinfo($_FILES["profil"]["name"],PATHINFO_EXTENSION));
             $target_file =  "img/profil/" . $_SESSION['id'] . "." . $imageFileType;
             $uploadOk = 1;
@@ -57,6 +69,7 @@
                     $stmt->bindParam(1,$target_file);
                     $stmt->bindParam(2,$_SESSION['id']);
                     $stmt->execute();
+                    $user['img_profil'] = $target_file;
                 }else {
                     $errlog = "Désolé, une erreur s'est produite lors du téléchargement de votre fichier.";
                 }
@@ -82,7 +95,8 @@
         <input type="password" name="nmdp" placeholder="Nouveau Mot de passe">
 
         <h2>Image profil</h2>
-        
+        <img src="<?php echo $user['img_profil']; ?>" alt="Image de profil" style="width: 100px; height: 100px;">
+        <br>
         <input type="file" accept="image/*" name="profil" id="profil">
         <button type="submit">Valider</button>
         <br>
