@@ -151,7 +151,7 @@
                         $_SESSION['email'] = $_SESSION['email'];
                         $_SESSION['admin']=0;
                         $_SESSION['id'] = $util['id_util'];
-                        unset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['email'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie']);
+                        unset($_SESSION['date_naissance'],$_SESSION['nom'],$_SESSION['prenom'],$_SESSION['adresse'],$_SESSION['tel'],$_SESSION['mdp'],$_SESSION['pseudo'],$_SESSION['categorie']);
                         header("Location: index.php");
                         exit();
                     }
