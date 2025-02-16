@@ -33,11 +33,11 @@ $ebooks = $stmtEbooks->fetchAll();
         echo '<div class="livres">';
         foreach ($ebooks as $ebook) {
             echo '<div class="livre">';
-            echo '<a href="info_livre.php?id_livre=' . $ebook['id_livre'] . '">'; /* Lien vers la page info-livre */
+            echo '<a href="info_livre.php?id_livre=' . $ebook['id_livre'] . '" >'; /* Lien vers la page info-livre */
             echo '<img class="imgCouverture" src="'.$ebook['img_couverture'].'" alt="Couverture du livre">';
             echo '</a>';
             echo '<h3>'.$ebook['titre_livre'].'</h3>';
-            echo '<a class="btReservationsEbooks" href="'.$ebook['lien_PDF'].'">Télécharger</a>'; /* Lien de téléchargement */
+            echo '<a class="btReservationsEbooks" href="'.$ebook['lien_PDF'].'" target="_blank">Télécharger</a>'; /* Lien de téléchargement */
             echo '</div>';
         }
         echo '</div>';
