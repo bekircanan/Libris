@@ -1,6 +1,54 @@
 <?php
 require('header.php');
 
+use PHPMailer\PHPMailer\PHPMailer;
+require '.\vendor\autoload.php';
+$errlog = '';
+
+// Fonction pour envoyer un mail
+function smtp($email, $subject, $body){
+    $mail = new PHPMailer();
+    $mail->IsSMTP(); 
+    $mail->SMTPAuth = true;
+    $mail->SMTPSecure = "tls";
+    $mail->Host = "smtp.gmail.com";
+    $mail->Port = 587;
+    $mail->isHTML(true);
+    $mail->CharSet = 'UTF-8';
+    $mail->Username = "Libris.supp@gmail.com";
+    $mail->Password = "ajjulessggrafgrq";
+    $mail->AddAddress($email);
+    $mail->SetFrom("Libris-supp@gmail.com");
+    $mail->Subject = $subject;
+    $mail->Body = $body;
+    $mail->SMTPOptions=array('ssl'=>array(
+        'verify_peer'=>false,
+        'verify_peer_name'=>false,
+        'allow_self_signed'=>false
+    ));
+    if(!$mail->Send()){
+        return 'Erreur: '.$mail->ErrorInfo;
+    }else{
+        return 'Mail envoyé';
+    }
+}
+
+function envoyeMail($emprunts){
+    $subject = 'Rappel de retour de livre';
+    foreach($emprunts as $emprunt){
+        if(calculerStatut($emprunt['date_debut_emprunt'])=="En retard"){
+            $email = $emprunt['email'];
+            $body = 'Bonjour '.$emprunt['prenom_util'].' '.$emprunt['nom_util'].',<br><br>
+            Nous vous rappelons que vous avez emprunté le livre "'.$emprunt['titre_livre'].'" le '.$emprunt['date_debut_emprunt'].'. La date de retour prévue est le '.calculerDateRetour($emprunt['date_debut_emprunt']).'.<br><br>
+            Merci de bien vouloir nous le retourner dans les plus brefs délais.<br><br>
+            Cordialement,<br>
+            L\'équipe de Libris';
+            $errlog = smtp($email, $subject, $body);
+        }
+    }
+}
+
+
 $stmtNbExemplairesDisponibles = $conn->prepare("
     SELECT 
         l.id_livre,
@@ -75,6 +123,9 @@ $stmtEmprunts = $conn->prepare("
 $stmtEmprunts->execute();
 $emprunts = $stmtEmprunts->fetchAll(PDO::FETCH_ASSOC);
 
+if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['form'] === 'envoyerMail'){
+    envoyeMail($emprunts);
+}
 
 $stmtReservations = $conn->prepare("
     SELECT 
@@ -354,6 +405,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
                 ?>
                 </tbody>
             </table>
+            <form method="Post">
+                <input type="hidden" name="form" value="envoyerMail">
+                <button class="sumbit">Envoyer un mail de rappel</button>
+            </form>
         </div>
         <div class="onglet-gestion-content" id="reservations">
             <input type="text" id="search-reservations-input" placeholder="Rechercher une réservation..." onkeyup="searchReservations()">
