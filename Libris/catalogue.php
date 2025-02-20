@@ -15,15 +15,24 @@
         if ($_POST['form']=== 'tri' || $_POST['form'] === 'filtre'){
             if (isset($_POST['tri'])) {
                 // Vérifie si une recherche avancée a été effectuée
-                if($_POST['listcond'] === 1){
-                    $ListeParametres = explode(';',$_POST['listePram']);
-                    $Argument = 1;
-                }else{
+                 
+                if ($_POST['listePram'] === ""){
                     $ListeParametres = [];
                     $Argument = 0;
                 }
+                elseif($_POST['listcond'] == 1 ){
+                    
+                    if (str_contains($_POST['listePram'], ";")){
+                        $ListeParametres = explode(';',$_POST['listePram']);
+                        
+                    }else{
+                        array_push($ListeParametres,$_POST['listePram']);
+                    }
+                    $Argument = 1;
+                }   
                 
                 $whereClause = $_POST['whereCause'];
+                
                 if ($_POST['tri'] == 'z-a') {
                     $order = 'l.titre_livre DESC'; // Z-A
                 } elseif ($_POST['tri'] == 'prix-croissant') {
@@ -55,10 +64,11 @@
                 $ListeConditions[] = "eb.id_livre IS NOT NULL";
             }
             // Filtre par prix
-            if (isset($_POST['prix']) && isset($_POST['prix-min']) && isset($_POST['prix-max'])){
-                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
-                array_push($ListeParametres, $_POST['prix-min'], $_POST['prix-max']);
-                
+            if (isset($_POST['prix'])){
+                if ($_POST['prix'] == 1){
+                    $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                    array_push($ListeParametres, $_POST['prix-min'], $_POST['prix-max']);
+                }
             }
         }
             
@@ -89,11 +99,14 @@
                 $ListeConditions[] = "eb.id_livre IS NOT NULL";
             }
             // Filtre par prix
-            if (isset($_GET['prix']) && isset($_GET['prix-min']) && isset($_GET['prix-max'])){
-                $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
-                array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
-                
+            if (isset($_GET['prix'])){
+                if ($_GET['prix'] == 1){
+                    $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
+                    array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
+                }
             }
+                
+                
             
             // Filtre par annee
             if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
@@ -171,14 +184,14 @@
         }else{
             if($_SERVER['REQUEST_METHOD'] == 'GET'){
                 if(isset($_GET['recherche'])){
-                    $whereClause = 'WHERE pc.type_public LIKE "%' .$_GET['recherche']. '%"
-                                        OR g.nom_genre LIKE "%' .$_GET['recherche']. '%" 
-                                        OR l.titre_livre LIKE "%' .$_GET['recherche']. '%"  
-                                        OR l.type_litteraire LIKE "%' .$_GET['recherche']. '%" 
-                                        OR lang.nom_langue LIKE "%' .$_GET['recherche']. '%" 
-                                        OR ed.nom_edition LIKE "%' .$_GET['recherche']. '%" 
-                                        OR a.nom_auteur LIKE "%' .$_GET['recherche']. '%"
-                                        OR l.cote_livre LIKE "%' .$_GET['recherche']. '%"';
+                    $whereClause = "WHERE pc.type_public LIKE \"%" .$_GET['recherche']. "%\"
+                                        OR g.nom_genre LIKE \"%" .$_GET['recherche']. "%\" 
+                                        OR l.titre_livre LIKE \"%" .$_GET['recherche']. "%\"  
+                                        OR l.type_litteraire LIKE \"%" .$_GET['recherche']. "%\" 
+                                        OR lang.nom_langue LIKE \"%" .$_GET['recherche']. "%\" 
+                                        OR ed.nom_edition LIKE \"%" .$_GET['recherche']. "%\" 
+                                        OR a.nom_auteur LIKE \"%" .$_GET['recherche']. "%\"
+                                        OR l.cote_livre LIKE \"%" .$_GET['recherche']. "%\"";
                     $ListeParametres = [];
                 }else{
                     $whereClause = '';
@@ -194,7 +207,7 @@
     if(empty($ListeParametres) && $Argument){
         $whereClause = '';
     }  
-     
+    
     // Requête pour récupérer les livres
     $stmtRecherche = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, eb.prix, l.img_couverture
                                         FROM livre l LEFT OUTER JOIN ebook eb ON l.id_livre = eb.id_livre
@@ -241,7 +254,7 @@
                         <label for="ebook">E-book</label>
                     </div>
                     <div class="groupe-checkbox">
-                        <input type="checkbox" name="prix"> 
+                        <input type="hidden" name="prix" value="0"> 
                         
                     </div>
                     <label for="prix-min">Prix min <span id="valeurMin">0</span>:</label>
@@ -271,7 +284,7 @@
          
         <form method="POST">
             <input type="hidden" name="form" value="tri">
-            <input type="hidden" name="whereCause" value="<?php echo empty($whereClause) ? "" : $whereClause ?>"></label>
+            <input type="hidden" name="whereCause" value='<?php echo empty($whereClause) ? "" : $whereClause ?>'></label>
             <input type="hidden" name="listcond" value="<?php echo empty($ListeConditionsRechercheAvance) ? 1 : 0 ?>"></label>
             <input type="hidden" name="listePram" value=
             <?php 
@@ -375,14 +388,24 @@
     let slideMax = document.querySelector("#prix-max");
     let valeurSlideMin = document.querySelector("#valeurMin");
     let valeurSlideMax = document.querySelector("#valeurMax");
+    let listCheckboxSlide = document.querySelectorAll(".groupe-checkbox")[1];
+    let checkboxSlide = listCheckboxSlide.querySelector("input");
 
     // Afficher la valeur des sliders
+    slideMax.addEventListener('click', () => {
+        checkboxSlide.value = 1;
+    });
+    slideMin.addEventListener('click', () => {
+        checkboxSlide.value = 1;
+    });
     slideMax.addEventListener('input', () =>{
         valeurSlideMax.innerHTML = slideMax.value;
-    })
+    });
     slideMin.addEventListener('input', () =>{
         valeurSlideMin.innerHTML = slideMin.value;
-    })
+    });
+
+
 </script>
 
 <?php
