@@ -104,10 +104,7 @@
                     $ListeConditions[] = "eb.prix BETWEEN ? AND ?";
                     array_push($ListeParametres, $_GET['prix-min'], $_GET['prix-max']);
                 }
-            }
-                
-                
-            
+            }    
             // Filtre par annee
             if (isset($_GET['anneeDebut']) && isset($_GET['anneeFin'])) {
                 if (!empty($_GET['anneeDebut']) && !empty($_GET['anneeFin'])){
@@ -118,25 +115,25 @@
             // Filtre par recherche-avance
             if (isset($_GET['recherche-avance'])){
                 if($_GET['recherche-avance'][0] !== ''){
-                    $conditionCritaire = ''; 
+                    $conditionCriteres = ''; 
                     $conditions = '';
                     // Boucle pour chaque critaire de recherche avancée
                     for($i = 0; $i < sizeof($_GET['recherche-avance']); $i++){
                         switch(strtolower($_GET['critaireValue'][$i])){
                             case "titre":
-                                $conditionCritaire = "l.titre_livre";
+                                $conditionCriteres = "l.titre_livre";
                                 break;
                             case "auteur":
-                                $conditionCritaire = "a.nom_auteur";
+                                $conditionCriteres = "a.nom_auteur";
                                 break;
                             case "edition":
-                                $conditionCritaire = "ed.nom_edition";
+                                $conditionCriteres = "ed.nom_edition";
                                 break;
                             case "isbn":
-                                $conditionCritaire = "i.num_isbn";
+                                $conditionCriteres = "i.num_isbn";
                                 break;
                             case "sujet":
-                                $conditionCritaire = "l.resume";
+                                $conditionCriteres = "l.resume";
                                 break;
                             default:
                                 break;
@@ -145,16 +142,16 @@
                         if ($i != 0 OR strtolower($_GET['critaireOption'][0]) === "sauf"){
                             switch(strtolower($_GET['critaireOption'][$i])){
                                 case "et":
-                                    $conditions = "AND" .' '. $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
+                                    $conditions = "AND" .' '. $conditionCriteres . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     break;
                                 case "ou":
-                                    $conditions = "OR" .' '. $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
+                                    $conditions = "OR" .' '. $conditionCriteres . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     break;
                                 case "sauf":
                                     if($i===0){
-                                        $conditions = $conditionCritaire . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
+                                        $conditions = $conditionCriteres . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
                                     }else{
-                                        $conditions = ' AND ' . $conditionCritaire . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
+                                        $conditions = ' AND ' . $conditionCriteres . " NOT LIKE '%".$_GET['recherche-avance'][$i]."%'";
 
                                     }
                                     break;
@@ -163,7 +160,7 @@
                                     break;
                             }
                         }else{
-                            $conditions = $conditionCritaire . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
+                            $conditions = $conditionCriteres . " LIKE '%".$_GET['recherche-avance'][$i]."%'";
                         }
                         array_push($ListeConditionsRechercheAvance, $conditions);
                     }
