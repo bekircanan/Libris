@@ -1,11 +1,16 @@
 <?php
 require_once "header.php";
 $i=0;
-$stmt = $conn->prepare("SELECT id_livre,titre_livre,resume FROM livre");
+// on récupère les livres pour les afficher dans le tableaux plus bas
+$stmt = $conn->prepare("SELECT id_livre,titre_livre,resume,img_couverture FROM livre");
 $stmt->execute();
 $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if(isset($_POST['form']) && $_POST['form']==='supprimeLivre'){
+
+            // on supprime les exemplaires, les emprunts et les réservations liés au livre
+
             $stmt = $conn->prepare("Delete e From emprunter e INNER JOIN exemplaire ex ON ex.id_exemplaire = e.id_exemplaire INNER JOIN isbn i ON ex.num_isbn = i.num_isbn WHERE i.id_livre = :id_livre");
             $stmt->bindParam(':id_livre', $_POST['id_livre']);
             $stmt->execute();
@@ -23,14 +28,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $stmt->execute();
 
     }elseif(isset($_POST['form'],$_POST['id_livre'], $_POST['titre_livre'], $_POST['resume']) && $_POST['form']==='ModifieLivre'){
+        // on teste si une image a été envoyée
         if(isset($_FILES['img_couverture']) && !empty($_FILES['img_couverture']['name'])){
             $imageFileName = "{$_POST['titre_livre']}.png";
             $imageFileName = str_replace(' ', '_', $imageFileName);
             $targetDir = "./img/img_couv/";
             $targetFile = $targetDir . basename($imageFileName);
+            // On teste si l'image existe déjà, si oui on la supprime
             if (file_exists($targetFile)) {
                 unlink($targetFile);
             }
+            // on teste si la nouvelle image a bien été envoyée et s'il n'y a pas d'erreur
             if (move_uploaded_file($_FILES["img_couverture"]["tmp_name"], $targetFile)){
                 $stmt = $conn->prepare("UPDATE livre SET titre_livre = :titre_livre, resume = :resume,img_couverture = :img_couverture WHERE id_livre = :id_livre");
                 $stmt->bindParam(':titre_livre', $_POST['titre_livre']);
@@ -50,7 +58,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 }
 // Check if image file is an actual image or fake image
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['form'] === 'ajout_livre') {
+
     if (isset($_POST["envoyer"])) {
+        // On teste si le fichier a bien été envoyé et s'il n'y a pas d'erreur
         if (empty($_FILES["fileToUpload"]["name"])) {
             echo "<script>document.addEventListener('DOMContentLoaded', function() {  popup(); });</script>";
         }
@@ -59,10 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
         }
         else{
             $fileType = strtolower(pathinfo($_FILES["fileToUpload"]["name"], PATHINFO_EXTENSION));
+            // On teste si le fichier est bien un .csv
             if ($fileType === "csv") {
                 $content = file_get_contents($_FILES["fileToUpload"]["tmp_name"]);
                 $lines = explode(";", $content);
+                // On parcours les lignes du fichier
                 foreach ($lines as $line) {
+                    // On sépare les champs
                     if (empty($line)) {
                         break;
                     }
@@ -83,15 +96,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                     $nom_auteurs = explode(",", $field[6]);;
                     $prenom_auteurs = explode(",", $field[7]);;
                     $date_parution = date('Y-m-d', strtotime($field[8]));
-                    
+                    // On vérifie si le livre existe déjà
                     $stmtTestIsbn = $conn->prepare("SELECT * FROM isbn WHERE num_isbn = '{$num_isbn}'");
                     $stmtTestIsbn->execute();
                     $testIsbn = $stmtTestIsbn->fetch();
                     $stmtTestCote = $conn->prepare("SELECT * FROM livre WHERE cote_livre = '{$cote}'");
                     $stmtTestCote->execute();
                     $testCote = $stmtTestCote->fetch();
-
+                    // On teste si le livre existe déjà sous le même exemplaire
                     if(empty($testCote)){
+                        // On insère le livre
                         $stmtInsertLivre = $conn->prepare("
                         INSERT INTO livre (cote_livre, titre_livre, type_litteraire, resume)
                         VALUES (:cote_livre, :titre_livre, :type_litteraire, :resume)");
@@ -108,14 +122,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             WHERE cote_livre = '{$cote}'");
                         $stmtSelectIdLivre->execute();
                         $id_livre = $stmtSelectIdLivre->fetch(PDO::FETCH_ASSOC);
+                        // on va parcourir les genres pour les insérer un par un
                         foreach($genres as $genre) {
+                            // on prépare la requète pour vérifier si le genre existe déjà
                             $stmtSelectIdGenre = $conn->prepare("
                                 SELECT id_genre
                                 FROM genre
                                 WHERE nom_genre = '{$genre}'");
                             $stmtSelectIdGenre->execute();
                             $id_genre = $stmtSelectIdGenre->fetch();
+                            // On teste si le genre existe déjà
                             if(empty($id_genre)){
+                                // si il n'existe pas, on l'insère
                                 $stmtInsertGenre = $conn->prepare("
                                     INSERT INTO genre (nom_genre)
                                     VALUES (:nom_genre)");
@@ -127,7 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                                     WHERE nom_genre = '{$genre}'");
                                 $stmtSelectIdGenre->execute();
                                 $id_genre = $stmtSelectIdGenre->fetch();
-                            }
+                            } 
+                            // on insère le lien entre le livre et le genre
                             $stmtInsertGenre = $conn->prepare("
                                 INSERT INTO livre_genre (id_genre, id_livre)
                                 VALUES (:id_genre, :id_livre)");
@@ -135,13 +154,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             $stmtInsertGenre->bindParam(':id_genre', $id_genre['id_genre']);
                             $stmtInsertGenre->execute();
                         }
+                        // on va parcourir les public cibles afin de vérifier si chacun d'entre eux existent déjà
                         foreach($public_cibles as $public_cible) {
+
                             $stmtSelectIdPublicCible = $conn->prepare("
                                 SELECT id_public
                                 FROM public_cible
                                 WHERE type_public = '{$public_cible}'");
                             $stmtSelectIdPublicCible->execute();
                             $id_public_cible = $stmtSelectIdPublicCible->fetch();
+                            // On teste si le public cible existe déjà
                             if(empty($id_public_cible)){
                                 $stmtInsertPublicCible = $conn->prepare("
                                     INSERT INTO public_cible (type_public)
@@ -155,6 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                                 $stmtSelectIdPublicCible->execute();
                                 $id_public_cible = $stmtSelectIdPublicCible->fetch();
                             }
+                            // on insère le lien entre le livre et le public cible
                             $stmtInsertPublicCible = $conn->prepare("
                                 INSERT INTO livre_public (id_public, id_livre)
                                 VALUES (:id_public, :id_livre)");
@@ -170,6 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             WHERE nom_langue = '{$langue}'");
                         $stmtSelectLangue->execute();
                         $id_langue = $stmtSelectLangue->fetch();
+                        // On teste si la langue existe déjà, si oui on récupère son id, sinon on l'insère
                         if(empty($id_langue)){
                             $stmtInsertLangue = $conn->prepare("
                                 INSERT INTO langue (nom_langue)
@@ -190,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             WHERE nom_edition = '{$edition}'");
                         $stmtSelectIdEdition->execute();
                         $id_edition = $stmtSelectIdEdition->fetch();
+                        // On teste si l'édition existe déjà, si oui on récupère son id, sinon on l'insère
                         if(empty($id_edition)){
                             $stmtInsertEdition = $conn->prepare("
                                 INSERT INTO edition (nom_edition)
@@ -203,6 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                             $stmtSelectIdEdition->execute();
                             $id_edition = $stmtSelectIdEdition->fetch();
                         }
+                        // On teste si l'isbn existe déjà, si oui on récupère son id, sinon on l'insère
                         if(empty($testIsbn)){
                             $stmtInsertIsbn = $conn->prepare("
                                 INSERT INTO isbn (num_isbn, id_livre, id_langue, id_edition, nb_pages)
@@ -222,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                                 VALUES (:num_isbn)");
                         $stmtInsertExemplaire->bindParam(':num_isbn', $num_isbn);
                         $stmtInsertExemplaire->execute();
-                        
+                        // on parcours les auteurs pour les insérer un par un
                         foreach($nom_auteurs as $nom_auteur){
                             $prenom_auteur = array_shift($prenom_auteurs);
                             $stmtTestAuteur = $conn->prepare("
@@ -231,6 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                                 WHERE nom_auteur = '{$nom_auteur}' and prenom_auteur = '{$prenom_auteur}'");
                             $stmtTestAuteur->execute();
                             $id_auteur = $stmtTestAuteur->fetch();
+                            // On teste si l'auteur existe déjà, si oui on récupère son id, sinon on l'insère
                             if($id_auteur === false) {
                                 $stmtInsertAuteur = $conn->prepare("
                                     INSERT INTO auteur (nom_auteur, prenom_auteur)
@@ -261,12 +288,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                         $imageFileName = str_replace(' ', '_', $imageFileName);
                         $targetDir = "./img/img_couv/";
                         $targetFile = $targetDir . basename($imageFileName);
+                        // On teste si l'image existe déjà, si oui on la supprime
                         if (file_exists($targetFile)) {
                             unlink($targetFile);
 
                         }
+                        // on parcours les fichiers pour trouver l'image correspondante
                         foreach($_FILES["folderToUpload"]["name"] as $key => $name){
+                            // on teste si le nom de l'image correspond au titre du livre
                             if($imageFileName === $name){
+                                // on teste si l'image a bien été envoyée et s'il n'y a pas d'erreur
                                 if (move_uploaded_file($_FILES["folderToUpload"]["tmp_name"][$key], $targetFile)){
                                     $stmtUpdateLivre = $conn->prepare("
                                     UPDATE livre
@@ -345,6 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                 </thead>
                 <tbody>
                 <?php
+                // on affiche les livres
                 foreach ($livres as $livre) {
                     echo "<tr>";
                     echo "<td>". $livre["titre_livre"] ."</td>";
