@@ -381,8 +381,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['for
                     echo "<tr>";
                     echo "<td>". $livre["titre_livre"] ."</td>";
                     echo "<td>". $livre["resume"]. "</td>";
+                    $replace= str_replace("'","`",$livre["resume"]);
                     echo "<td>
-                    <button onclick=\"popupModifie('".$livre["id_livre"]."','".$livre["titre_livre"]."','".$livre["resume"]."')\">Modifier</button>
+                    <button onclick=\"popupModifie('".$livre["id_livre"]."','".$livre["titre_livre"]."','".$replace."')\">Modifier</button>
                     <button onclick=\"popupSupprime('".$livre["id_livre"]."')\">Supprimer</button>";
                     echo "</td>";
                     echo "</tr>";
@@ -511,7 +512,7 @@ function popupSupprime(id_livre) {
         popup.innerHTML = `
             <div class="popupGestion-content">
                 <h2>Confirmation de suppression</h2>
-                <p>Êtes-vous sûr de vouloir supprime cette livre ?</p>
+                <p>Êtes-vous sûr de vouloir supprimer ce livre ?</p>
                 <form method="POST" action="gestion-livres.php">
                     <input type="hidden" name="form" value="supprimeLivre">
                     <input type="hidden" name="id_livre" value="${id_livre}">

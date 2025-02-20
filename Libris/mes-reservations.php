@@ -1,6 +1,6 @@
 <?php
 require('header.php');
-
+// Récupérer les réservations de l'utilisateur
 $stmtReservationsUtil = $conn->prepare("
     SELECT l.titre_livre, l.img_couverture, l.id_livre, r.num_isbn, r.id_util
     FROM reserver r
@@ -11,6 +11,7 @@ $stmtReservationsUtil = $conn->prepare("
 $stmtReservationsUtil->execute([':idUtilisateur' => $_SESSION['id']]);
 $reservationsUtil = $stmtReservationsUtil->fetchAll();
 
+// Récupérer les informations des livres
 $stmtNbExemplairesDisponibles = $conn->prepare("
     SELECT 
         l.id_livre,
@@ -36,6 +37,7 @@ $stmtNbExemplairesDisponibles = $conn->prepare("
 $stmtNbExemplairesDisponibles->execute();
 $nbExemplairesDisponibles = $stmtNbExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
 
+// Récupérer les exemplaires disponibles
 $stmtExemplairesDisponibles = $conn->prepare("
     SELECT 
         e.num_isbn,
@@ -53,6 +55,7 @@ $stmtExemplairesDisponibles = $conn->prepare("
 $stmtExemplairesDisponibles->execute();
 $exemplairesDisponibles = $stmtExemplairesDisponibles->fetchAll(PDO::FETCH_ASSOC);
 
+// Récupérer les emprunts
 $stmtEmprunts = $conn->prepare("
     SELECT 
         l.id_livre, 
@@ -82,7 +85,7 @@ $stmtEmprunts = $conn->prepare("
 $stmtEmprunts->execute();
 $emprunts = $stmtEmprunts->fetchAll(PDO::FETCH_ASSOC);
 
-
+// Récupérer les réservations
 $stmtReservations = $conn->prepare("
     SELECT 
         reserver.date_reservation,
@@ -111,12 +114,14 @@ $stmtReservations = $conn->prepare("
 $stmtReservations->execute();
 $reservations = $stmtReservations->fetchAll(PDO::FETCH_ASSOC);
 
+// Fonction pour calculer la date de retour
 function calculerDateRetour($dateEmprunt) {
     $date = new DateTime($dateEmprunt);
     $date->modify('+3 weeks');
     return $date->format('Y-m-d');
 }
 
+// Fonction pour calculer la position de l'utilisateur dans la file d'attente
 function calculerPositionFileAttente($reservations, $id_livre) {
     $i = 1;
     foreach ($reservations as $reservation) {
@@ -157,6 +162,7 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
 
     $user = $fileAttente[0];
     $dateDisponibilite = "Disponible";
+    // Vérifier si l'utilisateur actuel est le premier de la file d'attente
     if ($user == $id_util) {
         if ($nbExemplairesDisponibles > 0) {
             $nbExemplairesDisponibles--;
@@ -180,6 +186,7 @@ function calculerDateDisponibilite($exemplairesDisponibles, $emprunts, $reservat
     return $dateDisponibilite;
 }
 
+// Fonction pour convertir la date
 function convertirDate($date) {
     $timestamp = strtotime($date);
 
@@ -197,11 +204,14 @@ function convertirDate($date) {
     return "$jour " . $mois[$moisNum] . " $annee";
 }
 
+// Traitement de l'annulation de réservation
 if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerAnnulation')) {
     $num_isbn = $_POST['num_isbn'];
     $id_util = $_POST['id_util'];
 
+    // Vérifier si les champs sont remplis
     if (!empty($num_isbn) && !empty($id_util)) {
+        // Supprimer la réservation
         $stmt = $conn->prepare("DELETE FROM reserver WHERE num_isbn = :num_isbn AND id_util = :id_util");
         $stmt->bindParam(':num_isbn', $num_isbn, PDO::PARAM_STR);
         $stmt->bindParam(':id_util', $id_util, PDO::PARAM_INT);
@@ -215,6 +225,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerAnnulat
 <div class="reservations-ebooks">
     <h1>Mes Réservations</h1>
     <?php
+    // Vérifier si l'utilisateur a des réservations en cours
     $hasDisponible = false;
     foreach ($reservationsUtil as $reservation) {
         if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) === 'Disponible') {
@@ -223,6 +234,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerAnnulat
         }
     }
 
+    // Vérifier si l'utilisateur a des réservations indisponibles
     $hasIndisponible = false;
     foreach ($reservationsUtil as $reservation) {
         if (calculerDateDisponibilite($nbExemplairesDisponibles, $emprunts, $reservations, $_SESSION['id'], $reservation['num_isbn']) != 'Disponible') {
@@ -277,6 +289,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'confirmerAnnulat
     ?>
 </div>
 <script>
+    // Fonction pour afficher la popup de confirmation d'annulation
     function popupConfirmAnnulation(num_isbn, id_util) {
         let popup = document.createElement('div');
         popup.className = 'popupGestion hidden';

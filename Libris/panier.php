@@ -5,7 +5,7 @@
     require '.\vendor\autoload.php';
     $errlog = '';
 
-   
+   // Fonction pour envoyer un mail
     function smtp($email, $subject, $body){
         $mail = new PHPMailer();
         $mail->IsSMTP(); 
@@ -33,6 +33,7 @@
         }
     }
 
+    // Récupération des ebooks achetés par l'utilisateur
     $stmtAfficheEbook = $conn->prepare("SELECT DISTINCT l.id_livre, l.titre_livre, e.prix, achat.id_achat, e.lien_PDF, l.img_couverture
                                         FROM achat_ebook achat JOIN ebook e ON e.id_ebook = achat.id_ebook 
                                                 JOIN livre l ON e.id_livre = l.id_livre 
@@ -43,10 +44,12 @@
     $stmtAfficheEbook->execute([':idUtilisateur' => $_SESSION['id']]);
     $achatEbook = $stmtAfficheEbook->fetchAll();
 
+    // Récupération des auteurs des ebooks achetés
     $stmtAuteur = $conn->prepare("SELECT DISTINCT a.nom_auteur, a.prenom_auteur 
                                     FROM auteur a LEFT OUTER JOIN a_ecrit ae ON a.id_auteur = ae.id_auteur
                                     WHERE id_livre = :id_livre");
     
+    // Calcul du prix total des ebooks achetés
     $prixTotal = 0;
     $listeLienEbook = '';
     foreach($achatEbook as $ebook){
@@ -54,42 +57,28 @@
         $listeLienEbook = $listeLienEbook . ' ' . $ebook['titre_livre'] . ' : ' . $ebook['lien_PDF']; //"\n"
     }
 
-    if(!isset($_SESSION['id'])){
-        header("Location: ./index.php");
-        exit;
-    }else{
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            if ($_POST['form']=== 'supprimer' || $_POST['form']=== 'payer'){
-                if(isset($_POST['supprimer']) && !isset($_POST['payer'])){
-                    $stmtDeleteEbook = $conn->prepare("DELETE FROM achat_ebook WHERE id_achat = :idAchat");
-                    $stmtDeleteEbook->execute([':idAchat' => $_POST['supprimer']]);
-        
-                }else if(isset($_POST['payer']) && !isset($_POST['supprimer']) && !empty($achatEbook)){
-                    
-                    $stmtRecupEmail = $conn->prepare("SELECT email FROM utilisateur WHERE id_util = :idUtilisateur");
-                    $stmtRecupEmail->execute([':idUtilisateur' => $_SESSION['id']]); 
-                    $user = $stmtRecupEmail->fetch();
-        
-                    $stmtModifDateAchat = $conn->prepare("UPDATE achat_ebook SET regle = 1, date_achat = NOW() WHERE id_util = :idUtilisateur");
-                    $stmtModifDateAchat->execute([':idUtilisateur' => $_SESSION['id']]);
-                    echo "<script>document.addEventListener('DOMContentLoaded', function() { openPopUp(); });</script>";        
+    // Traitement du formulaire de suppression ou de paiement
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        if ($_POST['form']=== 'supprimer' || $_POST['form']=== 'payer'){
+            if(isset($_POST['supprimer']) && !isset($_POST['payer'])){
+                $stmtDeleteEbook = $conn->prepare("DELETE FROM achat_ebook WHERE id_achat = :idAchat");
+                $stmtDeleteEbook->execute([':idAchat' => $_POST['supprimer']]);
+    
+            }else if(isset($_POST['payer']) && !isset($_POST['supprimer']) && !empty($achatEbook)){
+                // Modification de la date d'achat
+                $stmtModifDateAchat = $conn->prepare("UPDATE achat_ebook SET regle = 1, date_achat = NOW() WHERE id_util = :idUtilisateur");
+                $stmtModifDateAchat->execute([':idUtilisateur' => $_SESSION['id']]);
+                echo "<script>document.addEventListener('DOMContentLoaded', function() { openPopUp(); });</script>";        
 
-                    // si l'utilisateur existe, on crée un token et on l'envoie par mail
-                    if($user){
-                        $token = bin2hex(random_bytes(16));
-                        $expire = date('Y-m-d H:i:s', time() + 60 * 15);
-                        $stmt = $conn->prepare("INSERT INTO token (nom_token, expire, id_util) VALUES (:nomToken, :expire, :idUtilisateur)");
-                        $stmt->execute([':expire' => $expire, ':nomToken' => $token, ':idUtilisateur' => $_SESSION['id']]);
-                        $errlog = smtp($user['email'], 'Merci pour votre achat sur Libris !', 'Merci pour cette transaction sur Libris. Voici le lien de téléchargement de chaques livres : '. "<br>" . $listeLienEbook);
-                    } else {
-                        $errlog ='Aucun compte n\'est associé à cet email.';
-                    }
-                }
-                header("Refresh:0");
+                // on crée un token et on l'envoie par mail
+                $token = bin2hex(random_bytes(16));
+                $expire = date('Y-m-d H:i:s', time() + 60 * 15);
+                $stmt = $conn->prepare("INSERT INTO token (nom_token, expire, id_util) VALUES (:nomToken, :expire, :idUtilisateur)");
+                $stmt->execute([':expire' => $expire, ':nomToken' => $token, ':idUtilisateur' => $_SESSION['id']]);
+                $errlog = smtp($_SESSION['email'], 'Merci pour votre achat sur Libris !', 'Merci pour cette transaction sur Libris. Voici le lien de téléchargement de chaques livres : '. "<br>" . $listeLienEbook);
             }
+            header("Refresh:0");
         }
-        
-        
     }
     
 ?>
@@ -132,6 +121,7 @@
             if ($prixTotal === 0){
                 echo '<p class=panier_vide>Votre panier est vide</p>';
             }else{
+                // Affichage des ebooks achetés
                 foreach($achatEbook as $ebook){
                     $lesAuteurs = '';
                     echo '<div class="ebook_acheter">'; 
@@ -171,6 +161,7 @@
                 openPopUp()
             }
 
+            // fonction pour ouvrir la pop up
             function openPopUp() {
                 
                 modal.classList.toggle("modal_change");
@@ -178,6 +169,7 @@
                 localStorage.setItem("popUp", true);
             }
 
+            // fonction pour fermer la pop up
             function closePopUp() {
                
                 modal.classList.toggle("modal_change");

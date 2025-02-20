@@ -1,6 +1,6 @@
 <?php
     require_once 'header.php';
-    
+    // Récupérer les derniers livres
     $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, GROUP_CONCAT(CONCAT(a.prenom_auteur, ' ', a.nom_auteur) SEPARATOR ', ') AS auteurs
                                 FROM livre l
                                 JOIN a_ecrit ae ON l.id_livre = ae.id_livre
@@ -9,6 +9,19 @@
                                 ORDER BY ae.date_parution DESC LIMIT 25;");
     $stmt->execute();
     $livres = $stmt->fetchAll();
+    // Récupérer les livres les mieux notés
+    $stmt = $conn->prepare("SELECT l.id_livre, l.titre_livre, l.img_couverture, 
+            GROUP_CONCAT(DISTINCT CONCAT(a.prenom_auteur, ' ', a.nom_auteur) SEPARATOR ', ') AS auteurs, 
+            AVG(av.note_avis) AS moy
+                FROM livre l
+                JOIN a_ecrit ae ON l.id_livre = ae.id_livre
+                JOIN auteur a ON a.id_auteur = ae.id_auteur
+                LEFT JOIN avis av ON l.id_livre = av.id_livre
+                GROUP BY l.id_livre, l.titre_livre, l.img_couverture
+                having moy>1
+                ORDER BY moy DESC LIMIT 25;");
+    $stmt->execute();
+    $livresnote = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div class ="pre-container">
     <div class="text-container">
@@ -19,6 +32,7 @@
         <div class="slide">
         <?php 
         if($livres){
+            // Afficher les livres
             foreach($livres as $liv){ 
                 echo '<div class="pre-livre"><a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']). '">'; 
                 echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
@@ -36,24 +50,6 @@
     </div>
 </div>
 
-<?php
-$stmt = $conn->prepare("
-SELECT l.id_livre, l.titre_livre, l.img_couverture, 
-       GROUP_CONCAT(DISTINCT CONCAT(a.prenom_auteur, ' ', a.nom_auteur) SEPARATOR ', ') AS auteurs, 
-       AVG(av.note_avis) AS moy
-        FROM livre l
-        JOIN a_ecrit ae ON l.id_livre = ae.id_livre
-        JOIN auteur a ON a.id_auteur = ae.id_auteur
-        LEFT JOIN avis av ON l.id_livre = av.id_livre
-        GROUP BY l.id_livre, l.titre_livre, l.img_couverture
-        having moy>1
-        ORDER BY moy DESC LIMIT 25
-");
-$stmt->execute();
-$livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-?>
-
 <div class="pre-container">
     <div class="text-container">
         <h1>Les mieux notés</h1>
@@ -63,7 +59,8 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="slide">
             <?php 
             if ($livres) {
-                foreach ($livres as $liv) {
+                // Afficher les livres les mieux notés
+                foreach ($livresnote as $liv) {
                         echo '<div class="pre-livre">';
                         echo '<a href="./info_livre.php?id_livre=' . htmlspecialchars($liv['id_livre']) . '">';
                         echo '<img src="' . htmlspecialchars($liv['img_couverture']) . '" alt="' . htmlspecialchars($liv['titre_livre']) . '">';
@@ -81,15 +78,18 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
+    // Fonction pour faire défiler les livres
     document.querySelectorAll('.slide').forEach(container => {
         const items = container.children;
         const scrollButton = container.nextElementSibling;
         let isScrolling = false;
 
+        // Afficher le bouton de défilement si plus de 4 livres
         if (items.length > 4) {
             scrollButton.style.display = 'block';
         }
 
+        // défilement progressif des livres
         const debounce = (func, delay) => {
             let inDebounce;
             return function() {
@@ -100,10 +100,11 @@ $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
             };
         };
 
+        //défilement vers la droite ou la gauche selon le bouton cliqué 
         const handleScroll = (direction) => {
             if (isScrolling) return;
             isScrolling = true;
-
+            
             if (direction === 'forward') {
                 const firstItem = items[0];
                 container.scrollLeft += firstItem.offsetWidth;

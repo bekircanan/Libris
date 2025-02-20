@@ -1,6 +1,7 @@
 <?php
 require('header.php');
 
+// Récupérer les e-books possédés par l'utilisateur
 $stmtEbooks = $conn->prepare("
     SELECT l.id_livre, l.img_couverture, l.titre_livre, lien_PDF
     FROM achat_ebook ae
@@ -32,11 +33,11 @@ $ebooks = $stmtEbooks->fetchAll();
         echo '<div class="livres">';
         foreach ($ebooks as $ebook) {
             echo '<div class="livre">';
-            echo '<a href="info_livre.php?id_livre=' . $ebook['id_livre'] . '">'; /* Lien vers la page info-livre */
+            echo '<a href="info_livre.php?id_livre=' . $ebook['id_livre'] . '" >'; /* Lien vers la page info-livre */
             echo '<img class="imgCouverture" src="'.$ebook['img_couverture'].'" alt="Couverture du livre">';
             echo '</a>';
             echo '<h3>'.$ebook['titre_livre'].'</h3>';
-            echo '<a class="btReservationsEbooks" href="'.$ebook['lien_PDF'].'">Télécharger</a>';
+            echo '<a class="btReservationsEbooks" href="'.$ebook['lien_PDF'].'" target="_blank">Télécharger</a>'; /* Lien de téléchargement */
             echo '</div>';
         }
         echo '</div>';
