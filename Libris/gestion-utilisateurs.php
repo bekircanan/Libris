@@ -8,10 +8,10 @@ $stmtUtilisateurs = $conn->prepare("
         a.*, 
         ea.date_abonnement
     FROM utilisateur u
-    LEFT JOIN EST_ABONNE ea ON u.id_util = ea.id_util
-    LEFT JOIN ABONNEMENT a ON ea.id_abonnement = a.id_abonnement
+    LEFT JOIN est_abonne ea ON u.id_util = ea.id_util
+    LEFT JOIN abonnement a ON ea.id_abonnement = a.id_abonnement
     WHERE u.id_util NOT IN (
-        SELECT id_util FROM BIBLIOTECAIRE
+        SELECT id_util FROM bibliotecaire
     )
 ");
 $stmtUtilisateurs->execute();
