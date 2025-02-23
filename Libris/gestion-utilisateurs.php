@@ -7,7 +7,7 @@ $stmtUtilisateurs = $conn->prepare("
         u.*, 
         a.*, 
         ea.date_abonnement
-    FROM UTILISATEUR u
+    FROM utilisateur u
     LEFT JOIN EST_ABONNE ea ON u.id_util = ea.id_util
     LEFT JOIN ABONNEMENT a ON ea.id_abonnement = a.id_abonnement
     WHERE u.id_util NOT IN (
