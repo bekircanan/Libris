@@ -137,9 +137,9 @@
             // Afficher les liens en fonction de l'utilisateur
             if (isset($_SESSION['user'])) {
                 if (isset($_SESSION['admin']) && $_SESSION['admin'] === 1) {
-                    echo '<li><a href="./gestion-utilisateurs"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
-                    echo '<li><a href="./gestion-livres"><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
-                    echo '<li><a href="./gestion-emprunts-reservations"><i class="fa-sharp fa-thin fa-books"></i> Gestion des emprunts/reservations</a></li>';
+                    echo '<li><a href="./gestion-utilisateurs.php"><i class="fa-sharp fa-regular fa-scroll"></i> Gestion des comptes</a></li>';
+                    echo '<li><a href="./gestion-livres.php"><i class="fa-sharp fa-thin fa-books"></i> Gestion des livres</a></li>';
+                    echo '<li><a href="./gestion-emprunts-reservations.php"><i class="fa-sharp fa-thin fa-books"></i> Gestion des emprunts/reservations</a></li>';
                 } else {
                     echo '<li><a href="./mes-reservations.php"><i class="fa-sharp fa-regular fa-scroll"></i> Mes réservations</a></li>';
                     echo '<li><a href="./mes-ebooks.php"><i class="fa-sharp fa-thin fa-books"></i> Mes e-books</a></li>';
