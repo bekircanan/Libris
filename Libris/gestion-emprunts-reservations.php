@@ -33,7 +33,8 @@ function smtp($email, $subject, $body){
     }
 }
 
-function envoyeMail($emprunts){
+
+function envoyeMailAll($emprunts){
     $subject = 'Rappel de retour de livre';
     foreach($emprunts as $emprunt){
         if(calculerStatut($emprunt['date_debut_emprunt'])=="En retard"){
@@ -48,7 +49,18 @@ function envoyeMail($emprunts){
     }
 }
 
+function envoyeMail($email){
+    $subject = 'Rappel de retour de livre';
+    $email = $email;
+    $body = 'Bonjour,<br><br>
+    Nous vous rappelons que vous avez emprunté le livre.
+    Merci de bien vouloir nous le retourner dans les plus brefs délais.<br><br>
+    Cordialement,<br>
+    L\'équipe de Libris';
+    smtp($email, $subject, $body);
+}
 
+// 
 $stmtNbExemplairesDisponibles = $conn->prepare("
     SELECT 
         l.id_livre,
@@ -123,8 +135,12 @@ $stmtEmprunts = $conn->prepare("
 $stmtEmprunts->execute();
 $emprunts = $stmtEmprunts->fetchAll(PDO::FETCH_ASSOC);
 
-if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form']) && $_POST['form'] === 'envoyerMail'){
-    envoyeMail($emprunts);
+if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['form'])){
+    if($_POST['form'] === 'envoyerMail'){
+        envoyeMailALL($emprunts);
+    }else{
+        envoyeMail($_POST['button']);
+    }
 }
 
 $stmtReservations = $conn->prepare("
@@ -373,6 +389,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
 
         <div class="onglet-gestion-content active-gestion" id="emprunts">
             <input type="text" id="search-emprunts-input" placeholder="Rechercher un emprunt..." onkeyup="searchEmprunts()">
+            <form method="Post">
+                <input type="hidden" name="form" value="envoyerMail">
+                <button class="sumbit">Envoyer un mail de rappel</button>
+            </form>
             <table class="table-gestion" id="table-emprunts">
                 <thead>
                 <tr>
@@ -399,16 +419,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && ($_POST['form'] === 'validerEmprunt'
                     echo "<td class='col-statut'>". calculerStatut($emprunt['date_debut_emprunt']) ."</td>";
                     echo "<td>
                         <button onclick=popupConfirmRetour(".$emprunt['id_exemplaire'].",".$emprunt['id_util'].")>Retour</button>
+                        <form method='Post'>
+                            <input type='hidden' name='form' value='envoyerMail2'>
+                            <button class='sumbit' name='button' value='".$emprunt['email']."'>Envoyer</button>
+                        </form>
                     </td>";
                     echo "</tr>";
                 }
                 ?>
                 </tbody>
             </table>
-            <form method="Post">
-                <input type="hidden" name="form" value="envoyerMail">
-                <button class="sumbit">Envoyer un mail de rappel</button>
-            </form>
         </div>
         <div class="onglet-gestion-content" id="reservations">
             <input type="text" id="search-reservations-input" placeholder="Rechercher une réservation..." onkeyup="searchReservations()">
