@@ -15,8 +15,8 @@
         $mail->Port = 587;
         $mail->isHTML(true);
         $mail->CharSet = 'UTF-8';
-        $mail->Username = "Libris.supp@gmail.com";
-        $mail->Password = "ajjulessggrafgrq";
+        $mail->Username = "email";
+        $mail->Password = "password";
         $mail->AddAddress($email);
         $mail->SetFrom("Libris-supp@gmail.com");
         $mail->Subject = $subject;
